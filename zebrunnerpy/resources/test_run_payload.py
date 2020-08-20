@@ -1,0 +1,22 @@
+test_run = {
+  "blocker": None,
+  "buildNumber": "BUILD_NUMBER_INT",
+  "ciRunId": None,
+  "configXML": None,
+  "driverMode": "DRIVER_MODE",
+  "id": None,
+  "jobId": "JOB_ID_INT",
+  "knownIssue": None,
+  "project": None,
+  "reviewed": None,
+  "scmBranch": None,
+  "scmCommit": None,
+  "scmURL": None,
+  "startedBy": "STARTED_BY",
+  "status": None,
+  "testSuiteId": "TEST_SUITE_ID_INT",
+  "upstreamJobBuildNumber": None,
+  "upstreamJobId": None,
+  "userId": None,
+  "workItem": None
+}

@@ -1,7 +1,7 @@
 import os
 
-from pytest_zafira.api import ZafiraClient
-from pytest_zafira.services import get_env_var, Context, Parameter
+from . import ZafiraClient
+from .context import Context, Parameter
 
 
 class ZafiraState:
