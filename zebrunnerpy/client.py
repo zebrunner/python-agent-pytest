@@ -1,14 +1,14 @@
 from .resource_constants import Initiator, TestStatus, DriverMode
 from .api_request import APIRequest
-from .resources.user_cred_payload import user_cred
-from .resources.test_suite_payload import test_suite
-from .resources.test_case_payload import test_case
-from .resources.job_payload import job
-from .resources.test_run_payload import test_run
-from .resources.test_payload import test
-from .resources.test_artifact_payload import artifact
-from .resources.user_payload import user
-from .resources.refresh_token_payload import refresh_token
+from .resources import user_cred
+from .resources import test_suite
+from .resources import test_case
+from .resources import job
+from .resources import test_run
+from .resources import test
+from .resources import artifact
+from .resources import user
+from .resources import refresh_token
 
 
 class ZafiraClient:

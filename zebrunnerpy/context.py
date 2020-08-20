@@ -5,8 +5,6 @@ from enum import Enum
 
 from .exceptions import ConfigError
 
-logger = logging.getLogger('settings')
-
 CONFIG_FILE_PATH = getcwd() + '/zafira_properties.ini'
 
 
@@ -38,8 +36,8 @@ def get_env_var(env_var_key):
     """
     env_var_value = environ.get(env_var_key)
     if env_var_value is None:
-        logger.error('ENV var missing: [{0}], please set this variable'.format(env_var_key))
+        logging.error('ENV var missing: [{0}], please set this variable'.format(env_var_key))
         raise ConfigError("Env variable {0} is mandatory, please set this variable".format(env_var_key))
     else:
-        logger.debug('ENV variable is: [{0}]:[{1}]'.format(env_var_key, env_var_value))
+        logging.debug('ENV variable is: [{0}]:[{1}]'.format(env_var_key, env_var_value))
     return env_var_value

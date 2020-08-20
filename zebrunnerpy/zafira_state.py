@@ -1,6 +1,6 @@
 import os
 
-from . import ZafiraClient
+from .client import ZafiraClient
 from .context import Context, Parameter
 
 

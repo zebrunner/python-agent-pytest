@@ -1,10 +1,7 @@
-import logging
 import requests
 
 
 class APIRequest:
-
-    logger = logging.getLogger('zafira')
 
     def __init__(self, base_url):
         self.base_url = base_url
