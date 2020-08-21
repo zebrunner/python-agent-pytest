@@ -1,3 +1,4 @@
+import datetime
 import logging
 import time
 import pytest
@@ -77,11 +78,10 @@ class PyTestZafiraListener(BaseZafiraListener):
     Contains hook implementations
     """
 
+    FRAMEWORK = 'pytest'
+
     def __init__(self, state):
         super().__init__(state)
-
-        # self.state.CONFIG = "<config><arg unique='false'><key>env</key><value>API " \
-        #                     + Context.get_gui_parameter(Parameter.BROWSER).upper() + "</value></arg></config>"
 
     @pytest.hookimpl
     def pytest_sessionstart(self, session):
@@ -92,24 +92,13 @@ class PyTestZafiraListener(BaseZafiraListener):
         if not self.initialized:
             return
         try:
-            self.state.user = self.state.zc.get_user_profile().json()
-            self.state.test_suite = self.state.zc.create_test_suite(
-                self.state.user["id"], self.state.suite_name, 'filename'
-            ).json()
-            self.state.job = self.state.zc.create_job(
-                self.state.user["id"],
-                self.state.job_name,
-                self.state.job_url,
-                "jenkins_host"
-            ).json()
             self.state.test_run = self.state.zc.start_test_run(
-                self.state.job["id"],
-                self.state.test_suite["id"],
-                0
-                # ,
-                # config=self.state.CONFIG
-            ).json()
-            self.state.ci_run_id = self.state.test_run.get('ciRunId')
+                session.name,
+                datetime.datetime.utcnow(),
+                self.FRAMEWORK,
+                self.state.zafira_project
+            )
+            self.state.test_run_id = self.state.test_run.json()["id"]
         except Exception as e:
             self.state.is_enabled = False
             logging.error("Undefined error during test run registration! {}".format(e))
@@ -123,29 +112,39 @@ class PyTestZafiraListener(BaseZafiraListener):
         if not self.state.is_enabled:
             return
         try:
+            # test_name = item.name
+            # class_name = item.nodeid.split('::')[1]
+            # self.state.ci_test_id = str(uuid.uuid4())
+            #
+            # full_path_to_file = item.nodeid.split('::')[0].split('/')
+            # package = self.compose_package_name(full_path_to_file) + '/'
+            # self.state.test_case = self.state.zc.create_test_case(
+            #     class_name, test_name, self.state.test_suite["id"], self.state.user["id"]
+            # ).json()
+            # work_items = []
+            # if hasattr(item._evalxfail, 'reason'):
+            #     work_items.append('xfail')
+            # self.state.test = self.state.zc.start_test(
+            #     self.state.test_run["id"],
+            #     self.state.test_case["id"],
+            #     test_name,
+            #     round(time.time() * 1000),
+            #     self.state.ci_test_id,
+            #     TestStatus.IN_PROGRESS.value,
+            #     class_name,
+            #     package,
+            #     work_items
+            # ).json()
             test_name = item.name
             class_name = item.nodeid.split('::')[1]
-            self.state.ci_test_id = str(uuid.uuid4())
-
-            full_path_to_file = item.nodeid.split('::')[0].split('/')
-            package = self.compose_package_name(full_path_to_file) + '/'
-            self.state.test_case = self.state.zc.create_test_case(
-                class_name, test_name, self.state.test_suite["id"], self.state.user["id"]
-            ).json()
-            work_items = []
-            if hasattr(item._evalxfail, 'reason'):
-                work_items.append('xfail')
+            uid = str(uuid.uuid4())
             self.state.test = self.state.zc.start_test(
-                self.state.test_run["id"],
-                self.state.test_case["id"],
+                uid,
+                self.state.test_run_id,
                 test_name,
-                round(time.time() * 1000),
-                self.state.ci_test_id,
-                TestStatus.IN_PROGRESS.value,
-                class_name,
-                package,
-                work_items
-            ).json()
+                datetime.datetime.utcnow(),
+                class_name
+            )
         except Exception as e:
             logging.error("Undefined error during test case/method start! {}".format(e))
 

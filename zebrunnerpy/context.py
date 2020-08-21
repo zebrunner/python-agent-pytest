@@ -18,7 +18,7 @@ class Context:
 
 
 class Parameter(Enum):
-    SERVICE_URL = 'service-url'
+    SERVICE_URL = 'service_url'
     ACCESS_TOKEN = 'access_token'
     ZAFIRA_ENABLED = 'zafira_enabled'
     JOB_NAME = 'job_name'
@@ -26,6 +26,7 @@ class Parameter(Enum):
     ARTIFACT_LOG_NAME = 'artifact_log_name'
     AWS_SCREEN_SHOT_BUCKET = 'aws_screen_shot_bucket'
     S3_SAVE_SCREENSHOTS = 's3_save_screenshots'
+    ZAFIRA_PROJECT = 'zafira_project'
 
 
 def get_env_var(env_var_key):

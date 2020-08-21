@@ -1,6 +1,9 @@
+import datetime
+from copy import deepcopy
+
 from .resource_constants import Initiator, TestStatus, DriverMode
 from .api_request import APIRequest
-from .resources import user_cred
+from .resources import user_cred, test_v1
 from .resources import test_suite
 from .resources import test_case
 from .resources import job
@@ -10,13 +13,14 @@ from .resources import artifact
 from .resources import user
 from .resources import refresh_token
 
+from .resources import test_run_v1
+
 
 class ZafiraClient:
+    # deprecated API endpoints
     DEFAULT_USER = "anonymous"
     STATUS_PATH = "/api/status"
-    REFRESH_TOKEN_PATH = "/api/iam/v1/auth/refresh"
     LOGIN_PATH = "/api/auth/login"
-    PROFILE_PATH = "/api/users/profile"
     TEST_SUITES_PATH = "/api/tests/suites"
     TEST_CASES_PATH = "/api/tests/cases"
     JOBS_PATH = "/api/jobs"
@@ -32,6 +36,11 @@ class ZafiraClient:
     USERS_PATH = "/api/users"
     PROJECT_PATH = "/api/projects"
     GET_SETTING_TOOL_PATH = "/api/settings/tool/{}"
+
+    # actual API endpoints
+    TEST_RUNS_PATH_V1 = '/api/reporting/v1/test-runs?projectKey={}'
+    REFRESH_TOKEN_PATH = "/api/iam/v1/auth/refresh"
+    TESTS_PATH_V1 = '/api/reporting/v1/test-runs/{}/tests'
 
     INSTANCE = None
 
@@ -85,22 +94,33 @@ class ZafiraClient:
         return self.api.send_post(ZafiraClient.JOBS_PATH, job, headers=self.init_auth_headers(),
                                   default_err_msg="Unable to create job")
 
-    def start_test_run(self, job_id, test_suite_id, build_number, started_by=Initiator.SCHEDULER.value,  # noqa F405
-                       driver_mode=DriverMode.METHOD_MODE.value, config=None, blocker=None,  # noqa F405
-                       work_item=None, status=None, project=None, known_issue=None):
-        test_run["jobId"] = job_id
-        test_run["testSuiteId"] = test_suite_id
-        test_run["buildNumber"] = build_number
-        test_run["startedBy"] = started_by
-        test_run["driverMode"] = driver_mode
-        test_run["blocker"] = blocker
-        test_run["workItem"] = work_item
-        test_run["status"] = status
-        test_run["project"] = project
-        test_run["knownIssue"] = known_issue
-        test_run["configXML"] = config
-        return self.api.send_post(ZafiraClient.TEST_RUNS_PATH, test_run, headers=self.init_auth_headers(),
+    # def start_test_run(self, job_id, test_suite_id, build_number, started_by=Initiator.SCHEDULER.value,  # noqa F405
+    #                    driver_mode=DriverMode.METHOD_MODE.value, config=None, blocker=None,  # noqa F405
+    #                    work_item=None, status=None, project=None, known_issue=None):
+    #     test_run["jobId"] = job_id
+    #     test_run["testSuiteId"] = test_suite_id
+    #     test_run["buildNumber"] = build_number
+    #     test_run["startedBy"] = started_by
+    #     test_run["driverMode"] = driver_mode
+    #     test_run["blocker"] = blocker
+    #     test_run["workItem"] = work_item
+    #     test_run["status"] = status
+    #     test_run["project"] = project
+    #     test_run["knownIssue"] = known_issue
+    #     test_run["configXML"] = config
+    #     return self.api.send_post(ZafiraClient.TEST_RUNS_PATH, test_run, headers=self.init_auth_headers(),
+    #                               default_err_msg="Unable to start test run")
+
+    def start_test_run(self, name, started_at, framework, project):
+        body = deepcopy(test_run_v1)
+        body["name"] = name
+        started_at = started_at.replace(tzinfo=datetime.timezone.utc)
+        body["startedAt"] = started_at.isoformat()
+        body["framework"] = framework
+        return self.api.send_post(ZafiraClient.TEST_RUNS_PATH_V1.format(project), body,
+                                  headers=self.init_auth_headers(),
                                   default_err_msg="Unable to start test run")
+
 
     def update_test_run(self, test_run):
         return self.api.send_put(ZafiraClient.TEST_RUNS_PATH, test_run, headers=self.init_auth_headers(),
@@ -114,19 +134,29 @@ class ZafiraClient:
         return self.api.send_post(ZafiraClient.TEST_RUNS_ABORT_PATH.format(test_run_id),
                                   headers=self.init_auth_headers(), default_err_msg="Unable to find test run by id")
 
-    def start_test(self, test_run_id, test_case_id, test_name, start_time, ci_test_id,
-                   status=TestStatus.IN_PROGRESS.value, test_class=None,  # noqa F405
-                   test_group=None, work_items=None):
-        test["testRunId"] = test_run_id
-        test["testCaseId"] = test_case_id
-        test["name"] = test_name
-        test["ciTestId"] = ci_test_id
-        test["startTime"] = start_time
-        test["testClass"] = test_class
-        test["status"] = status
-        test["workItems"] = work_items
-        test["testGroup"] = test_group
-        return self.api.send_post(ZafiraClient.TESTS_PATH, test, headers=self.init_auth_headers(),
+    # def start_test(self, test_run_id, test_case_id, test_name, start_time, ci_test_id,
+    #                status=TestStatus.IN_PROGRESS.value, test_class=None,  # noqa F405
+    #                test_group=None, work_items=None):
+    #     test["testRunId"] = test_run_id
+    #     test["testCaseId"] = test_case_id
+    #     test["name"] = test_name
+    #     test["ciTestId"] = ci_test_id
+    #     test["startTime"] = start_time
+    #     test["testClass"] = test_class
+    #     test["status"] = status
+    #     test["workItems"] = work_items
+    #     test["testGroup"] = test_group
+    #     return self.api.send_post(ZafiraClient.TESTS_PATH, test, headers=self.init_auth_headers(),
+    #                               default_err_msg="Unable to start test")
+
+    def start_test(self, uid, test_run_id, test_name, started_at, class_name):
+        body = deepcopy(test_v1)
+        body["uuid"] = uid
+        body["name"] = test_name
+        started_at = started_at.replace(tzinfo=datetime.timezone.utc)
+        body["startedAt"] = started_at.isoformat()
+        body["className"] = class_name
+        return self.api.send_post(ZafiraClient.TESTS_PATH_V1.format(test_run_id), body, headers=self.init_auth_headers(),
                                   default_err_msg="Unable to start test")
 
     def finish_test(self, test):
@@ -169,13 +199,6 @@ class ZafiraClient:
         user["password"] = password
         return self.api.send_put(ZafiraClient.USERS_PATH, user, headers=self.init_auth_headers(),
                                  default_err_msg="Unable to create user")
-
-    def get_user_profile(self, username=None):
-        endpoint = ZafiraClient.PROFILE_PATH
-        if username:
-            endpoint += "?username=" + username
-        return self.api.send_get(endpoint, headers=self.init_auth_headers(),
-                                 default_err_msg="Unable to authorize user")
 
     def get_user_or_anonymous_if_not_found(self, username):
         try:

@@ -1,3 +1,5 @@
+import json
+
 import requests
 
 
@@ -11,6 +13,7 @@ class APIRequest:
         url = self.base_url + endpoint
         # logging.info('POST {} \n Headers:{} \n Payload: {}'.format(url, self.headers, body))
         try:
+
             resp = requests.post(url, json=body, headers=headers)
         except Exception as e:
             self.logger.error(default_err_msg, e)

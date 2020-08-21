@@ -1,4 +1,2 @@
-# notes for 0.1.2.2
-migrated pytest implementation
-# notes for 0.1.2
-added zafira client (deprecated yet)
+testruns and test creation is working well
+the rest not

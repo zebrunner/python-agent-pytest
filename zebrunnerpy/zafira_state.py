@@ -82,8 +82,8 @@ class ZafiraState:
     .. attribute:: MAX_LENGTH_OF_WORKITEM
         maximal length of work item visible on Zafira UI
 
-    .. attribute:: CONFIG
-        ENV_NAME, COMPANY_CODE_NAME, etc. on Zafira UI
+    .. attribute:: zafira_project
+        project filter on Zafira UI
 
     """
 
@@ -107,11 +107,14 @@ class ZafiraState:
         self.job_name = str(os.environ.get('BUILD_URL'))
         self.artifact_log_name = Context.get(Parameter.ARTIFACT_LOG_NAME)
         self.artifact_expires_in_default_time = Context.get(Parameter.ARTIFACT_EXPIRES_IN_DEFAULT_TIME)
+        self.zafira_project = Context.get(Parameter.ZAFIRA_PROJECT)
 
         self.suite_name = str(os.environ.get('JOB_NAME'))
         self.job_url = str(os.environ.get('JOB_URL'))
 
         self.refresh_token = None
+
+        self.test_run_id = None
 
         self.user = None
         self.job = None
