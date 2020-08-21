@@ -4,6 +4,7 @@ import time
 import pytest
 import uuid
 
+from zebrunnerpy.resources import test_result_v1
 from .resource_constants import TestStatus
 
 
@@ -112,29 +113,6 @@ class PyTestZafiraListener(BaseZafiraListener):
         if not self.state.is_enabled:
             return
         try:
-            # test_name = item.name
-            # class_name = item.nodeid.split('::')[1]
-            # self.state.ci_test_id = str(uuid.uuid4())
-            #
-            # full_path_to_file = item.nodeid.split('::')[0].split('/')
-            # package = self.compose_package_name(full_path_to_file) + '/'
-            # self.state.test_case = self.state.zc.create_test_case(
-            #     class_name, test_name, self.state.test_suite["id"], self.state.user["id"]
-            # ).json()
-            # work_items = []
-            # if hasattr(item._evalxfail, 'reason'):
-            #     work_items.append('xfail')
-            # self.state.test = self.state.zc.start_test(
-            #     self.state.test_run["id"],
-            #     self.state.test_case["id"],
-            #     test_name,
-            #     round(time.time() * 1000),
-            #     self.state.ci_test_id,
-            #     TestStatus.IN_PROGRESS.value,
-            #     class_name,
-            #     package,
-            #     work_items
-            # ).json()
             test_name = item.name
             class_name = item.nodeid.split('::')[1]
             uid = str(uuid.uuid4())
@@ -145,6 +123,7 @@ class PyTestZafiraListener(BaseZafiraListener):
                 datetime.datetime.utcnow(),
                 class_name
             )
+            self.state.test_id = self.state.test.json()["id"]
         except Exception as e:
             logging.error("Undefined error during test case/method start! {}".format(e))
 
@@ -156,23 +135,8 @@ class PyTestZafiraListener(BaseZafiraListener):
         if not self.state.is_enabled:
             return
         try:
-            if item._skipped_by_mark:
-                test_name = item.name
-                class_name = item.nodeid.split('::')[1]
-                full_path_to_file = item.nodeid.split('::')[0].split('/')
-                package = self.compose_package_name(full_path_to_file) + '/'
-                self.state.test_case = self.state.zc.create_test_case(
-                    class_name, test_name, self.state.test_suite["id"], self.state.user["id"]
-                ).json()
-                self.state.test = self.state.zc.start_test(
-                    self.state.test_run["id"], self.state.test_case["id"], test_name,
-                    round(time.time() * 1000), self.state.ci_test_id, test_class=class_name, test_group=package
-                ).json()
 
-                self.state.test['status'] = TestStatus.SKIPPED.value
-                self.add_work_item_to_test(self.state.test['id'], self.state.skip_reason)
-
-            self.state.zc.finish_test(self.state.test)
+            self.state.zc.finish_test(self.state.test_run_id, self.state.test_id, self.state.test.json())
         except Exception as e:
             logging.error("Unable to finish test run correctly: {}".format(e))
 
@@ -186,25 +150,15 @@ class PyTestZafiraListener(BaseZafiraListener):
             return
         try:
             if report.when == 'setup':
-                if report.skipped:
-                    self.state.skip_reason = report.longrepr[2]
                 if report.failed:
                     self.on_test_failure(report)
             if report.when == 'call':
-                self.state.test["finishTime"] = round(time.time() * 1000)
                 test_result = report.outcome
                 if test_result is 'passed':
                     self.on_test_success()
-                elif test_result is 'failed':
+                if test_result is 'failed':
                     self.on_test_failure(report)
-                else:
-                    self.on_test_skipped(report)
-                self.add_artifact_to_test(
-                    self.state.test,
-                    self.state.artifact_log_name,
-                    'http://google.com',
-                    self.state.artifact_expires_in_default_time
-                )
+
         except Exception as e:
             logging.error("Unable to finish test correctly: {}".format(e))
 
@@ -221,11 +175,11 @@ class PyTestZafiraListener(BaseZafiraListener):
             logging.error("Unable to finish test run correctly: {}".format(e))
 
     def on_test_success(self):
-        self.state.test['status'] = TestStatus.PASSED.value
+        test_result_v1["result"] = 'passed'
 
     def on_test_failure(self, message):
-        self.state.test['status'] = TestStatus.FAILED.value
-        self.state.test['message'] = message.longreprtext
+        test_result_v1["result"] = 'failed'
+        test_result_v1["reason"] = message.longreprtext
 
     def on_test_skipped(self, message):
         self.state.test['message'] = message.longreprtext

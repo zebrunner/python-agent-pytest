@@ -3,7 +3,7 @@ from copy import deepcopy
 
 from .resource_constants import Initiator, TestStatus, DriverMode
 from .api_request import APIRequest
-from .resources import user_cred, test_v1
+from .resources import user_cred, test_v1, test_result_v1
 from .resources import test_suite
 from .resources import test_case
 from .resources import job
@@ -41,6 +41,7 @@ class ZafiraClient:
     TEST_RUNS_PATH_V1 = '/api/reporting/v1/test-runs?projectKey={}'
     REFRESH_TOKEN_PATH = "/api/iam/v1/auth/refresh"
     TESTS_PATH_V1 = '/api/reporting/v1/test-runs/{}/tests'
+    TESTS_FINISH_PATH_V1 = '/api/reporting/v1/test-runs/{}/tests/{}'
 
     INSTANCE = None
 
@@ -159,8 +160,15 @@ class ZafiraClient:
         return self.api.send_post(ZafiraClient.TESTS_PATH_V1.format(test_run_id), body, headers=self.init_auth_headers(),
                                   default_err_msg="Unable to start test")
 
-    def finish_test(self, test):
-        return self.api.send_post(ZafiraClient.TEST_FINISH_PATH.format(test["id"]), test,
+    def finish_test(self, test_run_id, test_id, test):
+        body = deepcopy(test_result_v1)
+        body["id"] = test_id
+        body["uuid"] = test["uuid"]
+        body["name"] = test["name"]
+        body["startedAt"] = test["startedAt"]
+        body["className"] = test["className"]
+        body["endedAt"] = datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc).isoformat()
+        return self.api.send_put(ZafiraClient.TESTS_FINISH_PATH_V1.format(test_run_id, test_id), body,
                                   headers=self.init_auth_headers(), default_err_msg="Unable to finish test")
 
     def delete_test_by_id(self, test_id):

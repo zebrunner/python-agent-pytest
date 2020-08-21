@@ -136,3 +136,9 @@ test_v1 = {
   "startedAt": "2007-12-03T10:15:30Z"
 
 }
+
+
+test_result_v1 = {
+  "result": "failed",
+  "endedAt": "2007-12-03T10:15:30Z"
+}

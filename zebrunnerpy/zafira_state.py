@@ -115,6 +115,7 @@ class ZafiraState:
         self.refresh_token = None
 
         self.test_run_id = None
+        self.test_id = None
 
         self.user = None
         self.job = None
