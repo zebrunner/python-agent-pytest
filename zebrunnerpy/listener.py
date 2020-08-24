@@ -170,15 +170,15 @@ class PyTestZafiraListener(BaseZafiraListener):
         if not self.state.is_enabled:
             return
         try:
-            self.state.zc.finish_test_run(self.state.test_run["id"])
+            self.state.zc.finish_test_run(self.state.test_run.json())
         except Exception as e:
             logging.error("Unable to finish test run correctly: {}".format(e))
 
     def on_test_success(self):
-        test_result_v1["result"] = 'passed'
+        test_result_v1["result"] = TestStatus.PASSED.value
 
     def on_test_failure(self, message):
-        test_result_v1["result"] = 'failed'
+        test_result_v1["result"] = TestStatus.FAILED.value
         test_result_v1["reason"] = message.longreprtext
 
     def on_test_skipped(self, message):
