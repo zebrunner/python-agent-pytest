@@ -122,8 +122,8 @@ class PyTestZafiraListener(BaseZafiraListener):
                 test_name,
                 datetime.datetime.utcnow(),
                 class_name
-            )
-            self.state.test_id = self.state.test.json()["id"]
+            ).json()
+            self.state.test_id = self.state.test["id"]
         except Exception as e:
             logging.error("Undefined error during test case/method start! {}".format(e))
 
@@ -135,8 +135,23 @@ class PyTestZafiraListener(BaseZafiraListener):
         if not self.state.is_enabled:
             return
         try:
+            skip_mark = [marker for marker in item.own_markers if marker.name == 'skip']
+            if skip_mark:
+                test_name = item.name
+                class_name = item.nodeid.split('::')[1]
+                uid = str(uuid.uuid4())
+                self.state.test = self.state.zc.start_test(
+                    uid,
+                    self.state.test_run_id,
+                    test_name,
+                    datetime.datetime.utcnow(),
+                    class_name
+                ).json()
+                self.state.test_id = self.state.test["id"]
+                self.state.test["result"] = TestStatus.SKIPPED.value
+                self.state.test["reason"] = skip_mark[0].kwargs["reason"]
 
-            self.state.zc.finish_test(self.state.test_run_id, self.state.test_id, self.state.test.json())
+            self.state.zc.finish_test(self.state.test_run_id, self.state.test_id, self.state.test)
         except Exception as e:
             logging.error("Unable to finish test run correctly: {}".format(e))
 
@@ -156,8 +171,10 @@ class PyTestZafiraListener(BaseZafiraListener):
                 test_result = report.outcome
                 if test_result is 'passed':
                     self.on_test_success()
-                if test_result is 'failed':
+                elif test_result is 'failed':
                     self.on_test_failure(report)
+                else:
+                    self.on_test_skipped(report)
 
         except Exception as e:
             logging.error("Unable to finish test correctly: {}".format(e))
@@ -175,15 +192,16 @@ class PyTestZafiraListener(BaseZafiraListener):
             logging.error("Unable to finish test run correctly: {}".format(e))
 
     def on_test_success(self):
-        test_result_v1["result"] = TestStatus.PASSED.value
+        self.state.test["result"] = TestStatus.PASSED.value
 
     def on_test_failure(self, message):
-        test_result_v1["result"] = TestStatus.FAILED.value
-        test_result_v1["reason"] = message.longreprtext
+        self.state.test["result"] = TestStatus.FAILED.value
+        self.state.test["reason"] = message.longreprtext
 
     def on_test_skipped(self, message):
-        self.state.test['message'] = message.longreprtext
         if not hasattr(message, 'wasxfail'):
-            self.state.test['status'] = TestStatus.SKIPPED.value
+            self.state.test['result'] = TestStatus.SKIPPED.value
+            self.state.test['reason'] = message.longreprtext
         else:
-            self.state.test['status'] = TestStatus.FAILED.value
+            self.state.test['result'] = TestStatus.FAILED.value
+            self.state.test['reason'] = message.wasxfail

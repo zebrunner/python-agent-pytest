@@ -170,6 +170,8 @@ class ZafiraClient:
         body["startedAt"] = test["startedAt"]
         body["className"] = test["className"]
         body["methodName"] = test["methodName"]
+        body["result"] = test["result"]
+        body["reason"] = test.get("reason") or "passed"
         body["endedAt"] = datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc).isoformat()
         return self.api.send_put(ZafiraClient.TESTS_FINISH_PATH_V1.format(test_run_id, test_id), body,
                                   headers=self.init_auth_headers(), default_err_msg="Unable to finish test")
