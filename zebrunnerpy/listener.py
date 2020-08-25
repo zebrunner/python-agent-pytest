@@ -1,14 +1,14 @@
 import datetime
 import logging
-import time
 import pytest
 import uuid
 
-from zebrunnerpy.resources import test_result_v1
 from .resource_constants import TestStatus
 
 
 class BaseZafiraListener:
+
+    LOGGER = logging.getLogger('zebrunner')
 
     def __init__(self, state):
         self.state = state
@@ -18,18 +18,14 @@ class BaseZafiraListener:
     def initialize_zafira(self):
         enabled = False
         try:
-            if self.state.is_enabled:
 
-                self.state.is_enabled = self.state.zc.is_zafira_available()
-
-                if self.state.is_enabled:
-                    self.state.refresh_token = self.state.zc.refresh_token(self.state.access_token).json()
-                    self.state.zc.auth_token = self.state.refresh_token['authToken']
-                    logging.info("Zafira is " + "available" if self.state.is_enabled else "unavailable")
+            self.state.refresh_token = self.state.zc.refresh_token(self.state.access_token).json()
+            self.state.zc.auth_token = self.state.refresh_token['authToken']
+            self.LOGGER.info("Zafira is " + "available" if self.state.is_enabled else "unavailable")
 
             enabled = self.state.is_enabled
         except Exception as e:
-            logging.error("Unable to initialize connector: {}".format(e))
+            self.LOGGER.error("Unable to initialize connector: {}".format(e))
         return enabled
 
     def compose_package_name(self, path_entries_list):
@@ -44,7 +40,7 @@ class BaseZafiraListener:
         try:
             self.state.zc.add_test_artifact_to_test(test["id"], artifact_link, artifact_name, expires_in)
         except Exception as e:
-            logging.error("Unable to add artifact to test correctly: {}".format(e))
+            self.LOGGER.error("Unable to add artifact to test correctly: {}".format(e))
 
     def on_test_success(self):
         """
@@ -71,7 +67,7 @@ class BaseZafiraListener:
             work_items.append(work_item if len(work_item) < self.state.MAX_LENGTH_OF_WORKITEM else 'Skipped')
             self.state.zc.create_test_work_items(test_id, work_items)
         except Exception as e:
-            logging.error("Unable to add work item: {}".format(e))
+            self.LOGGER.error("Unable to add work item: {}".format(e))
 
 
 class PyTestZafiraListener(BaseZafiraListener):
@@ -102,7 +98,7 @@ class PyTestZafiraListener(BaseZafiraListener):
             self.state.test_run_id = self.state.test_run.json()["id"]
         except Exception as e:
             self.state.is_enabled = False
-            logging.error("Undefined error during test run registration! {}".format(e))
+            self.LOGGER.error("Undefined error during test run registration! {}".format(e))
 
     @pytest.hookimpl
     def pytest_runtest_setup(self, item):
@@ -125,7 +121,7 @@ class PyTestZafiraListener(BaseZafiraListener):
             ).json()
             self.state.test_id = self.state.test["id"]
         except Exception as e:
-            logging.error("Undefined error during test case/method start! {}".format(e))
+            self.LOGGER.error("Undefined error during test case/method start! {}".format(e))
 
     @pytest.hookimpl
     def pytest_runtest_teardown(self, item):
@@ -153,7 +149,7 @@ class PyTestZafiraListener(BaseZafiraListener):
 
             self.state.zc.finish_test(self.state.test_run_id, self.state.test_id, self.state.test)
         except Exception as e:
-            logging.error("Unable to finish test run correctly: {}".format(e))
+            self.LOGGER.error("Unable to finish test run correctly: {}".format(e))
 
     @pytest.hookimpl
     def pytest_runtest_logreport(self, report):
@@ -177,7 +173,7 @@ class PyTestZafiraListener(BaseZafiraListener):
                     self.on_test_skipped(report)
 
         except Exception as e:
-            logging.error("Unable to finish test correctly: {}".format(e))
+            self.LOGGER.error("Unable to finish test correctly: {}".format(e))
 
     @pytest.hookimpl
     def pytest_sessionfinish(self, session, exitstatus):
@@ -189,7 +185,7 @@ class PyTestZafiraListener(BaseZafiraListener):
         try:
             self.state.zc.finish_test_run(self.state.test_run.json())
         except Exception as e:
-            logging.error("Unable to finish test run correctly: {}".format(e))
+            self.LOGGER.error("Unable to finish test run correctly: {}".format(e))
 
     def on_test_success(self):
         self.state.test["result"] = TestStatus.PASSED.value

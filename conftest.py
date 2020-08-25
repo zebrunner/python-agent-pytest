@@ -1,12 +1,19 @@
+import os
+
 import urllib3
 import logging
+import logging.config
 
-logging.basicConfig()
+import yaml
 
 from zebrunnerpy import connector_obj, PyTestZafiraListener
 
 pytest_plugins = ['zebrunnerpy.plugin']
 connector_obj.pytest_listener = PyTestZafiraListener(connector_obj.state)
+
+path = os.getcwd()
+config = yaml.load(open(os.path.join(path, 'logging.cfg'), 'r'))
+logging.config.dictConfig(config)
 
 
 def pytest_configure(config):

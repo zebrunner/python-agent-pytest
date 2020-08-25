@@ -7,6 +7,7 @@ from .exceptions import ConfigError
 
 CONFIG_FILE_PATH = getcwd() + '/zafira_properties.ini'
 
+LOGGER = logging.getLogger('zebrunner')
 
 class Context:
 
@@ -14,6 +15,7 @@ class Context:
     def get(parameter):
         config = configparser.ConfigParser()
         config.read(CONFIG_FILE_PATH)
+        LOGGER.debug('Acquiring property {}'.format(parameter.value))
         return config.get('config', parameter.value)
 
 
@@ -21,11 +23,6 @@ class Parameter(Enum):
     SERVICE_URL = 'service_url'
     ACCESS_TOKEN = 'access_token'
     ZAFIRA_ENABLED = 'zafira_enabled'
-    JOB_NAME = 'job_name'
-    ARTIFACT_EXPIRES_IN_DEFAULT_TIME = 'artifact_expires_in_default_time'
-    ARTIFACT_LOG_NAME = 'artifact_log_name'
-    AWS_SCREEN_SHOT_BUCKET = 'aws_screen_shot_bucket'
-    S3_SAVE_SCREENSHOTS = 's3_save_screenshots'
     ZAFIRA_PROJECT = 'zafira_project'
 
 
@@ -37,8 +34,8 @@ def get_env_var(env_var_key):
     """
     env_var_value = environ.get(env_var_key)
     if env_var_value is None:
-        logging.error('ENV var missing: [{0}], please set this variable'.format(env_var_key))
+        LOGGER.error('ENV var missing: [{0}], please set this variable'.format(env_var_key))
         raise ConfigError("Env variable {0} is mandatory, please set this variable".format(env_var_key))
     else:
-        logging.debug('ENV variable is: [{0}]:[{1}]'.format(env_var_key, env_var_value))
+        LOGGER.debug('ENV variable is: [{0}]:[{1}]'.format(env_var_key, env_var_value))
     return env_var_value

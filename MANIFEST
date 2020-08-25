@@ -7,6 +7,7 @@ zebrunnerpy/api_request.py
 zebrunnerpy/client.py
 zebrunnerpy/context.py
 zebrunnerpy/exceptions.py
+zebrunnerpy/handler.py
 zebrunnerpy/listener.py
 zebrunnerpy/plugin.py
 zebrunnerpy/resource_constants.py

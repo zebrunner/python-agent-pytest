@@ -1,6 +1,6 @@
 import os
 
-from .client import ZafiraClient
+from .client import client
 from .context import Context, Parameter
 
 
@@ -99,14 +99,11 @@ class ZafiraState:
         return cls.INSTANCE
 
     def __init__(self):
-        self.zc = ZafiraClient(Context.get(Parameter.SERVICE_URL))
+        self.zc = client
 
         self.is_enabled = eval(Context.get(Parameter.ZAFIRA_ENABLED))
         self.service_url = Context.get(Parameter.SERVICE_URL)
         self.access_token = Context.get(Parameter.ACCESS_TOKEN)
-        self.job_name = str(os.environ.get('BUILD_URL'))
-        self.artifact_log_name = Context.get(Parameter.ARTIFACT_LOG_NAME)
-        self.artifact_expires_in_default_time = Context.get(Parameter.ARTIFACT_EXPIRES_IN_DEFAULT_TIME)
         self.zafira_project = Context.get(Parameter.ZAFIRA_PROJECT)
 
         self.suite_name = str(os.environ.get('JOB_NAME'))
