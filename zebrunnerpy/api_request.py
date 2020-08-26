@@ -18,7 +18,7 @@ class APIRequest:
 
             resp = requests.post(url, json=body, headers=headers)
         except Exception as e:
-            self.logger.error(default_err_msg, e)
+            self.LOGGER.error(default_err_msg, e)
         return self.__verify_response(resp)
 
     def send_post_without_authorization(self, endpoint, body=None, default_err_msg=None):
@@ -27,7 +27,7 @@ class APIRequest:
         try:
             resp = requests.post(url, json=body)
         except Exception as e:
-            self.logger.error(default_err_msg, e)
+            self.LOGGER.error(default_err_msg, e)
         return self.__verify_response(resp)
 
     def send_get(self, endpoint, headers=None, default_err_msg=None):
@@ -36,7 +36,7 @@ class APIRequest:
         try:
             resp = requests.get(url=url, headers=headers)
         except Exception as e:
-            self.logger.error(default_err_msg, e)
+            self.LOGGER.error(default_err_msg, e)
         return self.__verify_response(resp)
 
     def send_delete(self, endpoint=None, body=None, headers=None, default_err_msg=None):
@@ -45,7 +45,7 @@ class APIRequest:
         try:
             resp = requests.delete(url, json=body, headers=headers)
         except Exception as e:
-            self.logger.error(default_err_msg, e)
+            self.LOGGER.error(default_err_msg, e)
         return self.__verify_response(resp)
 
     def send_put(self, endpoint=None, body=None, headers=None, default_err_msg=None):
@@ -54,7 +54,7 @@ class APIRequest:
         try:
             resp = requests.put(url, json=body, headers=headers)
         except Exception as e:
-            self.logger.error(default_err_msg, e)
+            self.LOGGER.error(default_err_msg, e)
         return self.__verify_response(resp)
 
     @staticmethod

@@ -2,7 +2,7 @@ from distutils.core import setup
 setup(
   name = 'zebrunnerpy',
   packages = ['zebrunnerpy'],
-  version = '0.4.1',
+  version = '0.4.2',
   license='MIT',
   description = 'Python3 connector for Zebrunner-reporting',
   author = 'Sergey Shukalovich',

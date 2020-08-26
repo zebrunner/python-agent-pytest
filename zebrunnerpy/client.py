@@ -92,7 +92,7 @@ class ZafiraClient:
         return {"Authorization": "Bearer " + self.auth_token}
 
     def init_auth_headers_with_screenshot(self):
-        return {"Content-Type": " image/png", "Authorization": "Bearer " + self.auth_token}
+        return {"content-type": "image/png", "Authorization": "Bearer " + self.auth_token}
 
 
 client = ZafiraClient(Context.get(Parameter.SERVICE_URL))
