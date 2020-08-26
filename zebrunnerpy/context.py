@@ -9,6 +9,7 @@ CONFIG_FILE_PATH = getcwd() + '/zafira_properties.ini'
 
 LOGGER = logging.getLogger('zebrunner')
 
+
 class Context:
 
     @staticmethod
@@ -24,6 +25,7 @@ class Parameter(Enum):
     ACCESS_TOKEN = 'access_token'
     ZAFIRA_ENABLED = 'zafira_enabled'
     ZAFIRA_PROJECT = 'zafira_project'
+    DRIVER_INSTANCE_NAME = 'driver_instance_name'
 
 
 def get_env_var(env_var_key):

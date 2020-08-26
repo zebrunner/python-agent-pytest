@@ -3,6 +3,7 @@ import logging
 import pytest
 import uuid
 
+from zebrunnerpy.context import Context, Parameter
 from .resource_constants import TestStatus
 
 
@@ -186,6 +187,30 @@ class PyTestZafiraListener(BaseZafiraListener):
             self.state.zc.finish_test_run(self.state.test_run.json())
         except Exception as e:
             self.LOGGER.error("Unable to finish test run correctly: {}".format(e))
+
+    @pytest.hookimpl
+    def pytest_runtest_makereport(self, item, call):
+        if not self.on_exception(item, call):
+            return
+
+        self.LOGGER.debug('Exception occurs... '
+                          'Trying to catch screenshot')
+
+        test_run_id = self.state.test_run.json()["id"]
+        test_id = self.state.test["id"]
+
+        self.state.zc.push_screenshot(
+            test_run_id,
+            test_id,
+            bytes(
+                item.instance.driver.get_screenshot_as_base64(),
+                'utf-8'
+            )
+        )
+
+    @staticmethod
+    def on_exception(item, call):
+        return hasattr(item.instance, Context.get(Parameter.DRIVER_INSTANCE_NAME)) and call.excinfo
 
     def on_test_success(self):
         self.state.test["result"] = TestStatus.PASSED.value

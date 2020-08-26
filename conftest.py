@@ -1,7 +1,6 @@
 import os
 
 import urllib3
-import logging
 import logging.config
 
 import yaml
