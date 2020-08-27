@@ -202,10 +202,7 @@ class PyTestZafiraListener(BaseZafiraListener):
         self.state.zc.push_screenshot(
             test_run_id,
             test_id,
-            bytes(
-                item.instance.driver.get_screenshot_as_base64(),
-                'utf-8'
-            )
+            item.instance.driver.get_screenshot_as_png()
         )
 
     @staticmethod

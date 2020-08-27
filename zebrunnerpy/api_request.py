@@ -15,8 +15,16 @@ class APIRequest:
         url = self.base_url + endpoint
         self.LOGGER.debug('POST {} \n Headers:{} \n Payload: {}'.format(url, headers, body))
         try:
-
             resp = requests.post(url, json=body, headers=headers)
+        except Exception as e:
+            self.LOGGER.error(default_err_msg, e)
+        return self.__verify_response(resp)
+
+    def send_post_screenshot(self, endpoint, body=None, headers=None, default_err_msg=None):
+        url = self.base_url + endpoint
+        self.LOGGER.debug('POST {} \n Headers:{} \n Payload: {}'.format(url, headers, body))
+        try:
+            resp = requests.post(url, body, headers=headers)
         except Exception as e:
             self.LOGGER.error(default_err_msg, e)
         return self.__verify_response(resp)

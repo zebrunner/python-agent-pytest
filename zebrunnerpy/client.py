@@ -81,7 +81,7 @@ class ZafiraClient:
         return self.api.send_post(ZafiraClient.TEST_LOGS_PATH.format(test_run_id), body, headers=self.init_auth_headers(), default_err_msg="Unable to send log entry")
 
     def push_screenshot(self, test_run_id, test_id, image):
-        return self.api.send_post(ZafiraClient.TEST_SCREENSHOTS_PATH.format(test_run_id, test_id), image, headers=self.init_auth_headers_with_screenshot(), default_err_msg="Unable to send screenshot")
+        return self.api.send_post_screenshot(ZafiraClient.TEST_SCREENSHOTS_PATH.format(test_run_id, test_id), image, headers=self.init_auth_headers_with_screenshot(), default_err_msg="Unable to send screenshot")
 
     def refresh_token(self, token):
         refresh_token["refreshToken"] = token
@@ -92,7 +92,7 @@ class ZafiraClient:
         return {"Authorization": "Bearer " + self.auth_token}
 
     def init_auth_headers_with_screenshot(self):
-        return {"content-type": "image/png", "Authorization": "Bearer " + self.auth_token}
+        return {"Content-type": "image/png", "Authorization": "Bearer " + self.auth_token}
 
 
 client = ZafiraClient(Context.get(Parameter.SERVICE_URL))
