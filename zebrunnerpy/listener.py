@@ -91,12 +91,12 @@ class PyTestZafiraListener(BaseZafiraListener):
             return
         try:
             self.state.test_run = self.state.zc.start_test_run(
-                session.name,
                 datetime.datetime.utcnow(),
                 self.FRAMEWORK,
                 self.state.zafira_project
             )
             self.state.test_run_id = self.state.test_run.json()["id"]
+            # self.state.zc.push_artifact(self.state.test_run_id)
         except Exception as e:
             self.state.is_enabled = False
             self.LOGGER.error("Undefined error during test run registration! {}".format(e))
@@ -113,10 +113,14 @@ class PyTestZafiraListener(BaseZafiraListener):
             test_name = item.name
             class_name = item.nodeid.split('::')[1]
             uid = str(uuid.uuid4())
+            maintainer = [marker for marker in item.own_markers if
+                          marker.name in Context.get_list(Parameter.TEST_OWNERS)]
+            maintainer = 'anonymous' if len(maintainer) == 0 else maintainer[0].name
             self.state.test = self.state.zc.start_test(
                 uid,
                 self.state.test_run_id,
                 test_name,
+                maintainer,
                 datetime.datetime.utcnow(),
                 class_name
             ).json()
@@ -137,10 +141,14 @@ class PyTestZafiraListener(BaseZafiraListener):
                 test_name = item.name
                 class_name = item.nodeid.split('::')[1]
                 uid = str(uuid.uuid4())
+                maintainer = [marker for marker in item.own_markers if
+                              marker.name in Context.get_list(Parameter.TEST_OWNERS)]
+                maintainer = 'anonymous' if len(maintainer) == 0 else maintainer[0].name
                 self.state.test = self.state.zc.start_test(
                     uid,
                     self.state.test_run_id,
                     test_name,
+                    maintainer,
                     datetime.datetime.utcnow(),
                     class_name
                 ).json()

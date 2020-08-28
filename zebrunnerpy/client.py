@@ -4,7 +4,7 @@ from copy import deepcopy
 
 from zebrunnerpy.context import Parameter, Context
 from .api_request import APIRequest
-from .resources import test_v1, test_result_v1, refresh_token, test_log
+from .resources import test_v1, test_result_v1, refresh_token, test_log, test_artifact
 
 from .resources import test_run_v1
 
@@ -18,6 +18,7 @@ class ZafiraClient:
     TEST_RUNS_FINISH_PATH_V1 = '/api/reporting/v1/test-runs/{}'
     TEST_LOGS_PATH = '/api/reporting/v1/test-runs/{}/logs'
     TEST_SCREENSHOTS_PATH = '/api/reporting/v1/test-runs/{}/tests/{}/screenshots'
+    TEST_RUN_ARTIFACT_V1 = '/api/reporting/v1/test-runs/{}/artifact-refs'
 
     INSTANCE = None
 
@@ -30,12 +31,14 @@ class ZafiraClient:
         self.api = APIRequest(service_url)
         self.auth_token = ''
 
-    def start_test_run(self, name, started_at, framework, project):
+    def start_test_run(self, started_at, framework, project):
         body = deepcopy(test_run_v1)
-        body["name"] = name
+        body["name"] = Context.get(Parameter.SUITE)
         started_at = started_at.replace(tzinfo=datetime.timezone.utc)
         body["startedAt"] = started_at.isoformat()
         body["framework"] = framework
+        body["config"]["env"] = Context.get(Parameter.ENV)
+        body["config"]["appVersion"] = Context.get(Parameter.BUILD)
         return self.api.send_post(ZafiraClient.TEST_RUNS_PATH_V1.format(project), body,
                                   headers=self.init_auth_headers(),
                                   default_err_msg="Unable to start test run")
@@ -45,10 +48,11 @@ class ZafiraClient:
         return self.api.send_put(ZafiraClient.TEST_RUNS_FINISH_PATH_V1.format(test_run["id"]), test_run,
                                   headers=self.init_auth_headers(), default_err_msg="Unable to finish test run")
 
-    def start_test(self, uid, test_run_id, test_name, started_at, class_name):
+    def start_test(self, uid, test_run_id, test_name, maintainer, started_at, class_name):
         body = deepcopy(test_v1)
         body["uuid"] = uid
         body["name"] = test_name
+        body["maintainer"] = maintainer
         started_at = started_at.replace(tzinfo=datetime.timezone.utc)
         body["startedAt"] = started_at.isoformat()
         body["className"] = class_name
@@ -82,6 +86,12 @@ class ZafiraClient:
 
     def push_screenshot(self, test_run_id, test_id, image):
         return self.api.send_post_screenshot(ZafiraClient.TEST_SCREENSHOTS_PATH.format(test_run_id, test_id), image, headers=self.init_auth_headers_with_screenshot(), default_err_msg="Unable to send screenshot")
+
+    def push_artifact(self, test_run_id):
+        body = deepcopy(test_artifact)
+        body["name"] = Context.get(Parameter.TEST_RUN_ARTIFACT)
+        body["url"] = Context.get(Parameter.TEST_RUN_ARTIFACT_URL)
+        return self.api.send_post(ZafiraClient.TEST_RUN_ARTIFACT_V1.format(test_run_id), body, headers=self.init_auth_headers(), default_err_msg="Unable to attach testrun artifact")
 
     def refresh_token(self, token):
         refresh_token["refreshToken"] = token

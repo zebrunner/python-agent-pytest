@@ -5,7 +5,12 @@ refresh_token = {
 test_run_v1 = {
   "name": "Test NG run",
   "startedAt": "2019-12-03T10:15:30+01:00",
-  "framework": "testng"
+  "framework": "testng",
+  "config": {
+    "env": "value",
+    "appVersion": "value",
+    "platform": "value"
+  }
 }
 
 
@@ -14,8 +19,8 @@ test_v1 = {
   "name": "Test ABC",
   "className": "com.test.MyTests",
   "methodName": "featureTest()",
-  "startedAt": "2007-12-03T10:15:30Z"
-
+  "startedAt": "2007-12-03T10:15:30Z",
+  "maintainer": "johndoe@zebrunner.com"
 }
 
 
@@ -26,3 +31,8 @@ test_result_v1 = {
 
 
 test_log = []
+
+test_artifact = {
+  "name": "jenkins-log-20200604.tar.gz",
+  "url": "https://ci.organization.org/pipelines/jenkins-log- 20200604.tar.gz"
+}
