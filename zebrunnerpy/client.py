@@ -18,7 +18,7 @@ class ZafiraClient:
     TEST_RUNS_FINISH_PATH_V1 = '/api/reporting/v1/test-runs/{}'
     TEST_LOGS_PATH = '/api/reporting/v1/test-runs/{}/logs'
     TEST_SCREENSHOTS_PATH = '/api/reporting/v1/test-runs/{}/tests/{}/screenshots'
-    TEST_RUN_ARTIFACT_V1 = '/api/reporting/v1/test-runs/{}/artifact-refs'
+    TEST_RUN_ARTIFACT_V1 = '/api/reporting/v1/test-runs/{}/tests/{}/artifacts'
 
     INSTANCE = None
 
@@ -87,11 +87,9 @@ class ZafiraClient:
     def push_screenshot(self, test_run_id, test_id, image):
         return self.api.send_post_screenshot(ZafiraClient.TEST_SCREENSHOTS_PATH.format(test_run_id, test_id), image, headers=self.init_auth_headers_with_screenshot(), default_err_msg="Unable to send screenshot")
 
-    def push_artifact(self, test_run_id):
-        body = deepcopy(test_artifact)
-        body["name"] = Context.get(Parameter.TEST_RUN_ARTIFACT)
-        body["url"] = Context.get(Parameter.TEST_RUN_ARTIFACT_URL)
-        return self.api.send_post(ZafiraClient.TEST_RUN_ARTIFACT_V1.format(test_run_id), body, headers=self.init_auth_headers(), default_err_msg="Unable to attach testrun artifact")
+    def push_artifact(self, test_run_id, test_id):
+        files = {'file': open(Context.get(Parameter.TEST_RUN_ARTIFACT), 'rb')}
+        return self.api.send_post_artifact(ZafiraClient.TEST_RUN_ARTIFACT_V1.format(test_run_id, test_id), files, headers=self.init_auth_headers(), default_err_msg="Unable to attach test artifact")
 
     def refresh_token(self, token):
         refresh_token["refreshToken"] = token

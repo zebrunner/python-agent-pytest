@@ -29,6 +29,15 @@ class APIRequest:
             self.LOGGER.error(default_err_msg, e)
         return self.__verify_response(resp)
 
+    def send_post_artifact(self, endpoint, files=None, headers=None, default_err_msg=None):
+        url = self.base_url + endpoint
+        self.LOGGER.debug('POST {} \n Headers:{}'.format(url, headers))
+        try:
+            resp = requests.post(url, files=files, headers=headers)
+        except Exception as e:
+            self.LOGGER.error(default_err_msg, e)
+        return self.__verify_response(resp)
+
     def send_post_without_authorization(self, endpoint, body=None, default_err_msg=None):
         url = self.base_url + endpoint
         self.LOGGER.debug('POST {} \n Payload: {}'.format(url, body))

@@ -96,7 +96,6 @@ class PyTestZafiraListener(BaseZafiraListener):
                 self.state.zafira_project
             )
             self.state.test_run_id = self.state.test_run.json()["id"]
-            # self.state.zc.push_artifact(self.state.test_run_id)
         except Exception as e:
             self.state.is_enabled = False
             self.LOGGER.error("Undefined error during test run registration! {}".format(e))
@@ -125,6 +124,7 @@ class PyTestZafiraListener(BaseZafiraListener):
                 class_name
             ).json()
             self.state.test_id = self.state.test["id"]
+            self.state.zc.push_artifact(self.state.test_run_id, self.state.test_id)
         except Exception as e:
             self.LOGGER.error("Undefined error during test case/method start! {}".format(e))
 
