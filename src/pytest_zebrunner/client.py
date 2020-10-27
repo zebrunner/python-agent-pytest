@@ -2,11 +2,9 @@ import datetime
 import time
 from copy import deepcopy
 
-from zebrunnerpy.context import Parameter, Context
 from .api_request import APIRequest
-from .resources import test_v1, test_result_v1, refresh_token, test_log, test_artifact
-
-from .resources import test_run_v1
+from .context import Context, Parameter
+from .resources import refresh_token, test_log, test_result_v1, test_run_v1, test_v1
 
 
 class ZafiraClient:

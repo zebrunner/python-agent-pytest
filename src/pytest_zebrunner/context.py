@@ -1,7 +1,7 @@
 import configparser
 import logging
-from os import getcwd, environ
 from enum import Enum
+from os import environ, getcwd
 
 from .exceptions import ConfigError
 

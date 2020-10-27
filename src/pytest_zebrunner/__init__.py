@@ -3,13 +3,15 @@ __all__ = [
     'connector_obj', 'PyTestZafiraListener', 'handler', 'ZebrunnerRestHandler'
 ]
 
+__version__ = '0.1.0'
+
 import logging
 from pprint import pprint
+from typing import Any
 
-from .plugin import connector_obj
-from .listener import PyTestZafiraListener
 from .handler import ZebrunnerRestHandler
-
+from .listener import PyTestZafiraListener
+from .plugin import connector_obj
 
 logger = logging.getLogger('ui')
 
@@ -18,7 +20,7 @@ try:
     from selenium import webdriver
 
     class CustomDriver(webdriver.Remote):
-        def __init__(self, *args, **kwargs):
+        def __init__(self, *args: Any, **kwargs: Any):
             super().__init__(*args, **kwargs)
             pprint(self.__dict__)
 

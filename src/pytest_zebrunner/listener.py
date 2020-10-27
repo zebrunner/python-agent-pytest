@@ -1,9 +1,10 @@
 import datetime
 import logging
-import pytest
 import uuid
 
-from zebrunnerpy.context import Context, Parameter
+import pytest
+
+from .context import Context, Parameter
 from .resource_constants import TestStatus
 
 
