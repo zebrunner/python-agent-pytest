@@ -8,7 +8,7 @@ class PytestZafiraConnector:
     or behave connector according to a running context
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.state = ZafiraState()
 
 

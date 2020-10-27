@@ -2,28 +2,13 @@ import configparser
 import logging
 from enum import Enum
 from os import environ, getcwd
+from typing import Any, List, Optional
 
 from .exceptions import ConfigError
 
 CONFIG_FILE_PATH = getcwd() + "/zafira_properties.ini"
 
 LOGGER = logging.getLogger("zebrunner")
-
-
-class Context:
-    @staticmethod
-    def get(parameter):
-        config = configparser.ConfigParser()
-        config.read(CONFIG_FILE_PATH)
-        LOGGER.debug("Acquiring property {}".format(parameter.value))
-        return config.get("config", parameter.value)
-
-    @staticmethod
-    def get_list(parameter):
-        config = configparser.ConfigParser()
-        config.read(CONFIG_FILE_PATH)
-        LOGGER.debug("Acquiring property {}".format(parameter.value))
-        return config.get("config", parameter.value).split(",")
 
 
 class Parameter(Enum):
@@ -40,10 +25,26 @@ class Parameter(Enum):
     TEST_RUN_ARTIFACT_URL = "test_run_artifact_url"
 
 
-def get_env_var(env_var_key):
+class Context:
+    @staticmethod
+    def get(parameter: Parameter) -> str:
+        config = configparser.ConfigParser()
+        config.read(CONFIG_FILE_PATH)
+        LOGGER.debug("Acquiring property {}".format(parameter.value))
+        return config.get("config", parameter.value)
+
+    @staticmethod
+    def get_list(parameter: Parameter) -> List[str]:
+        config = configparser.ConfigParser()
+        config.read(CONFIG_FILE_PATH)
+        LOGGER.debug("Acquiring property {}".format(parameter.value))
+        return config.get("config", parameter.value).split(",")
+
+
+def get_env_var(env_var_key: str) -> Optional[Any]:
     """
     Getter for environment variable keys.  Uses `os.environ.get(KEYNAME)`
-    :param env_key:  Type string.  Key name of environment variable to get.
+    :param env_var_key:  Type string.  Key name of environment variable to get.
     :return:  Value of the environment variable.
     """
     env_var_value = environ.get(env_var_key)

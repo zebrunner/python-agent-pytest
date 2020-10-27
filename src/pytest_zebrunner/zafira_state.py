@@ -93,12 +93,12 @@ class ZafiraState:
 
     INSTANCE = None
 
-    def __new__(cls):
+    def __new__(cls) -> "ZafiraState":
         if not cls.INSTANCE:
             cls.INSTANCE = super(ZafiraState, cls).__new__(cls)
         return cls.INSTANCE
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.zc = client
 
         self.is_enabled = eval(Context.get(Parameter.ZAFIRA_ENABLED))

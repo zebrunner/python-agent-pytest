@@ -1,5 +1,2 @@
-import pytest_zebrunner
-
-
-def test_ok():
+def test_ok() -> None:
     assert True

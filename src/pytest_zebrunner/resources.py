@@ -1,6 +1,8 @@
+from typing import Any, Dict, List
+
 refresh_token = {"refreshToken": "REFRESH_TOKEN"}
 
-test_run_v1 = {
+test_run_v1: Dict = {
     "name": "Test NG run",
     "startedAt": "2019-12-03T10:15:30+01:00",
     "framework": "testng",
@@ -21,7 +23,7 @@ test_v1 = {
 test_result_v1 = {"result": "failed", "endedAt": "2007-12-03T10:15:30Z"}
 
 
-test_log = []
+test_log: List[Any] = []
 
 test_artifact = {
     "name": "jenkins-log-20200604.tar.gz",

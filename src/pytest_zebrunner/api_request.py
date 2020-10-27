@@ -1,17 +1,21 @@
 import logging
+from typing import Any, Dict
 
 import requests
+from requests import Response
 
 
 class APIRequest:
 
     LOGGER = logging.getLogger("zebrunner")
 
-    def __init__(self, base_url):
+    def __init__(self, base_url: str) -> None:
         self.base_url = base_url
 
     # HTTP methods
-    def send_post(self, endpoint, body=None, headers=None, default_err_msg=None):
+    def send_post(
+        self, endpoint: str, body: Any = None, headers: Dict = None, default_err_msg: Any = None
+    ) -> Response:
         url = self.base_url + endpoint
         self.LOGGER.debug("POST {} \n Headers:{} \n Payload: {}".format(url, headers, body))
         try:
@@ -20,7 +24,9 @@ class APIRequest:
             self.LOGGER.error(default_err_msg, e)
         return self.__verify_response(resp)
 
-    def send_post_screenshot(self, endpoint, body=None, headers=None, default_err_msg=None):
+    def send_post_screenshot(
+        self, endpoint: str, body: Any = None, headers: Dict = None, default_err_msg: Any = None
+    ) -> Response:
         url = self.base_url + endpoint
         self.LOGGER.debug("POST {} \n Headers:{} \n Payload: {}".format(url, headers, body))
         try:
@@ -29,7 +35,9 @@ class APIRequest:
             self.LOGGER.error(default_err_msg, e)
         return self.__verify_response(resp)
 
-    def send_post_artifact(self, endpoint, files=None, headers=None, default_err_msg=None):
+    def send_post_artifact(
+        self, endpoint: str, files: Dict = None, headers: Dict = None, default_err_msg: Any = None
+    ) -> Response:
         url = self.base_url + endpoint
         self.LOGGER.debug("POST {} \n Headers:{}".format(url, headers))
         try:
@@ -38,7 +46,9 @@ class APIRequest:
             self.LOGGER.error(default_err_msg, e)
         return self.__verify_response(resp)
 
-    def send_post_without_authorization(self, endpoint, body=None, default_err_msg=None):
+    def send_post_without_authorization(
+        self, endpoint: str, body: Any = None, default_err_msg: Any = None
+    ) -> Response:
         url = self.base_url + endpoint
         self.LOGGER.debug("POST {} \n Payload: {}".format(url, body))
         try:
@@ -47,7 +57,7 @@ class APIRequest:
             self.LOGGER.error(default_err_msg, e)
         return self.__verify_response(resp)
 
-    def send_get(self, endpoint, headers=None, default_err_msg=None):
+    def send_get(self, endpoint: str, body: Any = None, headers: Dict = None, default_err_msg: Any = None) -> Response:
         url = self.base_url + endpoint
         self.LOGGER.debug("POST {} \n Headers:{} \n Payload: {}".format(url, headers, body))
         try:
@@ -56,7 +66,9 @@ class APIRequest:
             self.LOGGER.error(default_err_msg, e)
         return self.__verify_response(resp)
 
-    def send_delete(self, endpoint=None, body=None, headers=None, default_err_msg=None):
+    def send_delete(
+        self, endpoint: str, body: Any = None, headers: Dict = None, default_err_msg: Any = None
+    ) -> Response:
         url = self.base_url + endpoint
         self.LOGGER.debug("POST {} \n Headers:{} \n Payload: {}".format(url, headers, body))
         try:
@@ -65,7 +77,7 @@ class APIRequest:
             self.LOGGER.error(default_err_msg, e)
         return self.__verify_response(resp)
 
-    def send_put(self, endpoint=None, body=None, headers=None, default_err_msg=None):
+    def send_put(self, endpoint: str, body: Any = None, headers: Dict = None, default_err_msg: Any = None) -> Response:
         url = self.base_url + endpoint
         self.LOGGER.debug("POST {} \n Headers:{} \n Payload: {}".format(url, headers, body))
         try:
@@ -75,7 +87,7 @@ class APIRequest:
         return self.__verify_response(resp)
 
     @staticmethod
-    def __verify_response(resp):
+    def __verify_response(resp: Response) -> Response:
         """Log and check API call. In case status code of response is not 200, will raise an HTTPException """
         if not str(resp.status_code).startswith("2"):
             raise Exception("HTTP call fails. Response status code {status_code}".format(status_code=resp.status_code))
