@@ -4,7 +4,6 @@ from .plugin import connector_obj
 
 
 class ZebrunnerRestHandler(logging.Handler):
-
     def __init__(self):
         logging.Handler.__init__(self, level=10)
         self.state = connector_obj.state

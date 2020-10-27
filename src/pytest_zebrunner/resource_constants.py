@@ -6,19 +6,19 @@ import enum
 
 
 class TestStatus(enum.Enum):
-    UNKNOWN = 'UNKNOWN'
-    IN_PROGRESS = 'IN_PROGRESS'
-    PASSED = 'PASSED'
-    FAILED = 'FAILED'
-    SKIPPED = 'SKIPPED'
-    ABORTED = 'ABORTED'
-    QUEUED = 'QUEUED'
+    UNKNOWN = "UNKNOWN"
+    IN_PROGRESS = "IN_PROGRESS"
+    PASSED = "PASSED"
+    FAILED = "FAILED"
+    SKIPPED = "SKIPPED"
+    ABORTED = "ABORTED"
+    QUEUED = "QUEUED"
 
 
 class Initiator(enum.Enum):
-    SCHEDULER = 'SCHEDULER'
-    UPSTREAM_JOB = 'UPSTREAM_JOB'
-    HUMAN = 'HUMAN'
+    SCHEDULER = "SCHEDULER"
+    UPSTREAM_JOB = "UPSTREAM_JOB"
+    HUMAN = "HUMAN"
 
 
 class DriverMode(enum.Enum):

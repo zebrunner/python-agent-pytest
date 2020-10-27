@@ -7,6 +7,7 @@ class PytestZafiraConnector:
     Can be instantiated as pytest connector,
     or behave connector according to a running context
     """
+
     def __init__(self):
         self.state = ZafiraState()
 

@@ -5,7 +5,7 @@ import requests
 
 class APIRequest:
 
-    LOGGER = logging.getLogger('zebrunner')
+    LOGGER = logging.getLogger("zebrunner")
 
     def __init__(self, base_url):
         self.base_url = base_url
@@ -13,7 +13,7 @@ class APIRequest:
     # HTTP methods
     def send_post(self, endpoint, body=None, headers=None, default_err_msg=None):
         url = self.base_url + endpoint
-        self.LOGGER.debug('POST {} \n Headers:{} \n Payload: {}'.format(url, headers, body))
+        self.LOGGER.debug("POST {} \n Headers:{} \n Payload: {}".format(url, headers, body))
         try:
             resp = requests.post(url, json=body, headers=headers)
         except Exception as e:
@@ -22,7 +22,7 @@ class APIRequest:
 
     def send_post_screenshot(self, endpoint, body=None, headers=None, default_err_msg=None):
         url = self.base_url + endpoint
-        self.LOGGER.debug('POST {} \n Headers:{} \n Payload: {}'.format(url, headers, body))
+        self.LOGGER.debug("POST {} \n Headers:{} \n Payload: {}".format(url, headers, body))
         try:
             resp = requests.post(url, body, headers=headers)
         except Exception as e:
@@ -31,7 +31,7 @@ class APIRequest:
 
     def send_post_artifact(self, endpoint, files=None, headers=None, default_err_msg=None):
         url = self.base_url + endpoint
-        self.LOGGER.debug('POST {} \n Headers:{}'.format(url, headers))
+        self.LOGGER.debug("POST {} \n Headers:{}".format(url, headers))
         try:
             resp = requests.post(url, files=files, headers=headers)
         except Exception as e:
@@ -40,7 +40,7 @@ class APIRequest:
 
     def send_post_without_authorization(self, endpoint, body=None, default_err_msg=None):
         url = self.base_url + endpoint
-        self.LOGGER.debug('POST {} \n Payload: {}'.format(url, body))
+        self.LOGGER.debug("POST {} \n Payload: {}".format(url, body))
         try:
             resp = requests.post(url, json=body)
         except Exception as e:
@@ -49,7 +49,7 @@ class APIRequest:
 
     def send_get(self, endpoint, headers=None, default_err_msg=None):
         url = self.base_url + endpoint
-        self.LOGGER.debug('POST {} \n Headers:{} \n Payload: {}'.format(url, headers, body))
+        self.LOGGER.debug("POST {} \n Headers:{} \n Payload: {}".format(url, headers, body))
         try:
             resp = requests.get(url=url, headers=headers)
         except Exception as e:
@@ -58,7 +58,7 @@ class APIRequest:
 
     def send_delete(self, endpoint=None, body=None, headers=None, default_err_msg=None):
         url = self.base_url + endpoint
-        self.LOGGER.debug('POST {} \n Headers:{} \n Payload: {}'.format(url, headers, body))
+        self.LOGGER.debug("POST {} \n Headers:{} \n Payload: {}".format(url, headers, body))
         try:
             resp = requests.delete(url, json=body, headers=headers)
         except Exception as e:
@@ -67,7 +67,7 @@ class APIRequest:
 
     def send_put(self, endpoint=None, body=None, headers=None, default_err_msg=None):
         url = self.base_url + endpoint
-        self.LOGGER.debug('POST {} \n Headers:{} \n Payload: {}'.format(url, headers, body))
+        self.LOGGER.debug("POST {} \n Headers:{} \n Payload: {}".format(url, headers, body))
         try:
             resp = requests.put(url, json=body, headers=headers)
         except Exception as e:
@@ -77,6 +77,6 @@ class APIRequest:
     @staticmethod
     def __verify_response(resp):
         """Log and check API call. In case status code of response is not 200, will raise an HTTPException """
-        if not str(resp.status_code).startswith('2'):
+        if not str(resp.status_code).startswith("2"):
             raise Exception("HTTP call fails. Response status code {status_code}".format(status_code=resp.status_code))
         return resp

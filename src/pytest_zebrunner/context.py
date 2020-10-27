@@ -5,40 +5,39 @@ from os import environ, getcwd
 
 from .exceptions import ConfigError
 
-CONFIG_FILE_PATH = getcwd() + '/zafira_properties.ini'
+CONFIG_FILE_PATH = getcwd() + "/zafira_properties.ini"
 
-LOGGER = logging.getLogger('zebrunner')
+LOGGER = logging.getLogger("zebrunner")
 
 
 class Context:
-
     @staticmethod
     def get(parameter):
         config = configparser.ConfigParser()
         config.read(CONFIG_FILE_PATH)
-        LOGGER.debug('Acquiring property {}'.format(parameter.value))
-        return config.get('config', parameter.value)
+        LOGGER.debug("Acquiring property {}".format(parameter.value))
+        return config.get("config", parameter.value)
 
     @staticmethod
     def get_list(parameter):
         config = configparser.ConfigParser()
         config.read(CONFIG_FILE_PATH)
-        LOGGER.debug('Acquiring property {}'.format(parameter.value))
-        return config.get('config', parameter.value).split(',')
+        LOGGER.debug("Acquiring property {}".format(parameter.value))
+        return config.get("config", parameter.value).split(",")
 
 
 class Parameter(Enum):
-    SERVICE_URL = 'service_url'
-    ACCESS_TOKEN = 'access_token'
-    ZAFIRA_ENABLED = 'zafira_enabled'
-    ZAFIRA_PROJECT = 'zafira_project'
-    DRIVER_INSTANCE_NAME = 'driver_instance_name'
-    SUITE = 'suite'
-    BUILD = 'build'
-    ENV = 'env'
-    TEST_OWNERS = 'test_owners'
-    TEST_RUN_ARTIFACT = 'test_run_artifact'
-    TEST_RUN_ARTIFACT_URL = 'test_run_artifact_url'
+    SERVICE_URL = "service_url"
+    ACCESS_TOKEN = "access_token"
+    ZAFIRA_ENABLED = "zafira_enabled"
+    ZAFIRA_PROJECT = "zafira_project"
+    DRIVER_INSTANCE_NAME = "driver_instance_name"
+    SUITE = "suite"
+    BUILD = "build"
+    ENV = "env"
+    TEST_OWNERS = "test_owners"
+    TEST_RUN_ARTIFACT = "test_run_artifact"
+    TEST_RUN_ARTIFACT_URL = "test_run_artifact_url"
 
 
 def get_env_var(env_var_key):
@@ -49,8 +48,8 @@ def get_env_var(env_var_key):
     """
     env_var_value = environ.get(env_var_key)
     if env_var_value is None:
-        LOGGER.error('ENV var missing: [{0}], please set this variable'.format(env_var_key))
+        LOGGER.error("ENV var missing: [{0}], please set this variable".format(env_var_key))
         raise ConfigError("Env variable {0} is mandatory, please set this variable".format(env_var_key))
     else:
-        LOGGER.debug('ENV variable is: [{0}]:[{1}]'.format(env_var_key, env_var_value))
+        LOGGER.debug("ENV variable is: [{0}]:[{1}]".format(env_var_key, env_var_value))
     return env_var_value

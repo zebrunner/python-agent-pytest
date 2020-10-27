@@ -106,8 +106,8 @@ class ZafiraState:
         self.access_token = Context.get(Parameter.ACCESS_TOKEN)
         self.zafira_project = Context.get(Parameter.ZAFIRA_PROJECT)
 
-        self.suite_name = str(os.environ.get('JOB_NAME'))
-        self.job_url = str(os.environ.get('JOB_URL'))
+        self.suite_name = str(os.environ.get("JOB_NAME"))
+        self.job_url = str(os.environ.get("JOB_URL"))
 
         self.refresh_token = None
 
@@ -121,8 +121,8 @@ class ZafiraState:
         self.test_run = None
         self.test = None
 
-        self.ci_test_id = ''
-        self.ci_run_id = ''
+        self.ci_test_id = ""
+        self.ci_run_id = ""
 
         self.skip_reason = None
 

@@ -10,7 +10,7 @@ from .resource_constants import TestStatus
 
 class BaseZafiraListener:
 
-    LOGGER = logging.getLogger('zebrunner')
+    LOGGER = logging.getLogger("zebrunner")
 
     def __init__(self, state):
         self.state = state
@@ -22,7 +22,7 @@ class BaseZafiraListener:
         try:
 
             self.state.refresh_token = self.state.zc.refresh_token(self.state.access_token).json()
-            self.state.zc.auth_token = self.state.refresh_token['authToken']
+            self.state.zc.auth_token = self.state.refresh_token["authToken"]
             self.LOGGER.info("Zafira is " + "available" if self.state.is_enabled else "unavailable")
 
             enabled = self.state.is_enabled
@@ -33,7 +33,7 @@ class BaseZafiraListener:
     def compose_package_name(self, path_entries_list):
         if len(path_entries_list) == 2:
             return path_entries_list[0]
-        return path_entries_list[0] + '/' + self.compose_package_name(path_entries_list[1:])
+        return path_entries_list[0] + "/" + self.compose_package_name(path_entries_list[1:])
 
     def add_artifact_to_test(self, test, artifact_name, artifact_link, expires_in=None):
         """
@@ -66,7 +66,7 @@ class BaseZafiraListener:
             return
         try:
             work_items = list()
-            work_items.append(work_item if len(work_item) < self.state.MAX_LENGTH_OF_WORKITEM else 'Skipped')
+            work_items.append(work_item if len(work_item) < self.state.MAX_LENGTH_OF_WORKITEM else "Skipped")
             self.state.zc.create_test_work_items(test_id, work_items)
         except Exception as e:
             self.LOGGER.error("Unable to add work item: {}".format(e))
@@ -77,7 +77,7 @@ class PyTestZafiraListener(BaseZafiraListener):
     Contains hook implementations
     """
 
-    FRAMEWORK = 'pytest'
+    FRAMEWORK = "pytest"
 
     def __init__(self, state):
         super().__init__(state)
@@ -92,9 +92,7 @@ class PyTestZafiraListener(BaseZafiraListener):
             return
         try:
             self.state.test_run = self.state.zc.start_test_run(
-                datetime.datetime.utcnow(),
-                self.FRAMEWORK,
-                self.state.zafira_project
+                datetime.datetime.utcnow(), self.FRAMEWORK, self.state.zafira_project
             )
             self.state.test_run_id = self.state.test_run.json()["id"]
         except Exception as e:
@@ -111,18 +109,14 @@ class PyTestZafiraListener(BaseZafiraListener):
             return
         try:
             test_name = item.name
-            class_name = item.nodeid.split('::')[1]
+            class_name = item.nodeid.split("::")[1]
             uid = str(uuid.uuid4())
-            maintainer = [marker for marker in item.own_markers if
-                          marker.name in Context.get_list(Parameter.TEST_OWNERS)]
-            maintainer = 'anonymous' if len(maintainer) == 0 else maintainer[0].name
+            maintainer = [
+                marker for marker in item.own_markers if marker.name in Context.get_list(Parameter.TEST_OWNERS)
+            ]
+            maintainer = "anonymous" if len(maintainer) == 0 else maintainer[0].name
             self.state.test = self.state.zc.start_test(
-                uid,
-                self.state.test_run_id,
-                test_name,
-                maintainer,
-                datetime.datetime.utcnow(),
-                class_name
+                uid, self.state.test_run_id, test_name, maintainer, datetime.datetime.utcnow(), class_name
             ).json()
             self.state.test_id = self.state.test["id"]
             self.state.zc.push_artifact(self.state.test_run_id, self.state.test_id)
@@ -137,21 +131,17 @@ class PyTestZafiraListener(BaseZafiraListener):
         if not self.state.is_enabled:
             return
         try:
-            skip_mark = [marker for marker in item.own_markers if marker.name == 'skip']
+            skip_mark = [marker for marker in item.own_markers if marker.name == "skip"]
             if skip_mark:
                 test_name = item.name
-                class_name = item.nodeid.split('::')[1]
+                class_name = item.nodeid.split("::")[1]
                 uid = str(uuid.uuid4())
-                maintainer = [marker for marker in item.own_markers if
-                              marker.name in Context.get_list(Parameter.TEST_OWNERS)]
-                maintainer = 'anonymous' if len(maintainer) == 0 else maintainer[0].name
+                maintainer = [
+                    marker for marker in item.own_markers if marker.name in Context.get_list(Parameter.TEST_OWNERS)
+                ]
+                maintainer = "anonymous" if len(maintainer) == 0 else maintainer[0].name
                 self.state.test = self.state.zc.start_test(
-                    uid,
-                    self.state.test_run_id,
-                    test_name,
-                    maintainer,
-                    datetime.datetime.utcnow(),
-                    class_name
+                    uid, self.state.test_run_id, test_name, maintainer, datetime.datetime.utcnow(), class_name
                 ).json()
                 self.state.test_id = self.state.test["id"]
                 self.state.test["result"] = TestStatus.SKIPPED.value
@@ -170,14 +160,14 @@ class PyTestZafiraListener(BaseZafiraListener):
         if not self.state.is_enabled:
             return
         try:
-            if report.when == 'setup':
+            if report.when == "setup":
                 if report.failed:
                     self.on_test_failure(report)
-            if report.when == 'call':
+            if report.when == "call":
                 test_result = report.outcome
-                if test_result is 'passed':
+                if test_result is "passed":
                     self.on_test_success()
-                elif test_result is 'failed':
+                elif test_result is "failed":
                     self.on_test_failure(report)
                 else:
                     self.on_test_skipped(report)
@@ -202,17 +192,12 @@ class PyTestZafiraListener(BaseZafiraListener):
         if not self.on_exception(item, call):
             return
 
-        self.LOGGER.debug('Exception occurs... '
-                          'Trying to catch screenshot')
+        self.LOGGER.debug("Exception occurs... " "Trying to catch screenshot")
 
         test_run_id = self.state.test_run.json()["id"]
         test_id = self.state.test["id"]
 
-        self.state.zc.push_screenshot(
-            test_run_id,
-            test_id,
-            item.instance.driver.get_screenshot_as_png()
-        )
+        self.state.zc.push_screenshot(test_run_id, test_id, item.instance.driver.get_screenshot_as_png())
 
     @staticmethod
     def on_exception(item, call):
@@ -226,9 +211,9 @@ class PyTestZafiraListener(BaseZafiraListener):
         self.state.test["reason"] = message.longreprtext
 
     def on_test_skipped(self, message):
-        if not hasattr(message, 'wasxfail'):
-            self.state.test['result'] = TestStatus.SKIPPED.value
-            self.state.test['reason'] = message.longreprtext
+        if not hasattr(message, "wasxfail"):
+            self.state.test["result"] = TestStatus.SKIPPED.value
+            self.state.test["reason"] = message.longreprtext
         else:
-            self.state.test['result'] = TestStatus.FAILED.value
-            self.state.test['reason'] = message.wasxfail
+            self.state.test["result"] = TestStatus.FAILED.value
+            self.state.test["reason"] = message.wasxfail

@@ -1,9 +1,17 @@
 __all__ = [
-    'zafira_state', 'client', 'resource_constants', 'resources', 'plugin', 'listener',
-    'connector_obj', 'PyTestZafiraListener', 'handler', 'ZebrunnerRestHandler'
+    "zafira_state",
+    "client",
+    "resource_constants",
+    "resources",
+    "plugin",
+    "listener",
+    "connector_obj",
+    "PyTestZafiraListener",
+    "handler",
+    "ZebrunnerRestHandler",
 ]
 
-__version__ = '0.1.0'
+__version__ = "0.1.0"
 
 import logging
 from pprint import pprint
@@ -13,7 +21,7 @@ from .handler import ZebrunnerRestHandler
 from .listener import PyTestZafiraListener
 from .plugin import connector_obj
 
-logger = logging.getLogger('ui')
+logger = logging.getLogger("ui")
 
 
 try:
@@ -26,4 +34,4 @@ try:
 
     webdriver.WebDriver = CustomDriver
 except ImportError:
-    logger.warning('Selenium library is not installed.')
+    logger.warning("Selenium library is not installed.")
