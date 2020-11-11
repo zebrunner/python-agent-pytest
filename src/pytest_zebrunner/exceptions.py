@@ -1,10 +1,10 @@
-class ZafiraError(Exception):
+class ZebrunnerError(Exception):
     """ Common exception for Zafira App """
 
 
-class ConfigError(ZafiraError):
+class ConfigError(ZebrunnerError):
     """ Raises if environ var is missing """
 
 
-class APIError(ZafiraError):
+class APIError(ZebrunnerError):
     """ An exception for Zafira client API calls issues """

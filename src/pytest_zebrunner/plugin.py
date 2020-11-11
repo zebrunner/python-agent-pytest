@@ -1,15 +1,14 @@
-from .zafira_state import ZafiraState
+from typing import Any
+
+from pytest_zebrunner.hooks import PytestZebrunnerHooks
+from pytest_zebrunner.settings import ZebrunnerSettings
 
 
-class PytestZafiraConnector:
-    """
-    An instance of Zafira connector with generic Zafira state,
-    Can be instantiated as pytest connector,
-    or behave connector according to a running context
-    """
+def pytest_configure(config: Any) -> None:
+    settings = ZebrunnerSettings()
+    hooks = PytestZebrunnerHooks(settings)
 
-    def __init__(self) -> None:
-        self.state = ZafiraState()
+    config.pluginmanager.register(hooks)
 
-
-connector_obj = PytestZafiraConnector()
+    config.addinivalue_line("markers", "maintainer(name): Email or nickname of test maintainer")
+    config.addinivalue_line("markers", "skip: Skip test")

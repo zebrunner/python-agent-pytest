@@ -13,17 +13,25 @@ classifiers = [
     "Intended Audience :: Developers",
     "Topic :: Software Development :: Build Tools",
     "License :: OSI Approved :: MIT License",
+    "Framework :: Pytest",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.6",
     "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
 ]
 
+
+[tool.poetry.plugins.pytest11]
+pytest_zebrunner = "pytest_zebrunner.plugin"
+
+
 [tool.poetry.dependencies]
 python = "^3.6"
 pytest = "^6.1.1"
-urllib3 = "^1.25.11"
-requests = "^2.24.0"
+httpx = "^0.16.1"
+pydantic = "^1.7.2"
+python-dotenv = "^0.15.0"
+
 
 [tool.poetry.dev-dependencies]
 black = "^20.8b1"
