@@ -5,17 +5,12 @@ import pytest
 from _pytest.config import ExitCode
 from _pytest.main import Session
 from _pytest.nodes import Item
-from _pytest.reports import CollectReport, TestReport
+from _pytest.reports import TestReport
 from _pytest.runner import CallInfo
 
 from pytest_zebrunner.settings import ZebrunnerSettings
 from pytest_zebrunner.zebrunner_api.client import ZebrunnerAPI
-from pytest_zebrunner.zebrunner_api.models import (
-    FinishTestModel,
-    StartTestModel,
-    StartTestRunModel,
-    TestStatus,
-)
+from pytest_zebrunner.zebrunner_api.models import StartTestModel, StartTestRunModel
 
 
 class PytestZebrunnerHooks:
@@ -61,7 +56,7 @@ class PytestZebrunnerHooks:
 
         test_name = item.name
         class_name = item.nodeid.split("::")[1]
-        # maintainer = [mark.args[0] for mark in item.iter_markers("maintainer")]
+        maintainer = ",".join([mark.args[0] for mark in item.iter_markers("maintainer")])
 
         self.test_id = self.event_loop.run_until_complete(
             self.api.start_test(
@@ -70,31 +65,25 @@ class PytestZebrunnerHooks:
                     name=test_name,
                     class_name=class_name,
                     method_name=item.name,
-                    # maintainer=str(maintainer) if maintainer else None,
+                    maintainer=maintainer or None,
                 ),
             )
         )
 
     @pytest.hookimpl
-    def pytest_runtest_teardown(self, item: Item) -> None:
-        if not self.test_id or not self.test_run_id:
-            return
-
-        class_name = item.nodeid.split("::")[1]
-
-        test_id = self.event_loop.run_until_complete(
-            self.api.start_test(
-                self.test_run_id, StartTestModel(name=item.name, class_name=class_name, method_name=item.name)
-            )
-        )
-        self.event_loop.run_until_complete(
-            self.api.finish_test(self.test_run_id, test_id, FinishTestModel(result=TestStatus.IN_PROGRESS.value))
-        )
+    def pytest_runtest_makereport(item: Item, call: CallInfo) -> None:
+        call.item = item
 
     @pytest.hookimpl
-    def pytest_runtest_logreport(self, report: Union[TestReport, CollectReport]) -> None:
-        pass
+    def pytest_runtest_logreport(self, report: TestReport) -> None:
+        from pprint import pprint
 
-    @pytest.hookimpl
-    def pytest_runtest_makereport(self, item: Item, call: CallInfo) -> None:
-        pass
+        pprint(report.__dict__)
+        if report.when == "setup":
+            print(f"{self.test_id}: setup")
+        elif report.when == "call":
+            print(f"{self.test_id} call")
+        elif report.when == "teardown":
+            print(f"{self.test_id} teardown")
+        else:
+            print("Unable to fonosh test properly")
