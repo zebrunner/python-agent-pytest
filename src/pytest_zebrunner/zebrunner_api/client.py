@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pprint import pformat
 from typing import List
 
@@ -50,7 +50,6 @@ class ZebrunnerAPI:
 
     async def start_test_run(self, project_key: str, body: StartTestRunModel) -> int:
         url = self.service_url + "/api/reporting/v1/test-runs"
-
         response = await self._client.post(
             url, params={"projectKey": project_key}, json=body.dict(exclude_none=True, by_alias=True)
         )
@@ -79,7 +78,7 @@ class ZebrunnerAPI:
         url = self.service_url + f"/api/reporting/v1/test-runs/{test_run_id}"
 
         response = await self._client.put(
-            url, json={"endedAt": datetime.utcnow().replace(tzinfo=timezone.utc).isoformat()}
+            url, json={"endedAt": (datetime.utcnow().replace(tzinfo=timezone.utc) - timedelta(seconds=1)).isoformat()}
         )
         if response.status_code != 200:
             log_response(response, logging.ERROR)

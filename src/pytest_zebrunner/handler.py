@@ -1,9 +1,11 @@
-# class ZebrunnerRestHandler(old_hooks.Handler):
-#     def __init__(self) -> None:
-#         old_hooks.Handler.__init__(self, level=10)
-#         self.state = connector_obj.state
+# import logging
 #
-#     def emit(self, record: old_hooks.LogRecord) -> None:
+#
+# class ZebrunnerRestHandler(logging.Handler):
+#     def __init__(self) -> None:
+#         super().__init__()
+#
+#     def emit(self, record: logging.LogRecord) -> None:
 #         test_run = self.state.test_run
 #         test = self.state.test
 #

@@ -1,3 +1,4 @@
+import logging
 from asyncio import get_event_loop
 from typing import Optional, Union
 
@@ -10,7 +11,14 @@ from _pytest.runner import CallInfo
 
 from pytest_zebrunner.settings import ZebrunnerSettings
 from pytest_zebrunner.zebrunner_api.client import ZebrunnerAPI
-from pytest_zebrunner.zebrunner_api.models import StartTestModel, StartTestRunModel
+from pytest_zebrunner.zebrunner_api.models import (
+    FinishTestModel,
+    StartTestModel,
+    StartTestRunModel,
+    TestStatus,
+)
+
+logger = logging.getLogger(__name__)
 
 
 class PytestZebrunnerHooks:
@@ -22,6 +30,7 @@ class PytestZebrunnerHooks:
 
         self.test_run_id: Optional[int] = None
         self.test_id: Optional[int] = None
+        self.last_report: Optional[TestReport] = None
 
     @pytest.hookimpl
     def pytest_sessionstart(self, session: Session) -> None:
@@ -46,17 +55,35 @@ class PytestZebrunnerHooks:
         self.event_loop.run_until_complete(self.api.close())
 
     @pytest.hookimpl
-    def pytest_runtest_setup(self, item: Item) -> None:
-        """
-        Setup handler, set up initial parameters for test,
-        attaches to testsuite, registers and starts the test
-        """
+    def pytest_runtest_makereport(self, item: Item, call: CallInfo) -> TestReport:
+        report = TestReport.from_item_and_call(item, call)
+        report.item = item
+        return report
+
+    @pytest.hookimpl
+    def pytest_runtest_logreport(self, report: TestReport) -> None:
+        if report.when != "setup" and not self.last_report:
+            logger.error("last_report attribute must be not empty if not setup stage")
+            return
+
+        if report.when == "setup":
+            self.setup_test(report)
+        elif report.when == "call":
+            self.call_test(report)
+        elif report.when == "teardown":
+            self.teardown_test(report)
+        else:
+            print("Unable to finish test properly")
+
+    def setup_test(self, report: TestReport) -> None:
         if not self.test_run_id:
             return
 
-        test_name = item.name
-        class_name = item.nodeid.split("::")[1]
-        maintainer = ",".join([mark.args[0] for mark in item.iter_markers("maintainer")])
+        test_item: Item = report.item
+
+        test_name = test_item.name
+        class_name = test_item.nodeid.split("::")[1]
+        maintainer = ",".join([mark.args[0] for mark in test_item.iter_markers("maintainer")])
 
         self.test_id = self.event_loop.run_until_complete(
             self.api.start_test(
@@ -64,26 +91,33 @@ class PytestZebrunnerHooks:
                 StartTestModel(
                     name=test_name,
                     class_name=class_name,
-                    method_name=item.name,
+                    method_name=test_name,
                     maintainer=maintainer or None,
                 ),
             )
         )
+        self.last_report = report
 
-    @pytest.hookimpl
-    def pytest_runtest_makereport(item: Item, call: CallInfo) -> None:
-        call.item = item
+    def call_test(self, report: TestReport) -> None:
+        if not self.test_id or not self.test_run_id:
+            return
 
-    @pytest.hookimpl
-    def pytest_runtest_logreport(self, report: TestReport) -> None:
-        from pprint import pprint
-
-        pprint(report.__dict__)
-        if report.when == "setup":
-            print(f"{self.test_id}: setup")
-        elif report.when == "call":
-            print(f"{self.test_id} call")
-        elif report.when == "teardown":
-            print(f"{self.test_id} teardown")
+        if report.passed:
+            status = TestStatus.PASSED
         else:
-            print("Unable to fonosh test properly")
+            status = TestStatus.FAILED
+
+        self.event_loop.run_until_complete(
+            self.api.finish_test(self.test_run_id, self.test_id, FinishTestModel(result=status.value))
+        )
+        self.last_report = report
+
+    def teardown_test(self, report: TestReport) -> None:
+        if not self.test_id or not self.test_run_id or not self.last_report:
+            return
+
+        if report.when == "teardown" and self.last_report.when == "setup":
+            self.event_loop.run_until_complete(
+                self.api.finish_test(self.test_run_id, self.test_id, FinishTestModel(result=TestStatus.SKIPPED.value))
+            )
+        self.last_report = None

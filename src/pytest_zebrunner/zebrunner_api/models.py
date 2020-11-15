@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from enum import Enum
 from typing import Dict, List, Optional
 from uuid import uuid4
@@ -11,7 +11,7 @@ def generate_uuid() -> str:
 
 
 def generate_datetime_str() -> str:
-    return datetime.utcnow().replace(tzinfo=timezone.utc).isoformat()
+    return (datetime.utcnow() - timedelta(seconds=1)).replace(tzinfo=timezone.utc).isoformat()
 
 
 class TestStatus(Enum):
