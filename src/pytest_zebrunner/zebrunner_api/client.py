@@ -36,6 +36,7 @@ class ZebrunnerAPI:
         self.access_token = access_token
         self._client = AsyncClient()
         self._auth_token = None
+        self.authenticate = False
 
     def _sign_request(self, request: Request) -> Request:
         request.headers["Authorization"] = f"Bearer {self._auth_token}"
@@ -47,7 +48,7 @@ class ZebrunnerAPI:
         try:
             response = await self._client.post(url, json={"refreshToken": self.access_token})
         except httpx.RequestError as e:
-            logger.error("Error while sending request to zebrunner.", exc_info=e)
+            logger.warning("Error while sending request to zebrunner.", exc_info=e)
             return
 
         if response.status_code != 200:
@@ -56,6 +57,7 @@ class ZebrunnerAPI:
 
         self._auth_token = response.json()["authToken"]
         self._client.auth = self._sign_request
+        self.authenticated = True
 
     async def start_test_run(self, project_key: str, body: StartTestRunModel) -> Optional[int]:
         url = self.service_url + "/api/reporting/v1/test-runs"
@@ -65,7 +67,7 @@ class ZebrunnerAPI:
                 url, params={"projectKey": project_key}, json=body.dict(exclude_none=True, by_alias=True)
             )
         except httpx.RequestError as e:
-            logger.error("Error while sending request to zebrunner.", exc_info=e)
+            logger.warning("Error while sending request to zebrunner.", exc_info=e)
             return None
 
         if response.status_code != 200:
@@ -80,7 +82,7 @@ class ZebrunnerAPI:
         try:
             response = await self._client.post(url, json=body.dict(exclude_none=True, by_alias=True))
         except httpx.RequestError as e:
-            logger.error("Error while sending request to zebrunner.", exc_info=e)
+            logger.warning("Error while sending request to zebrunner.", exc_info=e)
             return None
 
         if response.status_code != 200:
@@ -95,7 +97,7 @@ class ZebrunnerAPI:
         try:
             response = await self._client.put(url, json=body.dict(exclude_none=True, by_alias=True))
         except httpx.RequestError as e:
-            logger.error("Error while sending request to zebrunner.", exc_info=e)
+            logger.warning("Error while sending request to zebrunner.", exc_info=e)
             return
 
         if response.status_code != 200:
@@ -110,7 +112,7 @@ class ZebrunnerAPI:
                 json={"endedAt": (datetime.utcnow().replace(tzinfo=timezone.utc) - timedelta(seconds=1)).isoformat()},
             )
         except httpx.RequestError as e:
-            logger.error("Error while sending request to zebrunner.", exc_info=e)
+            logger.warning("Error while sending request to zebrunner.", exc_info=e)
             return
 
         if response.status_code != 200:

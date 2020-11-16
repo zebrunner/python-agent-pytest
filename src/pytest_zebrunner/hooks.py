@@ -63,7 +63,6 @@ class PytestZebrunnerHooks:
     @pytest.hookimpl
     def pytest_runtest_logreport(self, report: TestReport) -> None:
         if report.when != "setup" and not self.last_report:
-            logger.error("last_report attribute must be not empty if not setup stage")
             return
 
         if report.when == "setup":
