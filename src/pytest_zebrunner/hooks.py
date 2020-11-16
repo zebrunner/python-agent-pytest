@@ -9,6 +9,7 @@ from _pytest.nodes import Item
 from _pytest.reports import TestReport
 from _pytest.runner import CallInfo
 
+from pytest_zebrunner.selenium_driver import DriverInfo
 from pytest_zebrunner.settings import ZebrunnerSettings
 from pytest_zebrunner.zebrunner_api.client import ZebrunnerAPI
 from pytest_zebrunner.zebrunner_api.models import (
@@ -100,6 +101,10 @@ class PytestZebrunnerHooks:
     def call_test(self, report: TestReport) -> None:
         if not self.test_id or not self.test_run_id:
             return
+
+        driver = DriverInfo()
+        if driver.info is not None:
+            logger.info(driver.info)
 
         if report.passed:
             status = TestStatus.PASSED
