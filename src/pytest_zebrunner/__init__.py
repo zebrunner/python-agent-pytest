@@ -1,12 +1,7 @@
 import logging
 from pprint import pprint
 
-# from .hooks import PytestZebrunnerHooks
-
-# import pytest
-
-# from .settings import ZebrunnerSettings
-
+logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger("ui")
 
 
