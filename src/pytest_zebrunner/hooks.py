@@ -16,6 +16,7 @@ from pytest_zebrunner.zebrunner_api.models import (
     FinishTestModel,
     StartTestModel,
     StartTestRunModel,
+    TestRunConfigModel,
     TestStatus,
 )
 
@@ -43,7 +44,12 @@ class PytestZebrunnerHooks:
         self.event_loop.run_until_complete(self.api.auth())
         self.test_run_id = self.event_loop.run_until_complete(
             self.api.start_test_run(
-                self.settings.zebrunner_project, StartTestRunModel(name="test_run_name", framework="pytest")
+                self.settings.zebrunner_project,
+                StartTestRunModel(
+                    name="test_run_name",
+                    framework="pytest",
+                    config=TestRunConfigModel(environment=self.settings.env, suite=self.settings.suite),
+                ),
             )
         )
 

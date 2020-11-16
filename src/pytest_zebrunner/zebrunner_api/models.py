@@ -38,13 +38,18 @@ class CamelModel(BaseModel):
         allow_population_by_field_name = True
 
 
+class TestRunConfigModel(CamelModel):
+    environment: Optional[str] = None
+    suite: Optional[str] = None
+
+
 class StartTestRunModel(CamelModel):
     name: str
     framework: str
     started_at: str = Field(default_factory=generate_datetime_str)
     uuid: str = Field(default_factory=generate_uuid)
     launch_context: Optional[dict] = None
-    config: Optional[dict] = None
+    config: Optional[TestRunConfigModel] = None
 
 
 class StartTestModel(CamelModel):

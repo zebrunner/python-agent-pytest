@@ -1,5 +1,4 @@
 import pytest
-from selenium.webdriver import Chrome
 
 
 def test_passed() -> None:
@@ -16,14 +15,14 @@ def test_skipped() -> None:
     assert True
 
 
-def test_failed() -> None:
-    assert False
+# def test_failed() -> None:
+#     assert False
+#
+#
+# def test_error() -> None:
+#     raise ValueError()
 
 
-def test_error() -> None:
-    raise ValueError()
-
-
-def test_selenium() -> None:
-    driver = Chrome()
-    assert driver
+# def test_selenium() -> None:
+#     driver = Chrome()
+#     assert driver
