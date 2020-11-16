@@ -1,8 +1,9 @@
 import logging
 from datetime import datetime, timedelta, timezone
 from pprint import pformat
-from typing import List
+from typing import List, Optional
 
+import httpx
 from httpx import AsyncClient, Request, Response
 
 from pytest_zebrunner.zebrunner_api.models import (
@@ -42,44 +43,76 @@ class ZebrunnerAPI:
 
     async def auth(self) -> None:
         url = self.service_url + "/api/iam/v1/auth/refresh"
-        response = await self._client.post(url, json={"refreshToken": self.access_token})
+
+        try:
+            response = await self._client.post(url, json={"refreshToken": self.access_token})
+        except httpx.RequestError as e:
+            logger.error("Error while sending request to zebrunner.", exc_info=e)
+            return
+
         if response.status_code != 200:
             log_response(response, logging.ERROR)
+            return
+
         self._auth_token = response.json()["authToken"]
         self._client.auth = self._sign_request
 
-    async def start_test_run(self, project_key: str, body: StartTestRunModel) -> int:
+    async def start_test_run(self, project_key: str, body: StartTestRunModel) -> Optional[int]:
         url = self.service_url + "/api/reporting/v1/test-runs"
-        response = await self._client.post(
-            url, params={"projectKey": project_key}, json=body.dict(exclude_none=True, by_alias=True)
-        )
+
+        try:
+            response = await self._client.post(
+                url, params={"projectKey": project_key}, json=body.dict(exclude_none=True, by_alias=True)
+            )
+        except httpx.RequestError as e:
+            logger.error("Error while sending request to zebrunner.", exc_info=e)
+            return None
+
         if response.status_code != 200:
             log_response(response, logging.ERROR)
+            return None
 
         return response.json()["id"]
 
-    async def start_test(self, test_run_id: int, body: StartTestModel) -> int:
+    async def start_test(self, test_run_id: int, body: StartTestModel) -> Optional[int]:
         url = self.service_url + f"/api/reporting/v1/test-runs/{test_run_id}/tests"
 
-        response = await self._client.post(url, json=body.dict(exclude_none=True, by_alias=True))
+        try:
+            response = await self._client.post(url, json=body.dict(exclude_none=True, by_alias=True))
+        except httpx.RequestError as e:
+            logger.error("Error while sending request to zebrunner.", exc_info=e)
+            return None
+
         if response.status_code != 200:
             log_response(response, logging.ERROR)
+            return None
 
         return response.json()["id"]
 
     async def finish_test(self, test_run_id: int, test_id: int, body: FinishTestModel) -> None:
         url = self.service_url + f"/api/reporting/v1/test-runs/{test_run_id}/tests/{test_id}"
 
-        response = await self._client.put(url, json=body.dict(exclude_none=True, by_alias=True))
+        try:
+            response = await self._client.put(url, json=body.dict(exclude_none=True, by_alias=True))
+        except httpx.RequestError as e:
+            logger.error("Error while sending request to zebrunner.", exc_info=e)
+            return
+
         if response.status_code != 200:
             log_response(response, logging.ERROR)
 
     async def finish_test_run(self, test_run_id: int) -> None:
         url = self.service_url + f"/api/reporting/v1/test-runs/{test_run_id}"
 
-        response = await self._client.put(
-            url, json={"endedAt": (datetime.utcnow().replace(tzinfo=timezone.utc) - timedelta(seconds=1)).isoformat()}
-        )
+        try:
+            response = await self._client.put(
+                url,
+                json={"endedAt": (datetime.utcnow().replace(tzinfo=timezone.utc) - timedelta(seconds=1)).isoformat()},
+            )
+        except httpx.RequestError as e:
+            logger.error("Error while sending request to zebrunner.", exc_info=e)
+            return
+
         if response.status_code != 200:
             log_response(response, logging.ERROR)
             return
