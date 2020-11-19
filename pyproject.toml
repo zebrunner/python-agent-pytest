@@ -26,7 +26,7 @@ pytest_zebrunner = "pytest_zebrunner.plugin"
 
 
 [tool.poetry.dependencies]
-python = "^3.6"
+python = "^3.6.1"
 pytest = "^6.1.1"
 httpx = "^0.16.1"
 pydantic = "^1.7.2"
