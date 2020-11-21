@@ -71,11 +71,24 @@ class FinishTestModel(CamelModel):
     test_session_refs: Optional[list] = None
 
 
-class LogRecordModel(BaseModel):
+class LogRecordModel(CamelModel):
     test_id: str
     level: str
     timestamp: str
     message: str
+
+
+class StartTestSessionModel(CamelModel):
+    session_id: str
+    # started_at: str = Field(default_factory=generate_datetime_str)
+    desired_capabilities: dict
+    capabilities: dict
+    test_refs: List[str] = []
+
+
+class FinishTestSessionModel(CamelModel):
+    ended_at: str = Field(default_factory=generate_datetime_str)
+    test_refs: List[str] = []
 
 
 if __name__ == "__main__":

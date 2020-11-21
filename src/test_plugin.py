@@ -1,4 +1,5 @@
 import pytest
+from selenium.webdriver import Chrome, Firefox
 
 
 def test_passed() -> None:
@@ -23,6 +24,10 @@ def test_skipped() -> None:
 #     raise ValueError()
 
 
-# def test_selenium() -> None:
-#     driver = Chrome()
-#     assert driver
+def test_selenium() -> None:
+    chrome = Chrome()
+    firefox = Firefox()
+    assert chrome
+    assert firefox
+    chrome.close()
+    firefox.close()

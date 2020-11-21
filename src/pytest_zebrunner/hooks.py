@@ -9,7 +9,7 @@ from _pytest.nodes import Item
 from _pytest.reports import TestReport
 from _pytest.runner import CallInfo
 
-from pytest_zebrunner.selenium_driver import DriverInfo
+from pytest_zebrunner.selenium_integration import SeleniumSession, inject_driver
 from pytest_zebrunner.settings import ZebrunnerSettings
 from pytest_zebrunner.zebrunner_api.client import ZebrunnerAPI
 from pytest_zebrunner.zebrunner_api.models import (
@@ -42,6 +42,9 @@ class PytestZebrunnerHooks:
         """
 
         self.event_loop.run_until_complete(self.api.auth())
+        self.session_manager = SeleniumSession(self.api)
+        inject_driver(self.session_manager)
+
         self.test_run_id = self.event_loop.run_until_complete(
             self.api.start_test_run(
                 self.settings.zebrunner_project,
@@ -59,12 +62,13 @@ class PytestZebrunnerHooks:
             return
 
         self.event_loop.run_until_complete(self.api.finish_test_run(self.test_run_id))
+        self.event_loop.run_until_complete(self.session_manager.finish_all_sessions())
         self.event_loop.run_until_complete(self.api.close())
 
     @pytest.hookimpl
     def pytest_runtest_makereport(self, item: Item, call: CallInfo) -> TestReport:
         report = TestReport.from_item_and_call(item, call)
-        report.item = item
+        report.item = item  # type: ignore
         return report
 
     @pytest.hookimpl
@@ -102,15 +106,12 @@ class PytestZebrunnerHooks:
                 ),
             )
         )
+        self.session_manager.add_test(str(self.test_id))
         self.last_report = report
 
     def call_test(self, report: TestReport) -> None:
         if not self.test_id or not self.test_run_id:
             return
-
-        driver = DriverInfo()
-        if driver.info is not None:
-            logger.info(driver.info)
 
         if report.passed:
             status = TestStatus.PASSED

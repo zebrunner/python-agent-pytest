@@ -1,0 +1,6 @@
+{
+    "python.pythonPath": "/home/anatoliy/.cache/pypoetry/virtualenvs/pytest-zebrunner-8OP3_wA--py3.6/bin/python",
+    "pythonTestExplorer.testFramework": "pytest",
+    "python.analysis.diagnosticMode": "workspace",
+    "python.analysis.typeCheckingMode": "basic"
+}
