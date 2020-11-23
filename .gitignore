@@ -152,3 +152,4 @@ crashlytics-build.properties
 fabric.properties
 
 .env
+.vscode/
