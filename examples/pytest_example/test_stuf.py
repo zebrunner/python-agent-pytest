@@ -13,3 +13,8 @@ def test_maintainer() -> None:
 @pytest.mark.skip
 def test_skip() -> None:
     assert True
+
+
+@pytest.mark.xfail
+def test_xfail() -> None:
+    assert False

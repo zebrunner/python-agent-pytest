@@ -30,28 +30,23 @@ class PytestZebrunnerHooks:
 
         self.api = ZebrunnerAPI(self.settings.service_url, self.settings.access_token)
 
+        self.event_loop.run_until_complete(self.api.auth())
+        self.session_manager = SeleniumSession(self.api)
+        inject_driver(self.session_manager)
+
         self.test_run_id: Optional[int] = None
         self.test_id: Optional[int] = None
         self.last_report: Optional[TestReport] = None
 
     @pytest.hookimpl
     def pytest_sessionstart(self, session: Session) -> None:
-        """
-        Setup-class handler, signs in user, creates a testsuite,
-        testcase, job and registers testrun in Zebrunner
-        """
-
-        self.event_loop.run_until_complete(self.api.auth())
-        self.session_manager = SeleniumSession(self.api)
-        inject_driver(self.session_manager)
-
         self.test_run_id = self.event_loop.run_until_complete(
             self.api.start_test_run(
                 self.settings.zebrunner_project,
                 StartTestRunModel(
-                    name="test_run_name",
+                    name=self.settings.suite or "Unnamed",
                     framework="pytest",
-                    config=TestRunConfigModel(environment=self.settings.env, suite=self.settings.suite),
+                    config=TestRunConfigModel(environment=self.settings.env, suite=self.settings.suite, build=self.settings.build),
                 ),
             )
         )
