@@ -3,7 +3,7 @@ from asyncio import get_event_loop
 from typing import Optional, Union
 
 import pytest
-from _pytest.config import ExitCode
+from _pytest.config import Config, ExitCode
 from _pytest.main import Session
 from _pytest.nodes import Item
 from _pytest.reports import TestReport
@@ -36,7 +36,6 @@ class PytestZebrunnerHooks:
 
         self.test_run_id: Optional[int] = None
         self.test_id: Optional[int] = None
-        self.last_report: Optional[TestReport] = None
 
     @pytest.hookimpl
     def pytest_sessionstart(self, session: Session) -> None:
@@ -46,7 +45,9 @@ class PytestZebrunnerHooks:
                 StartTestRunModel(
                     name=self.settings.suite or "Unnamed",
                     framework="pytest",
-                    config=TestRunConfigModel(environment=self.settings.env, suite=self.settings.suite, build=self.settings.build),
+                    config=TestRunConfigModel(
+                        environment=self.settings.env, suite=self.settings.suite, build=self.settings.build
+                    ),
                 ),
             )
         )
@@ -67,18 +68,11 @@ class PytestZebrunnerHooks:
         return report
 
     @pytest.hookimpl
-    def pytest_runtest_logreport(self, report: TestReport) -> None:
-        if report.when != "setup" and not self.last_report:
-            return
-
+    def pytest_report_teststatus(self, report: TestReport, config: Config) -> None:
         if report.when == "setup":
             self.setup_test(report)
         elif report.when == "call":
             self.call_test(report)
-        elif report.when == "teardown":
-            self.teardown_test(report)
-        else:
-            print("Unable to finish test properly")
 
     def setup_test(self, report: TestReport) -> None:
         if not self.test_run_id:
@@ -101,11 +95,33 @@ class PytestZebrunnerHooks:
                 ),
             )
         )
+
+        if report.skipped and self.test_id:
+            skip_markers = list(filter(lambda x: x.name == "skip", report.item.own_markers))
+            skip_reson = skip_markers[0].kwargs.get("reason") if skip_markers else None
+            self.event_loop.run_until_complete(
+                self.api.finish_test(
+                    self.test_run_id, self.test_id, FinishTestModel(reason=skip_reson, result=TestStatus.SKIPPED.value)
+                )
+            )
+            self.test_id = None
+            return
+
         self.session_manager.add_test(str(self.test_id))
-        self.last_report = report
 
     def call_test(self, report: TestReport) -> None:
         if not self.test_id or not self.test_run_id:
+            return
+
+        if report.skipped:
+            self.event_loop.run_until_complete(
+                self.api.finish_test(
+                    self.test_run_id,
+                    self.test_id,
+                    FinishTestModel(result=TestStatus.SKIPPED.value, reason=report.wasxfail or None),
+                )
+            )
+            self.test_id = None
             return
 
         if report.passed:
@@ -113,17 +129,5 @@ class PytestZebrunnerHooks:
         else:
             status = TestStatus.FAILED
 
-        self.event_loop.run_until_complete(
-            self.api.finish_test(self.test_run_id, self.test_id, FinishTestModel(result=status.value))
-        )
-        self.last_report = report
-
-    def teardown_test(self, report: TestReport) -> None:
-        if not self.test_id or not self.test_run_id or not self.last_report:
-            return
-
-        if report.when == "teardown" and self.last_report.when == "setup":
-            self.event_loop.run_until_complete(
-                self.api.finish_test(self.test_run_id, self.test_id, FinishTestModel(result=TestStatus.SKIPPED.value))
-            )
-        self.last_report = None
+        finish_test_data = FinishTestModel(result=status.value)
+        self.event_loop.run_until_complete(self.api.finish_test(self.test_run_id, self.test_id, finish_test_data))
