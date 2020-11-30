@@ -1,7 +1,7 @@
 from typing import Callable
 
 import pytest
-from selenium.webdriver import Chrome, Firefox
+from selenium.webdriver import Firefox
 
 
 def test_success() -> None:
@@ -24,9 +24,9 @@ def test_xfail() -> None:
 
 
 def test_selenium(send_screenshot: Callable) -> None:
-    chrome = Chrome()
     firefox = Firefox()
-    chrome.close()
+    firefox.get("https://www.google.com")
+    firefox.save_screenshot("firefox.png")
+    send_screenshot("firefox.png")
     firefox.close()
-    send_screenshot()
     assert True

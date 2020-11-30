@@ -155,3 +155,4 @@ fabric.properties
 .env
 .vscode/
 examples/pytest_example/conftest.py
+*.png

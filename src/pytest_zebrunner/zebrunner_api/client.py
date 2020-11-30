@@ -6,6 +6,7 @@ from typing import List, Optional
 import httpx
 from httpx import AsyncClient, Request, Response
 
+from pytest_zebrunner.utils import Singleton
 from pytest_zebrunner.zebrunner_api.models import (
     FinishTestModel,
     FinishTestSessionModel,
@@ -32,19 +33,23 @@ def log_response(response: Response, log_level: int = logging.DEBUG) -> None:
     )
 
 
-class ZebrunnerAPI:
-    def __init__(self, service_url: str, access_token: str):
-        self.service_url = service_url.rstrip("/")
-        self.access_token = access_token
-        self._client = AsyncClient()
-        self._auth_token = None
-        self.authenticate = False
+class ZebrunnerAPI(metaclass=Singleton):
+    def __init__(self, service_url: str = None, access_token: str = None):
+        if service_url and access_token:
+            self.service_url = service_url.rstrip("/")
+            self.access_token = access_token
+            self._client = AsyncClient()
+            self._auth_token = None
+            self.authenticated = False
 
     def _sign_request(self, request: Request) -> Request:
         request.headers["Authorization"] = f"Bearer {self._auth_token}"
         return request
 
     async def auth(self) -> None:
+        if not self.access_token or not self.service_url:
+            return
+
         url = self.service_url + "/api/iam/v1/auth/refresh"
 
         try:
@@ -134,10 +139,10 @@ class ZebrunnerAPI:
 
         raise NotImplementedError
 
-    async def send_screenshot(self, test_run_id: int, test_id: int) -> None:
-        # url = self.service_url + f"/api/reporting/v1/test-runs/{test_run_id}/tests/{test_id}/screenshots"
-
-        raise NotImplementedError
+    async def send_screenshot(self, test_run_id: int, test_id: int, image_path: str) -> None:
+        url = self.service_url + f"/api/reporting/v1/test-runs/{test_run_id}/tests/{test_id}/screenshots"
+        with open(image_path, "rb") as image:
+            await self._client.post(url, content=image.read(), headers={"Content-Type": "image/png"})
 
     async def send_artifact(self, test_run_id: int) -> None:
         # url = self.service_url + f"/api/reporting/v1/test-runs/{test_run_id}/artifact-refs"
