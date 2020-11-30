@@ -122,32 +122,12 @@ class ZebrunnerAPI:
             return
 
     async def start_test_session(self, body: StartTestSessionModel) -> Optional[str]:
-        url = self.service_url + "/api/reporting/v1/test-sessions"
-
-        try:
-            response = await self._client.post(url, json=body.dict(exclude_none=True, by_alias=True))
-        except httpx.RequestError as e:
-            logger.warning("Error while sending request to zebrunner.", exc_info=e)
-            return None
-
-        if response.status_code != 200:
-            log_response(response, logging.ERROR)
-            return None
-
-        return response.json().get("id")
+        # url = self.service_url + "/api/reporting/v1/test-sessions"
+        return None
 
     async def finish_test_session(self, zebrunner_id: str, body: FinishTestSessionModel) -> None:
-        url = self.service_url + f"/api/reporting/v1/test-sessions/{zebrunner_id}"
-
-        try:
-            response = await self._client.put(url, json=body.dict(exclude_none=True, by_alias=True))
-        except httpx.RequestError as e:
-            logger.warning("Error while sending request to zebrunner.", exc_info=e)
-            return
-
-        if response.status_code != 200:
-            log_response(response, logging.ERROR)
-            return
+        # url = self.service_url + f"/api/reporting/v1/test-sessions/{zebrunner_id}"
+        return
 
     async def send_logs(self, test_run_id: int, logs: List[LogRecordModel]) -> None:
         # url = self.service_url + f"/api/reporting/v1/test-runs/{test_run_id}/logs"
