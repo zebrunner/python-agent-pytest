@@ -1,3 +1,5 @@
+from typing import Callable
+
 import pytest
 from selenium.webdriver import Chrome, Firefox
 
@@ -21,9 +23,10 @@ def test_xfail() -> None:
     assert False
 
 
-def test_selenium() -> None:
+def test_selenium(send_screenshot: Callable) -> None:
     chrome = Chrome()
     firefox = Firefox()
     chrome.close()
     firefox.close()
+    send_screenshot()
     assert True
