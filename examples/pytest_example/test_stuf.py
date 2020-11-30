@@ -1,4 +1,5 @@
 import pytest
+from selenium.webdriver import Chrome, Firefox
 
 
 def test_success() -> None:
@@ -18,3 +19,11 @@ def test_skip() -> None:
 @pytest.mark.xfail(reason="This test should fail!")
 def test_xfail() -> None:
     assert False
+
+
+def test_selenium() -> None:
+    chrome = Chrome()
+    firefox = Firefox()
+    chrome.close()
+    firefox.close()
+    assert True
