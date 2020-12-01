@@ -4,7 +4,8 @@ import pytest
 from selenium.webdriver import Firefox
 
 
-def test_success() -> None:
+def test_success(send_artifact: Callable) -> None:
+    send_artifact("geckodriver.log")
     assert True
 
 

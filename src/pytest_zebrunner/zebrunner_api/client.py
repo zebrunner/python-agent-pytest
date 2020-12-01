@@ -137,6 +137,11 @@ class ZebrunnerAPI(metaclass=Singleton):
         with open(image_path, "rb") as image:
             self._client.post(url, content=image.read(), headers={"Content-Type": "image/png"})
 
+    def send_artifact(self, test_run_id: int, test_id: int, filename: str) -> None:
+        url = self.service_url + f"/api/reporting/v1/test-runs/{test_run_id}/tests/{test_id}/artifacts"
+        with open(filename, "rb") as file:
+            self._client.post(url, files={"file": file})
+
     def start_test_session(self, body: StartTestSessionModel) -> Optional[str]:
         # url = self.service_url + "/api/reporting/v1/test-sessions"
         return None
@@ -144,11 +149,6 @@ class ZebrunnerAPI(metaclass=Singleton):
     def finish_test_session(self, zebrunner_id: str, body: FinishTestSessionModel) -> None:
         # url = self.service_url + f"/api/reporting/v1/test-sessions/{zebrunner_id}"
         return
-
-    def send_artifact(self, test_run_id: int) -> None:
-        # url = self.service_url + f"/api/reporting/v1/test-runs/{test_run_id}/artifact-refs"
-
-        raise NotImplementedError
 
     def close(self) -> None:
         self._client.close()

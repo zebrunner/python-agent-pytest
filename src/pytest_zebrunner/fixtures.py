@@ -24,3 +24,13 @@ def send_screenshot() -> Callable:
             )
 
     return _send_screenshot
+
+
+@pytest.fixture(scope="session")
+def send_artifact() -> Callable:
+    def _send_artifact(filename: str) -> None:
+        api = ZebrunnerAPI()
+        if zebrunner_context.test_run_id and zebrunner_context.test_id:
+            api.send_artifact(zebrunner_context.test_run_id, zebrunner_context.test_id, filename)
+
+    return _send_artifact
