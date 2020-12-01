@@ -1,6 +1,5 @@
 import logging
-from asyncio import get_event_loop
-from typing import Union
+from typing import Optional, Union
 
 import pytest
 from _pytest.config import Config, ExitCode
@@ -20,13 +19,13 @@ from pytest_zebrunner.zebrunner_api.models import (
     TestRunConfigModel,
     TestStatus,
 )
+from pytest_zebrunner.zebrunner_logging import ZebrunnerHandler
 
 logger = logging.getLogger(__name__)
 
 
 class PytestZebrunnerHooks:
     def __init__(self, settings: ZebrunnerSettings, context: ZebrunnerContext):
-        self.event_loop = get_event_loop()
         self.settings = settings
         self.api = ZebrunnerAPI(self.settings.service_url, self.settings.access_token)
         self.session_manager = SeleniumSession(self.api)
@@ -35,30 +34,35 @@ class PytestZebrunnerHooks:
 
     @pytest.hookimpl
     def pytest_sessionstart(self, session: Session) -> None:
-        self.event_loop.run_until_complete(self.api.auth())
+        self.api.auth()
         inject_driver(self.session_manager)
 
-        self.zebrunner_context.test_run_id = self.event_loop.run_until_complete(
-            self.api.start_test_run(
-                self.settings.zebrunner_project,
-                StartTestRunModel(
-                    name=self.settings.suite or "Unnamed",
-                    framework="pytest",
-                    config=TestRunConfigModel(
-                        environment=self.settings.env, suite=self.settings.suite, build=self.settings.build
-                    ),
+        self.zebrunner_context.test_run_id = self.api.start_test_run(
+            self.settings.zebrunner_project,
+            StartTestRunModel(
+                name=self.settings.suite or "Unnamed",
+                framework="pytest",
+                config=TestRunConfigModel(
+                    environment=self.settings.env, suite=self.settings.suite, build=self.settings.build
                 ),
-            )
+            ),
         )
+        logging.root.addHandler(ZebrunnerHandler())
 
     @pytest.hookimpl
     def pytest_sessionfinish(self, session: Session, exitstatus: Union[int, ExitCode]) -> None:
         if not self.zebrunner_context.test_run_id:
             return
 
-        self.event_loop.run_until_complete(self.api.finish_test_run(self.zebrunner_context.test_run_id))
-        self.event_loop.run_until_complete(self.session_manager.finish_all_sessions())
-        self.event_loop.run_until_complete(self.api.close())
+        self.api.finish_test_run(self.zebrunner_context.test_run_id)
+        self.session_manager.finish_all_sessions()
+
+        handlers = list(filter(lambda x: isinstance(x, ZebrunnerHandler), logging.root.handlers))
+        zebrunner_handler: Optional[ZebrunnerHandler] = handlers[0] if handlers else None  # type: ignore
+        if zebrunner_handler:
+            zebrunner_handler.push_logs()
+
+        self.api.close()
 
     @pytest.hookimpl
     def pytest_runtest_makereport(self, item: Item, call: CallInfo) -> TestReport:
@@ -83,27 +87,23 @@ class PytestZebrunnerHooks:
         class_name = test_item.nodeid.split("::")[1]
         maintainer = ",".join([mark.args[0] for mark in test_item.iter_markers("maintainer")])
 
-        self.zebrunner_context.test_id = self.event_loop.run_until_complete(
-            self.api.start_test(
-                self.zebrunner_context.test_run_id,
-                StartTestModel(
-                    name=test_name,
-                    class_name=class_name,
-                    method_name=test_name,
-                    maintainer=maintainer or None,
-                ),
-            )
+        self.zebrunner_context.test_id = self.api.start_test(
+            self.zebrunner_context.test_run_id,
+            StartTestModel(
+                name=test_name,
+                class_name=class_name,
+                method_name=test_name,
+                maintainer=maintainer or None,
+            ),
         )
 
         if report.skipped and self.zebrunner_context.test_id:
             skip_markers = list(filter(lambda x: x.name == "skip", report.item.own_markers))
             skip_reson = skip_markers[0].kwargs.get("reason") if skip_markers else None
-            self.event_loop.run_until_complete(
-                self.api.finish_test(
-                    self.zebrunner_context.test_run_id,
-                    self.zebrunner_context.test_id,
-                    FinishTestModel(reason=skip_reson, result=TestStatus.SKIPPED.value),
-                )
+            self.api.finish_test(
+                self.zebrunner_context.test_run_id,
+                self.zebrunner_context.test_id,
+                FinishTestModel(reason=skip_reson, result=TestStatus.SKIPPED.value),
             )
             self.zebrunner_context.test_id = None
             return
@@ -115,12 +115,10 @@ class PytestZebrunnerHooks:
             return
 
         if report.skipped:
-            self.event_loop.run_until_complete(
-                self.api.finish_test(
-                    self.zebrunner_context.test_run_id,
-                    self.zebrunner_context.test_id,
-                    FinishTestModel(result=TestStatus.SKIPPED.value, reason=report.wasxfail or None),
-                )
+            self.api.finish_test(
+                self.zebrunner_context.test_run_id,
+                self.zebrunner_context.test_id,
+                FinishTestModel(result=TestStatus.SKIPPED.value, reason=report.wasxfail or None),
             )
             self.zebrunner_context.test_id = None
             return
@@ -131,6 +129,4 @@ class PytestZebrunnerHooks:
             status = TestStatus.FAILED
 
         finish_test_data = FinishTestModel(result=status.value)
-        self.event_loop.run_until_complete(
-            self.api.finish_test(self.zebrunner_context.test_run_id, self.zebrunner_context.test_id, finish_test_data)
-        )
+        self.api.finish_test(self.zebrunner_context.test_run_id, self.zebrunner_context.test_id, finish_test_data)

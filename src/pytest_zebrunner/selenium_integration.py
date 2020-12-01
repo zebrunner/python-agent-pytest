@@ -1,4 +1,3 @@
-import asyncio
 import logging
 from typing import Any, Dict
 
@@ -16,26 +15,26 @@ class SeleniumSession:
         self._active_sessions: Dict[str, Any] = {}
         self.api = api
 
-    async def start_session(self, session_id: str, capabilities: dict, desired_capabilities: dict) -> None:
+    def start_session(self, session_id: str, capabilities: dict, desired_capabilities: dict) -> None:
         self._active_sessions[session_id] = {"related_tests": []}
 
-        zebrunner_session_id = await self.api.start_test_session(
+        zebrunner_session_id = self.api.start_test_session(
             StartTestSessionModel(
                 session_id=session_id, desired_capabilities=desired_capabilities, capabilities=capabilities
             )
         )
         self._active_sessions[session_id]["zebrunner_session_id"] = zebrunner_session_id
 
-    async def finish_session(self, session_id: str) -> None:
-        await self.api.finish_test_session(
+    def finish_session(self, session_id: str) -> None:
+        self.api.finish_test_session(
             self._active_sessions[session_id]["zebrunner_session_id"],
             FinishTestSessionModel(test_refs=self._active_sessions[session_id]["related_tests"]),
         )
         del self._active_sessions[session_id]
 
-    async def finish_all_sessions(self) -> None:
+    def finish_all_sessions(self) -> None:
         for session_id in list(self._active_sessions):
-            await self.finish_session(session_id)
+            self.finish_session(session_id)
 
     def add_test(self, test_id: str) -> None:
         for sesion_id in self._active_sessions:
@@ -53,10 +52,7 @@ def inject_driver(session_manager: SeleniumSession) -> None:
 
         def init(session, *args, **kwargs) -> None:  # type: ignore
             base_init(session, *args, **kwargs)
-            loop = asyncio.get_event_loop()
-            loop.run_until_complete(
-                session_manager.start_session(session.session_id, session.capabilities, session.desired_capabilities)
-            )
+            session_manager.start_session(session.session_id, session.capabilities, session.desired_capabilities)
 
         WebDriver.__init__ = init
 

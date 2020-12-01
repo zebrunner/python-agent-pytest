@@ -1,4 +1,3 @@
-from asyncio import get_event_loop
 from logging import warning
 from typing import Callable
 
@@ -13,10 +12,7 @@ def send_screenshot() -> Callable:
     def _send_screenshot(image_path: str) -> None:
         api = ZebrunnerAPI()
         if zebrunner_context.test_id and zebrunner_context.test_run_id and api.authenticated:
-            event_loop = get_event_loop()
-            event_loop.run_until_complete(
-                api.send_screenshot(zebrunner_context.test_run_id, zebrunner_context.test_id, image_path)
-            )
+            api.send_screenshot(zebrunner_context.test_run_id, zebrunner_context.test_id, image_path)
         else:
             warning(
                 UserWarning("There's problems with running test session. Cant't push screenshot."),
