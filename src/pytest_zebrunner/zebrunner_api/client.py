@@ -114,7 +114,6 @@ class ZebrunnerAPI(metaclass=Singleton):
 
     def finish_test_run(self, test_run_id: int) -> None:
         url = self.service_url + f"/api/reporting/v1/test-runs/{test_run_id}"
-
         try:
             response = self._client.put(
                 url,
@@ -144,13 +143,18 @@ class ZebrunnerAPI(metaclass=Singleton):
         with open(filename, "rb") as file:
             self._client.post(url, files={"file": file})
 
-    def start_test_session(self, body: StartTestSessionModel) -> Optional[str]:
-        # url = self.service_url + "/api/reporting/v1/test-sessions"
-        return None
+    def start_test_session(self, test_run_id: int, body: StartTestSessionModel) -> Optional[str]:
+        url = self.service_url + f"/api/reporting/v1/test-runs/{test_run_id}/test-sessions"
+        response = self._client.post(url, json=body.dict(exclude_none=True, by_alias=True))
+        if not response.status_code == 200:
+            log_response(response, logging.ERROR)
+            return None
 
-    def finish_test_session(self, zebrunner_id: str, body: FinishTestSessionModel) -> None:
-        # url = self.service_url + f"/api/reporting/v1/test-sessions/{zebrunner_id}"
-        return
+        return response.json().get("id")
+
+    def finish_test_session(self, test_run_id: int, zebrunner_id: str, body: FinishTestSessionModel) -> None:
+        url = self.service_url + f"/api/reporting/v1/test-runs/{test_run_id}/test-sessions/{zebrunner_id}"
+        self._client.put(url, json=body.dict(exclude_none=True, by_alias=True))
 
     def close(self) -> None:
         self._client.close()

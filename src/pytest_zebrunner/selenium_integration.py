@@ -1,6 +1,7 @@
 import logging
 from typing import Any, Dict
 
+from pytest_zebrunner.context import zebrunner_context
 from pytest_zebrunner.zebrunner_api.client import ZebrunnerAPI
 from pytest_zebrunner.zebrunner_api.models import (
     FinishTestSessionModel,
@@ -18,19 +19,23 @@ class SeleniumSession:
     def start_session(self, session_id: str, capabilities: dict, desired_capabilities: dict) -> None:
         self._active_sessions[session_id] = {"related_tests": []}
 
-        zebrunner_session_id = self.api.start_test_session(
-            StartTestSessionModel(
-                session_id=session_id, desired_capabilities=desired_capabilities, capabilities=capabilities
+        if zebrunner_context.test_run_id:
+            zebrunner_session_id = self.api.start_test_session(
+                zebrunner_context.test_run_id,
+                StartTestSessionModel(
+                    session_id=session_id, desired_capabilities=desired_capabilities, capabilities=capabilities
+                ),
             )
-        )
-        self._active_sessions[session_id]["zebrunner_session_id"] = zebrunner_session_id
+            self._active_sessions[session_id]["zebrunner_session_id"] = zebrunner_session_id
 
     def finish_session(self, session_id: str) -> None:
-        self.api.finish_test_session(
-            self._active_sessions[session_id]["zebrunner_session_id"],
-            FinishTestSessionModel(test_refs=self._active_sessions[session_id]["related_tests"]),
-        )
-        del self._active_sessions[session_id]
+        if zebrunner_context.test_run_id:
+            self.api.finish_test_session(
+                zebrunner_context.test_run_id,
+                self._active_sessions[session_id]["zebrunner_session_id"],
+                FinishTestSessionModel(test_ids=self._active_sessions[session_id]["related_tests"]),
+            )
+            del self._active_sessions[session_id]
 
     def finish_all_sessions(self) -> None:
         for session_id in list(self._active_sessions):

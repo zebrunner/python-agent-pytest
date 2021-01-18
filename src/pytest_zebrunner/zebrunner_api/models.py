@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta, timezone
 from enum import Enum
-from typing import Dict, List, Optional
+from typing import List, Optional
 from uuid import uuid4
 
 from pydantic import BaseModel, Field
@@ -49,7 +49,6 @@ class StartTestRunModel(CamelModel):
     framework: str
     started_at: str = Field(default_factory=generate_datetime_str)
     uuid: str = Field(default_factory=generate_uuid)
-    launch_context: Optional[dict] = None
     config: Optional[TestRunConfigModel] = None
 
 
@@ -61,15 +60,13 @@ class StartTestModel(CamelModel):
     started_at: str = Field(default_factory=generate_datetime_str)
     maintainer: Optional[str] = None
     test_case: Optional[str] = None
-    test_session_refs: Optional[list] = None
+    # TODO: Add labels attribute
 
 
 class FinishTestModel(CamelModel):
     result: str
     ended_at: str = Field(default_factory=generate_datetime_str)
     reason: Optional[str] = None
-    labels: Optional[Dict[str, List[str]]] = None
-    test_session_refs: Optional[list] = None
 
 
 class LogRecordModel(CamelModel):
@@ -81,15 +78,15 @@ class LogRecordModel(CamelModel):
 
 class StartTestSessionModel(CamelModel):
     session_id: str
-    # started_at: str = Field(default_factory=generate_datetime_str)
+    started_at: str = Field(default_factory=generate_datetime_str)
     desired_capabilities: dict
     capabilities: dict
-    test_refs: List[str] = []
+    test_ids: List[str] = []
 
 
 class FinishTestSessionModel(CamelModel):
     ended_at: str = Field(default_factory=generate_datetime_str)
-    test_refs: List[str] = []
+    test_ids: List[str] = []
 
 
 if __name__ == "__main__":
