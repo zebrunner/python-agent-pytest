@@ -34,6 +34,8 @@ def log_response(response: Response, log_level: int = logging.DEBUG) -> None:
 
 
 class ZebrunnerAPI(metaclass=Singleton):
+    authenticated = False
+
     def __init__(self, service_url: str = None, access_token: str = None):
         if service_url and access_token:
             self.service_url = service_url.rstrip("/")
