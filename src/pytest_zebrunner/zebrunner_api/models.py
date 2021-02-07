@@ -40,7 +40,6 @@ class CamelModel(BaseModel):
 
 class TestRunConfigModel(CamelModel):
     environment: Optional[str] = None
-    suite: Optional[str] = None
     build: Optional[str] = None
 
 

@@ -8,7 +8,6 @@ class ZebrunnerSettings(BaseSettings):
     access_token: str
     zebrunner_project: str
     zebrunner_enabled: bool = True
-    suite: Optional[str] = None
     build: Optional[str] = None
     env: Optional[str] = None
 
