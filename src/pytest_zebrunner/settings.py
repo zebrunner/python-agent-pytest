@@ -9,6 +9,7 @@ class ZebrunnerSettings(BaseSettings):
     zebrunner_project: str
     zebrunner_enabled: bool = True
     build: Optional[str] = None
+    test_run_name: Optional[str]
     env: Optional[str] = None
 
     class Config:

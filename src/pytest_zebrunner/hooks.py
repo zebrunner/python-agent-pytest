@@ -1,4 +1,5 @@
 import logging
+from datetime import datetime
 from typing import Optional, Union
 
 import pytest
@@ -40,11 +41,9 @@ class PytestZebrunnerHooks:
         self.zebrunner_context.test_run_id = self.api.start_test_run(
             self.settings.zebrunner_project,
             StartTestRunModel(
-                name=self.settings.suite or "Unnamed",
+                name=self.settings.test_run_name or f"Unnamed {datetime.utcnow()}",
                 framework="pytest",
-                config=TestRunConfigModel(
-                    environment=self.settings.env, suite=self.settings.suite, build=self.settings.build
-                ),
+                config=TestRunConfigModel(environment=self.settings.env, build=self.settings.build),
             ),
         )
         logging.root.addHandler(ZebrunnerHandler())
@@ -86,6 +85,9 @@ class PytestZebrunnerHooks:
         test_name = test_item.name
         class_name = test_item.nodeid.split("::")[1]
         maintainer = ",".join([mark.args[0] for mark in test_item.iter_markers("maintainer")])
+        labels = [mark.args[0] for mark in test_item.iter_markers("labels")]
+        if labels:
+            labels = labels[0]
 
         self.zebrunner_context.test_id = self.api.start_test(
             self.zebrunner_context.test_run_id,
@@ -94,16 +96,17 @@ class PytestZebrunnerHooks:
                 class_name=class_name,
                 method_name=test_name,
                 maintainer=maintainer or None,
+                labels=[{"key": label[0], "value": label[1]} for label in labels],
             ),
         )
 
         if report.skipped and self.zebrunner_context.test_id:
             skip_markers = list(filter(lambda x: x.name == "skip", report.item.own_markers))
-            skip_reson = skip_markers[0].kwargs.get("reason") if skip_markers else None
+            skip_reason = skip_markers[0].kwargs.get("reason") if skip_markers else None
             self.api.finish_test(
                 self.zebrunner_context.test_run_id,
                 self.zebrunner_context.test_id,
-                FinishTestModel(reason=skip_reson, result=TestStatus.SKIPPED.value),
+                FinishTestModel(reason=skip_reason, result=TestStatus.SKIPPED.value),
             )
             self.zebrunner_context.test_id = None
             return

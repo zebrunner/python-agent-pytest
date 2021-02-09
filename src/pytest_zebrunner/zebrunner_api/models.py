@@ -1,6 +1,6 @@
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from enum import Enum
-from typing import List, Optional
+from typing import Any, Dict, List, Optional
 from uuid import uuid4
 
 from pydantic import BaseModel, Field
@@ -11,7 +11,7 @@ def generate_uuid() -> str:
 
 
 def generate_datetime_str() -> str:
-    return (datetime.utcnow() - timedelta(seconds=1)).replace(tzinfo=timezone.utc).isoformat()
+    return (datetime.utcnow()).replace(tzinfo=timezone.utc).isoformat()
 
 
 class TestStatus(Enum):
@@ -59,7 +59,7 @@ class StartTestModel(CamelModel):
     started_at: str = Field(default_factory=generate_datetime_str)
     maintainer: Optional[str] = None
     test_case: Optional[str] = None
-    # TODO: Add labels attribute
+    labels: Optional[List[Dict[str, Any]]]
 
 
 class FinishTestModel(CamelModel):
