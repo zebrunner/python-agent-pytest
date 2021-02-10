@@ -6,8 +6,7 @@ from typing import List, Optional
 import httpx
 from httpx import Client, Request, Response
 
-from pytest_zebrunner.utils import Singleton
-from pytest_zebrunner.zebrunner_api.models import (
+from pytest_zebrunner.api.models import (
     FinishTestModel,
     FinishTestSessionModel,
     LogRecordModel,
@@ -15,6 +14,7 @@ from pytest_zebrunner.zebrunner_api.models import (
     StartTestRunModel,
     StartTestSessionModel,
 )
+from pytest_zebrunner.utils import Singleton
 
 logger = logging.getLogger(__name__)
 

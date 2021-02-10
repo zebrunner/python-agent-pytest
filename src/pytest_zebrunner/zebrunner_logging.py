@@ -2,13 +2,13 @@ import time
 from logging import LogRecord, StreamHandler
 from typing import List
 
+from pytest_zebrunner.api.client import ZebrunnerAPI
+from pytest_zebrunner.api.models import LogRecordModel
 from pytest_zebrunner.context import zebrunner_context
-from pytest_zebrunner.zebrunner_api.client import ZebrunnerAPI
-from pytest_zebrunner.zebrunner_api.models import LogRecordModel
 
 
 class ZebrunnerHandler(StreamHandler):
-    BATH_SIZE = 20
+    BATСH_SIZE = 20
     logs: List[LogRecordModel] = []
 
     def __init__(self) -> None:
@@ -16,7 +16,7 @@ class ZebrunnerHandler(StreamHandler):
         self.api = ZebrunnerAPI()
 
     def emit(self, record: LogRecord) -> None:
-        if len(self.logs) >= self.BATH_SIZE:
+        if len(self.logs) >= self.BATСH_SIZE:
             self.push_logs()
 
         if zebrunner_context.test_id:

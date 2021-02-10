@@ -3,8 +3,8 @@ from typing import Callable
 
 import pytest
 
+from pytest_zebrunner.api.client import ZebrunnerAPI
 from pytest_zebrunner.context import zebrunner_context
-from pytest_zebrunner.zebrunner_api.client import ZebrunnerAPI
 
 
 @pytest.fixture(scope="session")

@@ -9,17 +9,17 @@ from _pytest.nodes import Item
 from _pytest.reports import TestReport
 from _pytest.runner import CallInfo
 
-from pytest_zebrunner.context import ZebrunnerContext
-from pytest_zebrunner.selenium_integration import SeleniumSession, inject_driver
-from pytest_zebrunner.settings import ZebrunnerSettings
-from pytest_zebrunner.zebrunner_api.client import ZebrunnerAPI
-from pytest_zebrunner.zebrunner_api.models import (
+from pytest_zebrunner.api.client import ZebrunnerAPI
+from pytest_zebrunner.api.models import (
     FinishTestModel,
     StartTestModel,
     StartTestRunModel,
     TestRunConfigModel,
     TestStatus,
 )
+from pytest_zebrunner.context import ZebrunnerContext
+from pytest_zebrunner.selenium_integration import SeleniumSession, inject_driver
+from pytest_zebrunner.settings import ZebrunnerSettings
 from pytest_zebrunner.zebrunner_logging import ZebrunnerHandler
 
 logger = logging.getLogger(__name__)
@@ -81,7 +81,6 @@ class PytestZebrunnerHooks:
             return
 
         test_item: Item = report.item
-
         test_name = test_item.name
         class_name = test_item.nodeid.split("::")[1]
         maintainer = ",".join([mark.args[0] for mark in test_item.iter_markers("maintainer")])

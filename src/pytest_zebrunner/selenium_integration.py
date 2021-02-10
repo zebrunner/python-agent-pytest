@@ -1,12 +1,9 @@
 import logging
 from typing import Any, Dict
 
+from pytest_zebrunner.api.client import ZebrunnerAPI
+from pytest_zebrunner.api.models import FinishTestSessionModel, StartTestSessionModel
 from pytest_zebrunner.context import zebrunner_context
-from pytest_zebrunner.zebrunner_api.client import ZebrunnerAPI
-from pytest_zebrunner.zebrunner_api.models import (
-    FinishTestSessionModel,
-    StartTestSessionModel,
-)
 
 logger = logging.getLogger(__name__)
 
