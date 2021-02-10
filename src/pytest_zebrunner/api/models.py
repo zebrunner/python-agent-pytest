@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import List, Optional
 from uuid import uuid4
 
 from pydantic import BaseModel, Field
@@ -51,6 +51,11 @@ class StartTestRunModel(CamelModel):
     config: Optional[TestRunConfigModel] = None
 
 
+class LabelModel(CamelModel):
+    key: str
+    value: str
+
+
 class StartTestModel(CamelModel):
     name: str
     class_name: str
@@ -59,7 +64,7 @@ class StartTestModel(CamelModel):
     started_at: str = Field(default_factory=generate_datetime_str)
     maintainer: Optional[str] = None
     test_case: Optional[str] = None
-    labels: Optional[List[Dict[str, Any]]]
+    labels: Optional[List[LabelModel]]
 
 
 class FinishTestModel(CamelModel):
@@ -86,6 +91,11 @@ class StartTestSessionModel(CamelModel):
 class FinishTestSessionModel(CamelModel):
     ended_at: str = Field(default_factory=generate_datetime_str)
     test_ids: List[str] = []
+
+
+class ArtifactReferenceModel(CamelModel):
+    name: str
+    value: str
 
 
 if __name__ == "__main__":

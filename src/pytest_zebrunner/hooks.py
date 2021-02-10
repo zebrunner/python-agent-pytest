@@ -12,6 +12,7 @@ from _pytest.runner import CallInfo
 from pytest_zebrunner.api.client import ZebrunnerAPI
 from pytest_zebrunner.api.models import (
     FinishTestModel,
+    LabelModel,
     StartTestModel,
     StartTestRunModel,
     TestRunConfigModel,
@@ -84,7 +85,7 @@ class PytestZebrunnerHooks:
         test_name = test_item.name
         class_name = test_item.nodeid.split("::")[1]
         maintainer = ",".join([mark.args[0] for mark in test_item.iter_markers("maintainer")])
-        labels = [mark.args[0] for mark in test_item.iter_markers("labels")]
+        labels = [LabelModel(key=mark.args[0], value=mark.args[1]) for mark in test_item.iter_markers("label")]
         if labels:
             labels = labels[0]
 

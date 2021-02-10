@@ -1,14 +1,17 @@
 import logging
 from datetime import datetime, timedelta, timezone
+from pathlib import Path
 from pprint import pformat
-from typing import List, Optional
+from typing import List, Optional, Union
 
 import httpx
 from httpx import Client, Request, Response
 
 from pytest_zebrunner.api.models import (
+    ArtifactReferenceModel,
     FinishTestModel,
     FinishTestSessionModel,
+    LabelModel,
     LogRecordModel,
     StartTestModel,
     StartTestRunModel,
@@ -133,15 +136,36 @@ class ZebrunnerAPI(metaclass=Singleton):
         body = [x.dict(exclude_none=True, by_alias=True) for x in logs]
         self._client.post(url, json=body)
 
-    def send_screenshot(self, test_run_id: int, test_id: int, image_path: str) -> None:
+    def send_screenshot(self, test_run_id: int, test_id: int, image_path: Union[str, Path]) -> None:
         url = self.service_url + f"/api/reporting/v1/test-runs/{test_run_id}/tests/{test_id}/screenshots"
         with open(image_path, "rb") as image:
             self._client.post(url, content=image.read(), headers={"Content-Type": "image/png"})
 
-    def send_artifact(self, test_run_id: int, test_id: int, filename: str) -> None:
-        url = self.service_url + f"/api/reporting/v1/test-runs/{test_run_id}/tests/{test_id}/artifacts"
+    def send_artifact(self, filename: Union[str, Path], test_run_id: int, test_id: Optional[int] = None) -> None:
+        if test_id:
+            url = f"{self.service_url}/api/reporting/v1/test-runs/{test_run_id}/tests/{test_id}/artifacts"
+        else:
+            url = f"{self.service_url}/api/reporting/v1/test-runs/{test_run_id}/artifacts"
         with open(filename, "rb") as file:
             self._client.post(url, files={"file": file})
+
+    def send_artifact_references(
+        self, references: List[ArtifactReferenceModel], test_run_id: int, test_id: Optional[int] = None
+    ) -> None:
+        if test_id:
+            url = f"{self.service_url}/api/reporting/v1/test-runs/{test_run_id}/tests/{test_id}/artifact-references"
+        else:
+            url = f"{self.service_url}/api/reporting/v1/test-runs/{test_run_id}/artifact-references/"
+        json_items = [item.dict(exclude_none=True, by_alias=True) for item in references]
+        self._client.put(url, json={"items": json_items})
+
+    def send_labels(self, labels: List[LabelModel], test_run_id: int, test_id: Optional[int] = None) -> None:
+        if test_id:
+            url = f"{self.service_url}/api/reporting/v1/test-runs/{test_run_id}/tests/{test_id}/labels"
+        else:
+            url = f"{self.service_url}/api/reporting/v1/test-runs/{test_run_id}/labels"
+        labels_json = [label.dict(exclude_none=True, by_alias=True) for label in labels]
+        self._client.put(url, json={"items": labels_json})
 
     def start_test_session(self, test_run_id: int, body: StartTestSessionModel) -> Optional[str]:
         url = self.service_url + f"/api/reporting/v1/test-runs/{test_run_id}/test-sessions"
