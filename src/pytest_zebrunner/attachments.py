@@ -8,7 +8,7 @@ from pytest_zebrunner.context import zebrunner_context
 api = ZebrunnerAPI()
 
 
-def attach_screenshot(path: Union[str, Path]) -> None:
+def attach_test_screenshot(path: Union[str, Path]) -> None:
     if zebrunner_context.test_is_active:
         api.send_screenshot(zebrunner_context.test_run_id, zebrunner_context.test_id, path)
 
