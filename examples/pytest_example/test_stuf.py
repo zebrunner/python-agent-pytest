@@ -1,8 +1,6 @@
 import pytest
 from selenium.webdriver import Chrome, Firefox
 
-from pytest_zebrunner import attachments
-
 
 def test_success() -> None:
     assert True
@@ -43,27 +41,27 @@ def test_selenium_both() -> None:
     assert True
 
 
-def test_send_screenshot() -> None:
-    chrome = Chrome()
-    chrome.get("https://www.google.com")
-    chrome.save_screenshot("google.png")
-    attachments.attach_test_screenshot("google.png")
-    chrome.close()
-    assert True
+# def test_send_screenshot() -> None:
+#     chrome = Chrome()
+#     chrome.get("https://www.google.com")
+#     chrome.save_screenshot("google.png")
+#     attachments.attach_test_screenshot("google.png")
+#     chrome.close()
+#     assert True
 
 
-def test_send_artifact() -> None:
-    firefox = Firefox()
-    firefox.get("https://www.google.com")
-    firefox.close()
-    attachments.attach_test_artifact("geckodriver.log")
-    attachments.attach_test_run_artifact("geckodriver.log")
-    assert True
+# def test_send_artifact() -> None:
+#     firefox = Firefox()
+#     firefox.get("https://www.google.com")
+#     firefox.close()
+#     attachments.attach_test_artifact("geckodriver.log")
+#     attachments.attach_test_run_artifact("geckodriver.log")
+#     assert True
 
 
-@pytest.mark.label("header", "label")
-@pytest.mark.label("header", "label2")
-def test_labels() -> None:
-    attachments.attach_test_label("body", "label")
-    attachments.attach_test_run_label("body", "test_run_label")
-    assert True
+# @pytest.mark.label("header", "label")
+# @pytest.mark.label("header", "label2")
+# def test_labels() -> None:
+#     attachments.attach_test_label("body", "label")
+#     attachments.attach_test_run_label("body", "test_run_label")
+#     assert True

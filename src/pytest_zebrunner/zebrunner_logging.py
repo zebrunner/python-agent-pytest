@@ -19,7 +19,7 @@ class ZebrunnerHandler(StreamHandler):
         if len(self.logs) >= self.BATСH_SIZE:
             self.push_logs()
 
-        if zebrunner_context.test_id:
+        if zebrunner_context.test_is_active:
             self.logs.append(
                 LogRecordModel(
                     test_id=str(zebrunner_context.test_id),

@@ -16,7 +16,7 @@ class SeleniumSession:
     def start_session(self, session_id: str, capabilities: dict, desired_capabilities: dict) -> None:
         self._active_sessions[session_id] = {"related_tests": []}
 
-        if zebrunner_context.test_run_id:
+        if zebrunner_context.test_run_is_active:
             zebrunner_session_id = self.api.start_test_session(
                 zebrunner_context.test_run_id,
                 StartTestSessionModel(
@@ -26,7 +26,7 @@ class SeleniumSession:
             self._active_sessions[session_id]["zebrunner_session_id"] = zebrunner_session_id
 
     def finish_session(self, session_id: str) -> None:
-        if zebrunner_context.test_run_id:
+        if zebrunner_context.test_run_is_active:
             self.api.finish_test_session(
                 zebrunner_context.test_run_id,
                 self._active_sessions[session_id]["zebrunner_session_id"],
@@ -38,12 +38,12 @@ class SeleniumSession:
         for session_id in list(self._active_sessions):
             self.finish_session(session_id)
 
-    def add_test(self, test_id: str) -> None:
-        for sesion_id in self._active_sessions:
-            if self._active_sessions[sesion_id].get("related_tests") is not None:
-                self._active_sessions[sesion_id]["related_tests"].append(test_id)
+    def add_test(self, test_id: int) -> None:
+        for session_id in self._active_sessions:
+            if self._active_sessions[session_id].get("related_tests") is not None:
+                self._active_sessions[session_id]["related_tests"].append(test_id)
             else:
-                self._active_sessions[sesion_id]["related_tests"] = [test_id]
+                self._active_sessions[session_id]["related_tests"] = [test_id]
 
 
 def inject_driver(session_manager: SeleniumSession) -> None:
