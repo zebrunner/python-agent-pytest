@@ -58,6 +58,7 @@ def test_send_artifact() -> None:
     firefox.close()
     attachments.attach_test_artifact("geckodriver.log")
     attachments.attach_test_run_artifact("geckodriver.log")
+    attachments.attach_test_artifact_reference("name", "reference")
     assert True
 
 

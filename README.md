@@ -48,3 +48,87 @@ which need to be specified. Parameter names are case insensitive and can be writ
 
 ## Additional functionality
 ---------------------------
+**IMPORTANT**: All attachments to tests can be done only while some test is running. All attachments to test-run csn be done only while pytest test-session is active.
+---------------------------
+
+
+### Attach screenshot
+```python
+from pytest_zebrunner.attachments import attach_test_screenshot
+
+
+def test_something():
+    ...
+    attach_test_screenshot("path_to_screenshot.png")
+    ...
+```
+
+### Attach artifact to test
+```python
+from pytest_zebrunner.attachments import attach_test_artifact
+
+
+def test_something():
+    ...
+    attach_test_artifact("path_to_artifact")
+    ...
+```
+
+### Attach artifact-reference to test
+```python
+from pytest_zebrunner.attachments import attach_test_artifact_reference
+
+
+def test_something():
+    ...
+    attach_test_artifact_reference("name", "reference")
+    ...
+```
+
+### Attach artifact to test-run
+```python
+from pytest_zebrunner.attachments import attach_test_run_artifact
+
+
+attach_test_run_artifact("path_to_artifact")
+```
+
+### Attach artifact-reference to test-run
+```python
+from pytest_zebrunner.attachments import attach_test_run_artifact_reference
+
+
+attach_test_run_artifact_reference("name", "reference")
+```
+
+### Attach labels to test
+```python
+@pytest.mark.label("name", "value")
+def test_something():
+    ...
+```
+or
+```python
+from pytest_zebrunner.attachments import attach_test_label
+
+
+def test_something():
+    ...
+    attach_test_label("name", "value")
+    ...
+```
+**Note:** These two methods can be combined.
+
+### Attach label to test run
+```python
+from pytest_zebrunner.attachments import attach_test_run_label
+
+attach_test_run_label("name", "value")
+```
+
+### Add maintainer to test
+```python
+@pytest.mark.maintainer("username_of_maintainer")
+def test_something():
+    ...
+```
