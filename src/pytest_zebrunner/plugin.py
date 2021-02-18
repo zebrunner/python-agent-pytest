@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 def pytest_configure(config: Any) -> None:
 
     try:
-        _ = ZebrunnerSettings()
+        settings = ZebrunnerSettings()
     except ValidationError as exc:
         field_errors = "\n".join([f"\033[93m {e['loc'][0]}\033[0m - {e['msg']}" for e in exc.errors()])
         warnings.warn(
@@ -24,8 +24,9 @@ def pytest_configure(config: Any) -> None:
         )
         return
 
-    hooks = PytestZebrunnerHooks()
-    config.pluginmanager.register(hooks)
+    if settings.reporting_enabled:
+        hooks = PytestZebrunnerHooks()
+        config.pluginmanager.register(hooks)
 
-    config.addinivalue_line("markers", "maintainer(name): Email or nickname of test maintainer")
-    config.addinivalue_line("markers", "label(name, value): Test label")
+        config.addinivalue_line("markers", "maintainer(name): Email or nickname of test maintainer")
+        config.addinivalue_line("markers", "label(name, value): Test label")

@@ -37,7 +37,7 @@ Example: `https://pytesttest.qaprosoft.farm`
 
 `ZEBRUNNER_PROJECT` - [required] Name of project.
 
-`ZEBRUNNER_ENABLED` - You can disable agent if it makes side effects in you project or doesn't work.
+`REPORTING_ENABLED` - You can disable agent if it makes side effects in you project or doesn't work.
 
 `BUILD` - Version of product on which tests are running.
 
