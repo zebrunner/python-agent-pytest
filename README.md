@@ -1,4 +1,4 @@
-# pytest_zebrunner
+# python-agent-pytest
 
 
 The official Zebrunner Pytest agent provides reporting functionality. It can automatically track selenium sessions
