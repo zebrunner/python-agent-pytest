@@ -5,6 +5,7 @@ The official Zebrunner Pytest agent provides reporting functionality. It can aut
 and send info about session details to Zebrunner backend. It can be ease integrated in project just by installing library
 and adding configuration file.
 
+
 ## Installation
 ---------------
 
