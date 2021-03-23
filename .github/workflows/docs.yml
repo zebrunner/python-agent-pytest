@@ -3,9 +3,9 @@ name: docs
 on: push
 
 jobs:
-  deploy-master:
+  deploy-main:
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/master'
+    if: github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v2
       - uses: qoqa/action-s3-cp@v1.1
