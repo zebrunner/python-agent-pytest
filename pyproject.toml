@@ -1,12 +1,12 @@
 [tool.poetry]
 name = "pytest-zebrunner"
-version = "0.1.1"
+version = "0.2.1"
 description = "Pytest connector for Zebrunner-reporting"
 authors = ["Anatoliy Platonov <p4m.dev@gmail.com>"]
 license = "MIT"
 readme = "README.md"
-homepage = "https://github.com/p4m-dev/zebrunner_py"
-repository = "https://github.com/p4m-dev/zebrunner_py"
+homepage = "https://zebrunner.com/documentation/agents/pytest"
+repository = "https://github.com/zebrunner/python-agent-pytest"
 keywords = ["automation", "zebrunner", "testing"]
 classifiers = [
     "Development Status :: 3 - Alpha",
@@ -15,7 +15,6 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
     "Framework :: Pytest",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.6",
     "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
 ]
