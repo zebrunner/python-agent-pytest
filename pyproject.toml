@@ -1,18 +1,25 @@
 [tool.poetry]
 name = "pytest-zebrunner"
-version = "0.2.1"
-description = "Pytest connector for Zebrunner-reporting"
+version = "1.0.0"
+description = "Pytest connector for Zebrunner reporting"
 authors = ["Anatoliy Platonov <p4m.dev@gmail.com>"]
-license = "MIT"
+license = "Apache"
 readme = "README.md"
 homepage = "https://zebrunner.com/documentation/agents/pytest"
 repository = "https://github.com/zebrunner/python-agent-pytest"
 keywords = ["automation", "zebrunner", "testing"]
 classifiers = [
-    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Information Technology",
+    "Intended Audience :: System Administrators",
     "Intended Audience :: Developers",
-    "Topic :: Software Development :: Build Tools",
-    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Topic :: Internet",
+    "Topic :: Software Development :: Libraries :: Application Frameworks",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Software Development",
+    "Development Status :: 3 - Beta",
+    "License :: OSI Approved :: Apache License",
     "Framework :: Pytest",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.7",
@@ -21,11 +28,11 @@ classifiers = [
 
 
 [tool.poetry.plugins.pytest11]
-pytest_zebrunner = "pytest_zebrunner.plugin"
+pytest-zebrunner = "pytest_zebrunner.plugin"
 
 
 [tool.poetry.dependencies]
-python = "^3.6.1"
+python = "^3.7"
 pytest = "^6.1.1"
 httpx = "^0.16.1"
 pydantic = "^1.7.2"
