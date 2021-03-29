@@ -32,18 +32,17 @@ ENV=stage
 You can configure agent only with environment variables. Another formats would
 be added in future. Planed formats are `yaml`, `ini` and program arguments.
 
-`SERVICE_URL` - [required] Base URL of Zebrunner service.
-Example: `https://pytesttest.qaprosoft.farm`
+- `SERVICE_URL` - [required] Base URL of Zebrunner service.
 
-`ACCESS_TOKEN` - [required] Authorization token. You can find it in Account & profile section.
+- `ACCESS_TOKEN` - [required] Authorization token. You can find it in Account & profile section.
 
-`ZEBRUNNER_PROJECT` - [required] Name of project.
+- `ZEBRUNNER_PROJECT` - [required] Name of project.
 
-`REPORTING_ENABLED` - You can disable agent if it makes side effects in you project or doesn't work.
+- `REPORTING_ENABLED` - You can disable agent if it makes side effects in you project or doesn't work.
 
-`BUILD` - Version of product on which tests are running.
+- `BUILD` - Version of product on which tests are running.
 
-`ENV` - Testing environment name.
+- `ENV` - Testing environment name.
 <!-- groups:end -->
 
 If required configurations not provided there is a warning in logs with problem description and names of options,
