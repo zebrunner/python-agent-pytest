@@ -1,4 +1,4 @@
-# python-agent-pytest
+# Zebrunner PyTest agent
 
 
 The official Zebrunner Pytest agent provides reporting functionality. It can automatically track selenium sessions
@@ -9,7 +9,7 @@ and adding configuration file.
 ## Installation
 ---------------
 
-    pip install pytest_zebrunner
+    pip install pytest-zebrunner
 
 ## Configuration
 ----------------
@@ -18,6 +18,8 @@ zebrunner service without additional configuration. To configure app you need to
 specify environment variables. It can be done by specifying variables in `.env`
 file.
 
+<!-- groups:start -->
+### Environment variables
 ```dosini
 SERVICE_URL=<zebrunner url>
 ACCESS_TOKEN=<access_token>
@@ -30,7 +32,6 @@ ENV=stage
 You can configure agent only with environment variables. Another formats would
 be added in future. Planed formats are `yaml`, `ini` and program arguments.
 
-### Configuration description
 `SERVICE_URL` - [required] Base URL of Zebrunner service.
 Example: `https://pytesttest.qaprosoft.farm`
 
@@ -43,13 +44,14 @@ Example: `https://pytesttest.qaprosoft.farm`
 `BUILD` - Version of product on which tests are running.
 
 `ENV` - Testing environment name.
+<!-- groups:end -->
 
 If required configurations not provided there is a warning in logs with problem description and names of options,
 which need to be specified. Parameter names are case insensitive and can be written in upper and lower registers.
 
 ## Additional functionality
 ---------------------------
-**IMPORTANT**: All attachments to tests can be done only while some test is running. All attachments to test-run csn be done only while pytest test-session is active.
+**IMPORTANT**: All attachments to tests can be done only while some test is running. All attachments to test-run can be done only while pytest test-session is active.
 ---------------------------
 
 
