@@ -44,7 +44,8 @@ class PytestZebrunnerHooks:
                 config=TestRunConfigModel(environment=test_run.environment, build=test_run.build),
             ),
         )
-        logging.root.addHandler(ZebrunnerHandler())
+        if zebrunner_context.settings.send_logs:
+            logging.root.addHandler(ZebrunnerHandler())
 
     @pytest.hookimpl
     def pytest_sessionfinish(self, session: Session, exitstatus: Union[int, ExitCode]) -> None:
