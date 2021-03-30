@@ -9,12 +9,10 @@ To include reporting into your project is pretty easy - just install agent and p
 
 
 ## Installation
----------------
 
     pip install pytest-zebrunner
 
 ## Configuration
-----------------
 After installation reporting is disabled by default. It won't send data to zebrunner service without valid configuration. 
 To configure app you need to specify environment variables. It also can be done by specifying variables in `.env` file in root path of your project.
 You can configure agent **only** with environment variables. Another formats would be added in future. 
@@ -59,7 +57,7 @@ Agent connects to pythons root logger and collect logs from there. Possible, in 
 
 
 ## Additional functionality
----------------------------
+
 **IMPORTANT**: All attachments to tests can be done only while some test is running. 
 All attachments to test-run can be done only while pytest test-session is active.
 ---------------------------
