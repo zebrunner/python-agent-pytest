@@ -1,11 +1,11 @@
 # Zebrunner PyTest agent
 
 
-The official Zebrunner Pytest agent provides reporting functionality. It can automatically track selenium sessions
-and send info about session details to Zebrunner backend. It can be ease integrated in project just by installing library
-and adding configuration file.
+The official Zebrunner PyTest agent provides the reporting functionality. It can automatically track Selenium sessions
+and send the info about session details to Zebrunner backend. It can be easily integrated into a project by just installing the library
+and adding the configuration file.
 
-To include reporting into your project is pretty easy - just install agent and provide minimal valid configuration for reporting.
+Including reporting into your project is easy - just install the agent and provide minimal valid configuration for reporting.
 
 
 ## Installation
@@ -13,10 +13,9 @@ To include reporting into your project is pretty easy - just install agent and p
     pip install pytest-zebrunner
 
 ## Configuration
-After installation reporting is disabled by default. It won't send data to zebrunner service without valid configuration.
-To configure app you need to specify environment variables. It also can be done by specifying variables in `.env` file in root path of your project.
-You can configure agent **only** with environment variables. Another formats would be added in future.
-Planed formats are `yaml`, `ini` and program arguments.
+After the installation, reporting is disabled by default. It won't send any data to the Zebrunner service without a valid configuration.
+To configure the app, you need to specify environment variables. It can also be done by specifying variables in the `.env` file in the root path of your project.
+You can configure the agent **only** with environment variables. Other formats like `yaml`, `ini` and program arguments will be added in future.
 
 <!-- groups:start -->
 ### Environment variables
@@ -31,13 +30,13 @@ ENV=stage
 SEND_LOGS=true
 ```
 
-- `SERVICE_URL` - [required] It is Zebrunner server hostname. It can be obtained in Zebrunner on the 'Account & profile' page under the 'Service URL' section;
+- `SERVICE_URL` - [required] It is the Zebrunner server hostname. It can be obtained in Zebrunner on the 'Account & profile' page under the 'Service URL' section;
 
 - `ACCESS_TOKEN` - [required] Access token must be used to perform API calls. It can be obtained in Zebrunner on the 'Account & profile' page under the 'Token' section;
 
 - `ZEBRUNNER_PROJECT` - [required] It is the project that the test run belongs to. The default value is `UNKNOWN`. You can manage projects in Zebrunner in the appropriate section;
 
-- `REPORTING_ENABLED` - You can disable agent if it makes side effects in you project or doesn't work. *Default*: `true`
+- `REPORTING_ENABLED` - You can disable the agent if it has side effects on you project or doesn't work. *Default*: `true`
 
 - `TEST_RUN_NAME` - It is the display name of the test run. *Default*: `Unnamed-%time`
 
@@ -45,26 +44,26 @@ SEND_LOGS=true
 
 - `ENV` - It is the environment where the tests will run.
 
-- `SEND_LOGS` - Send test logs to zebrunner. *Default*: `false`
+- `SEND_LOGS` - Sends test logs to Zebrunner. *Default*: `false`
 <!-- groups:end -->
 
-If required configurations not provided there is a warning in logs with problem description and names of options,
+If the required configurations are not provided, there is a warning displayed in logs with the problem description and the names of options
 which need to be specified. Parameter names are case insensitive and can be written in upper and lower registers.
 
 ## Collecting logs
-It is also possible to enable the log collection for your tests.  All you have to do to enable logging is to enable it in configuration.
-Agent connects to pythons root logger and collect logs from there. Possible, in future would be more options to configure logs sending.
+It is also possible to enable the log collection for your tests. All you have to do to enable logging is to enable it in the configuration.
+The agent connects to pythons root logger and collects the logs from there. In future, more options are expected to be available for configuring logs sending.
 
 
 ## Additional functionality
 
-**IMPORTANT**: All attachments to tests can be done only while some test is running.
-All attachments to test-run can be done only while pytest test-session is active.
+**IMPORTANT**: All attachments to tests can only be done while some test is running.
+All attachments to a test run can only be done while a pytest test session is active.
 ---------------------------
 
 ### Collecting captured screenshot
-Sometimes it may be useful to have an ability to track captured screenshots in scope of zebrunner reporting. The agent comes
-with API allowing you to send your screenshots to Zebrunner, so they will be attached to the test.
+Sometimes it may be useful to have the ability to track captured screenshots in scope of Zebrunner Reporting. The agent comes
+with the API allowing you to send your screenshots to Zebrunner, so that they could be attached to the test.
 
 ```python
 from pytest_zebrunner.attachments import attach_test_screenshot
@@ -78,14 +77,14 @@ def test_something():
 ```
 
 ### Collecting additional artifacts
-In case your tests or entire test run produce some artifacts, it may be useful to track them in Zebrunner.
-The agent comes with a few convenient methods for uploading artifacts in Zebrunner and linking them to the currently running test or the test run.
-Artifacts and artifact-references can be attached using functions from `attachments` module. Together with an artifact
+In case your tests or an entire test run produce some artifacts, it may be useful to track them in Zebrunner.
+The agent comes with a few convenient methods for uploading artifacts in Zebrunner and linking them to the currently running test or test run.
+Artifacts and artifact references can be attached using functions from `attachments` module. Together with an artifact
 or artifact reference, you must provide the display name. For the file, this name must contain the file extension that
 reflects the actual content of the file. If the file extension does not match the file content, this file will not be
 saved in Zebrunner. Artifact reference can have an arbitrary name.
 
-#### Attach artifact to test
+#### Attaching artifact to test
 ```python
 from pytest_zebrunner.attachments import attach_test_artifact
 
@@ -96,7 +95,7 @@ def test_something():
     ...
 ```
 
-### Attach artifact-reference to test
+### Attaching artifact reference to test
 ```python
 from pytest_zebrunner.attachments import attach_test_artifact_reference
 
@@ -107,7 +106,7 @@ def test_something():
     ...
 ```
 
-### Attach artifact to test-run
+### Attaching artifact to test run
 ```python
 from pytest_zebrunner.attachments import attach_test_run_artifact
 
@@ -115,7 +114,7 @@ from pytest_zebrunner.attachments import attach_test_run_artifact
 attach_test_run_artifact("path_to_artifact")
 ```
 
-### Attach artifact-reference to test-run
+### Attaching artifact reference to test run
 ```python
 from pytest_zebrunner.attachments import attach_test_run_artifact_reference
 
@@ -123,14 +122,14 @@ from pytest_zebrunner.attachments import attach_test_run_artifact_reference
 attach_test_run_artifact_reference("name", "reference")
 ```
 
-Artifact upload process is performed in the foreground now, sow it will block execution thread while sending.
-In future release background uploading would be realized.
+Artifact uploading process is performed in the foreground now, so it will block the execution thread while sending.
+The background uploading will be available in upcoming releases.
 
 
 ### Attaching test labels
 In some cases, it may be useful to attach some meta information related to a test. The agent comes with a concept of a label.
 Label is a key-value pair associated with a test. The key and value are represented by a `str`. Labels can be attached to
-tests and test-runs.
+tests and test runs.
 
 ```python
 @pytest.mark.label("name", "value")
@@ -149,7 +148,7 @@ def test_something():
 ```
 **Note:** These two methods can be combined.
 
-For test-run:
+For test run:
 ```python
 from pytest_zebrunner.attachments import attach_test_run_label
 
@@ -157,7 +156,7 @@ attach_test_run_label("name", "value")
 ```
 
 
-### Tracking test maintainer
+### Tracking of test maintainer
 You may want to add transparency to the process of automation maintenance by having an engineer responsible for
 evolution of specific tests or test classes. Zebrunner comes with a concept of a maintainer - a person that can be
 assigned to maintain tests. In order to keep track of those, the agent comes with the `@pytest.mark.maintainer` annotation.
@@ -170,7 +169,7 @@ def test_something():
     ...
 ```
 
-### Tracking of web driver sessions
-The Zebrunner test agent has a great ability to track tests along with remote driver sessions. You have nothing to do :)
-The agent automatically injects tracking functionality to selenium driver if selenium library is installed. Agent sends
-driver capabilities to zebrunner when the driver starts and finish time when the driver stops.
+### Tracking web driver sessions
+The Zebrunner test agent has a great ability to track tests along with remote driver sessions. You don't have to do anything.
+The agent automatically injects the tracking functionality to the Selenium driver if the Selenium library is installed. The agent sends
+driver capabilities to Zebrunner when the driver starts and the finish time when the driver stops.
