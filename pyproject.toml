@@ -50,7 +50,7 @@ selenium = "^3.141.0"
 [tool.coverage.paths]
 source = ["src", "*/site-packages"]
 
-[tool.coverage.run]
+[tool.coverage.run] 
 branch = true
 source = ["pytest_zebrunner"]
 
