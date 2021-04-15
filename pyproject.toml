@@ -46,11 +46,12 @@ mypy = "^0.790"
 pre-commit = "^2.7.1"
 pytest-cov = "^2.10.1"
 selenium = "^3.141.0"
+setuptools = "^56.0.0"
 
 [tool.coverage.paths]
 source = ["src", "*/site-packages"]
 
-[tool.coverage.run] 
+[tool.coverage.run]
 branch = true
 source = ["pytest_zebrunner"]
 
