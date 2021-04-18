@@ -6,17 +6,6 @@ from pydantic.main import BaseModel
 
 from pytest_zebrunner.settings import Settings, ZebrunnerSettings
 
-# @pytest.mark.parametrize("input, expected", [
-#     ({"name": "value"}, [["name"]]),
-#     ({"name": {"inner_name": "inner_value"}}, [["name" , "inner_name"]]),
-#     ({"name": {"inner_name": "inner_value"}, "name2": "value2"}, [["name", "inner_name"], ["name2"]]),
-#     ({}, [])
-# ])
-# def test_list_settings(input: dict, expected: list) -> None:
-#     settings = ZebrunnerSettings()
-#     name_list = settings._list_settings(input)
-#     assert name_list == expected
-
 
 def test_simple_model() -> None:
     settings = ZebrunnerSettings()
