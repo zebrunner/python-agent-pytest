@@ -1,6 +1,9 @@
-from typing import Any, List, Optional, Type
+import os
+from typing import Any, Dict, List, Optional, Type
 
 from pydantic import BaseModel
+
+PREFIX = "reporting"
 
 
 class TestRunSettings(BaseModel):
@@ -54,9 +57,25 @@ class ZebrunnerSettings:
         if len(path) == 1:
             settings_dict[path[0]] = value
         else:
-            current_dict = settings_dict.get(path[0]) or {}
+            current_dict = settings_dict.get(path[0], {})
+            ZebrunnerSettings.put_by_path(current_dict, path[1:], value)
             settings_dict[path[0]] = current_dict
-            ZebrunnerSettings.put_by_path(settings_dict[path[0]], path[1:], value)
+
+    def load_env(self, path_list: List[List[str]]) -> dict:
+        settings: Dict[str, Any] = {}
+        for path in path_list:
+            env_name = "_".join([PREFIX] + path).upper()
+            env_variable = os.getenv(env_name)
+            if env_variable is not None:
+                ZebrunnerSettings.put_by_path(settings, path, env_variable)
+
+        return settings
+
+    def load_settings(self) -> Settings:
+        settings_path_list = self._list_settings(Settings)
+        env_settings = self.load_env(settings_path_list)
+        settings = Settings(**env_settings)
+        return settings
 
     reporting_enabled: bool = True
     project_key: str

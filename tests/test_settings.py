@@ -1,3 +1,4 @@
+import os
 from typing import Any, List
 
 import pytest
@@ -72,3 +73,17 @@ def test_schema_parsed_without_exceptions() -> None:
     settings = ZebrunnerSettings()
     name_list = settings._list_settings(Settings)
     assert name_list
+
+
+def test_load_from_env() -> None:
+    os.environ.update(
+        {
+            "REPORTING_ENABLED": "true",
+            "REPORTING_SERVER_HOSTNAME": "hostname",
+            "REPORTING_SERVER_ACCESS_TOKEN": "access_token",
+        }
+    )
+    settings = ZebrunnerSettings().load_settings()
+    assert settings.server.hostname == "hostname"
+    assert settings.server.access_token == "access_token"
+    assert settings.enabled is True
