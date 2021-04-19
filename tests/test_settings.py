@@ -53,6 +53,18 @@ def env_variables() -> Generator:
     print("ENV_VARIUABLES_REMOVED")
 
 
+@pytest.fixture
+def env_file() -> Generator:
+    env_file = """
+        REPORTING_SERVER_HOSTNAME=env_file_hostname
+        REPORTING_SERVER_ACCESS_TOKEN=env_file_access_token
+    """
+    path = Path(".env")
+    path.write_text(env_file)
+    yield
+    path.unlink()
+
+
 def test_simple_model() -> None:
     settings = ZebrunnerSettings()
 
@@ -185,3 +197,11 @@ def test_load_settings_overrides(yaml_file, env_variables) -> None:  # type: ign
 
     assert settings.server.hostname == "env_hostname"
     assert settings.server.access_token == "env_access_token"
+
+
+def test_load_settings_env_file(env_file) -> None:  # type: ignore
+    settings_loader = ZebrunnerSettings()
+    settings = settings_loader.load_settings()
+
+    assert settings.server.hostname == "env_file_hostname"
+    assert settings.server.access_token == "env_file_access_token"

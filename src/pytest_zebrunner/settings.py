@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Type
 
+import dotenv
 import yaml
 from pydantic import BaseModel
 from pydantic.utils import deep_update
@@ -73,6 +74,7 @@ class ZebrunnerSettings:
             return ZebrunnerSettings.get_by_path(inner_dict, path[1:], default_value)
 
     def load_env(self, path_list: List[List[str]]) -> dict:
+        dotenv.load_dotenv(".env")
         settings: Dict[str, Any] = {}
         for path in path_list:
             env_name = "_".join([PREFIX] + path).upper()
