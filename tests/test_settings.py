@@ -5,7 +5,7 @@ from typing import Any, Generator, List
 import pytest
 from pydantic.main import BaseModel
 
-from pytest_zebrunner.settings import Settings, SettingsLoader
+from pytest_zebrunner import settings
 
 
 @pytest.fixture
@@ -66,8 +66,6 @@ def env_file() -> Generator:
 
 
 def test_simple_model() -> None:
-    settings = SettingsLoader()
-
     class SimpleModel(BaseModel):
         field1 = ""
 
@@ -75,8 +73,6 @@ def test_simple_model() -> None:
 
 
 def test_inner_model() -> None:
-    settings = SettingsLoader()
-
     class SimpleInnerModel(BaseModel):
         inner_field1 = ""
 
@@ -87,8 +83,6 @@ def test_inner_model() -> None:
 
 
 def test_combined_model() -> None:
-    settings = SettingsLoader()
-
     class SimpleInnerModel(BaseModel):
         inner_field1 = ""
 
@@ -104,7 +98,7 @@ def test_combined_model() -> None:
 )
 def test_put_by_path(path: List[str], value: Any, expected: dict) -> None:
     data: dict = {}
-    SettingsLoader._put_by_path(data, path, value)
+    settings._put_by_path(data, path, value)
     assert data == expected
 
 
@@ -118,90 +112,80 @@ def test_put_by_path(path: List[str], value: Any, expected: dict) -> None:
     ),
 )
 def test_get_by_path(data: dict, path: List[str], default_value: Any, expected: Any) -> None:
-    assert SettingsLoader._get_by_path(data, path, default_value) == expected
+    assert settings._get_by_path(data, path, default_value) == expected
 
 
 def test_combined_put_by_path() -> None:
     data: dict = {}
-    SettingsLoader._put_by_path(data, ["field2"], 1)
-    SettingsLoader._put_by_path(data, ["field1", "inner_field1"], 1)
-    SettingsLoader._put_by_path(data, ["field1", "inner_field2"], 1)
+    settings._put_by_path(data, ["field2"], 1)
+    settings._put_by_path(data, ["field1", "inner_field1"], 1)
+    settings._put_by_path(data, ["field1", "inner_field2"], 1)
     assert data == {"field2": 1, "field1": {"inner_field1": 1, "inner_field2": 1}}
 
 
 def test_schema_parsed_without_exceptions() -> None:
-    settings = SettingsLoader()
-    name_list = settings._list_settings(Settings)
+    name_list = settings._list_settings(settings.Settings)
     assert name_list
 
 
 def test_load_from_env(env_variables) -> None:  # type: ignore
-    settings_loader = SettingsLoader()
-    settings = settings_loader._load_env(settings_loader._list_settings(Settings))
+    data = settings._load_env(settings._list_settings(settings.Settings))
 
-    assert settings["server"]["hostname"] == "env_hostname"
-    assert settings["server"]["access_token"] == "env_access_token"
+    assert data["server"]["hostname"] == "env_hostname"
+    assert data["server"]["access_token"] == "env_access_token"
 
 
 def test_load_from_yaml(yaml_file: Path) -> None:
-    settings_loader = SettingsLoader()
-    settings = settings_loader._load_yaml(settings_loader._list_settings(Settings))
+    data = settings._load_yaml(settings._list_settings(settings.Settings))
 
-    assert settings["server"]["hostname"] == "yaml_hostname"
-    assert settings["server"]["access_token"] == "yaml_access_token"
-    assert settings["enabled"] is True
+    assert data["server"]["hostname"] == "yaml_hostname"
+    assert data["server"]["access_token"] == "yaml_access_token"
+    assert data["enabled"] is True
 
 
 def test_load_from_yml(yml_file: Path) -> None:
-    settings_loader = SettingsLoader()
-    settings = settings_loader._load_yaml(settings_loader._list_settings(Settings))
+    data = settings._load_yaml(settings._list_settings(settings.Settings))
 
-    assert settings["server"]["hostname"] == "yml_hostname"
-    assert settings["server"]["access_token"] == "yml_access_token"
-    assert settings["enabled"] is True
+    assert data["server"]["hostname"] == "yml_hostname"
+    assert data["server"]["access_token"] == "yml_access_token"
+    assert data["enabled"] is True
 
 
 def test_load_from_yaml_not_exists() -> None:
-    settings_loader = SettingsLoader()
-    settings = settings_loader._load_yaml(settings_loader._list_settings(Settings))
-    assert settings == {}
+    data = settings._load_yaml(settings._list_settings(settings.Settings))
+    assert data == {}
 
 
 def test_load_settings_env_only(env_variables) -> None:  # type: ignore
-    settings_loader = SettingsLoader()
-    settings = settings_loader.load_settings()
+    data = settings.load_settings()
 
-    assert settings.enabled is True
-    assert settings.server.hostname == "env_hostname"
-    assert settings.server.access_token == "env_access_token"
+    assert data.enabled is True
+    assert data.server.hostname == "env_hostname"
+    assert data.server.access_token == "env_access_token"
 
 
 def test_load_settings_yaml_only(yaml_file) -> None:  # type: ignore
-    settings_loader = SettingsLoader()
-    settings = settings_loader.load_settings()
+    data = settings.load_settings()
 
-    assert settings.server.hostname == "yaml_hostname"
-    assert settings.server.access_token == "yaml_access_token"
-    assert settings.enabled is True
+    assert data.server.hostname == "yaml_hostname"
+    assert data.server.access_token == "yaml_access_token"
+    assert data.enabled is True
 
 
 def test_load_settings_validation_error() -> None:
-    settings_loader = SettingsLoader()
     with pytest.raises(ValueError):
-        settings_loader.load_settings()
+        settings.load_settings()
 
 
 def test_load_settings_overrides(yaml_file, env_variables) -> None:  # type: ignore
-    settings_loader = SettingsLoader()
-    settings = settings_loader.load_settings()
+    data = settings.load_settings()
 
-    assert settings.server.hostname == "env_hostname"
-    assert settings.server.access_token == "env_access_token"
+    assert data.server.hostname == "env_hostname"
+    assert data.server.access_token == "env_access_token"
 
 
 def test_load_settings_env_file(env_file) -> None:  # type: ignore
-    settings_loader = SettingsLoader()
-    settings = settings_loader.load_settings()
+    data = settings.load_settings()
 
-    assert settings.server.hostname == "env_file_hostname"
-    assert settings.server.access_token == "env_file_access_token"
+    assert data.server.hostname == "env_file_hostname"
+    assert data.server.access_token == "env_file_access_token"

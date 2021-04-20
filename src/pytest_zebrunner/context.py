@@ -3,7 +3,7 @@ from typing import List, Optional, Tuple
 
 from pydantic.error_wrappers import ValidationError
 
-from pytest_zebrunner.settings import SettingsLoader
+from pytest_zebrunner.settings import Settings
 
 
 class TestRun:
@@ -28,7 +28,7 @@ class ZebrunnerContext:
         self.test_run: Optional[TestRun] = None
         self.test: Optional[Test] = None
         try:
-            self.settings = SettingsLoader()
+            self.settings = Settings()
         except ValidationError:
             self.settings = None  # type: ignore
 
