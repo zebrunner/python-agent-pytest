@@ -156,3 +156,4 @@ fabric.properties
 .vscode/
 examples/pytest_example/conftest.py
 *.png
+agent.yaml

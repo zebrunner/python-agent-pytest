@@ -25,7 +25,9 @@ logger = logging.getLogger(__name__)
 
 class PytestZebrunnerHooks:
     def __init__(self) -> None:
-        self.api = ZebrunnerAPI(zebrunner_context.settings.service_url, zebrunner_context.settings.access_token)
+        self.api = ZebrunnerAPI(
+            zebrunner_context.settings.server.hostname, zebrunner_context.settings.server.access_token
+        )
         self.session_manager = SeleniumSession(self.api)
 
     @pytest.hookimpl
@@ -33,11 +35,11 @@ class PytestZebrunnerHooks:
         self.api.auth()
         inject_driver(self.session_manager)
         settings = zebrunner_context.settings
-        test_run = TestRun(settings.test_run_name, settings.env, settings.build)
+        test_run = TestRun(settings.run.display_name, settings.run.environment, settings.run.build)
 
         zebrunner_context.test_run = test_run
         test_run.zebrunner_id = self.api.start_test_run(
-            settings.zebrunner_project,
+            settings.project_key,
             StartTestRunModel(
                 name=test_run.name,
                 framework="pytest",

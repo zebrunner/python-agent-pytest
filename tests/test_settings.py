@@ -3,39 +3,40 @@ from pathlib import Path
 from typing import Any, Generator, List
 
 import pytest
+import yaml
 from pydantic.main import BaseModel
 
 from pytest_zebrunner import settings
 
 
 @pytest.fixture
-def yaml_file() -> Generator:
-    yaml_file = """
-        reporting:
-          enabled: true
-          server:
-            hostname: yaml_hostname
-            access-token: yaml_access_token
-    """
+def yaml_file(tmpdir: str) -> Generator:
+    yaml_data = {
+        "reporting": {"enabled": True, "server": {"hostname": "yaml_hostname", "access-token": "yaml_access_token"}}
+    }
+    current_directory = os.getcwd()
+    os.chdir(tmpdir)
     path = Path("agent.yaml")
-    path.write_text(yaml_file)
+    with open(path, "w") as yaml_file:
+        yaml.dump(yaml_data, yaml_file)
     yield
     path.unlink()
+    os.chdir(current_directory)
 
 
 @pytest.fixture
-def yml_file() -> Generator:
-    yml_file = """
-        reporting:
-          enabled: true
-          server:
-            hostname: yml_hostname
-            access-token: yml_access_token
-    """
-    path = Path("agent.yml")
-    path.write_text(yml_file)
+def yml_file(tmpdir: str) -> Generator:
+    yml_data = {
+        "reporting": {"enabled": True, "server": {"hostname": "yml_hostname", "access-token": "yml_access_token"}}
+    }
+    current_directory = os.getcwd()
+    os.chdir(tmpdir)
+    path = Path("agent.yaml")
+    with open(path, "w") as yml_file:
+        yaml.dump(yml_data, yml_file)
     yield
     path.unlink()
+    os.chdir(current_directory)
 
 
 @pytest.fixture
@@ -46,23 +47,24 @@ def env_variables() -> Generator:
             "REPORTING_SERVER_ACCESS_TOKEN": "env_access_token",
         }
     )
-    print("ENVIRONMENT VARIABLES UPDATED")
     yield
     os.environ.pop("REPORTING_SERVER_HOSTNAME")
     os.environ.pop("REPORTING_SERVER_ACCESS_TOKEN")
-    print("ENV_VARIUABLES_REMOVED")
 
 
 @pytest.fixture
-def env_file() -> Generator:
+def env_file(tmpdir: str) -> Generator:
     env_file = """
         REPORTING_SERVER_HOSTNAME=env_file_hostname
         REPORTING_SERVER_ACCESS_TOKEN=env_file_access_token
     """
+    current_directory = os.getcwd()
+    os.chdir(tmpdir)
     path = Path(".env")
     path.write_text(env_file)
     yield
     path.unlink()
+    os.chdir(current_directory)
 
 
 def test_simple_model() -> None:
@@ -135,7 +137,7 @@ def test_load_from_env(env_variables) -> None:  # type: ignore
     assert data["server"]["access_token"] == "env_access_token"
 
 
-def test_load_from_yaml(yaml_file: Path) -> None:
+def test_load_from_yaml(yaml_file) -> None:  # type: ignore
     data = settings._load_yaml(settings._list_settings(settings.Settings))
 
     assert data["server"]["hostname"] == "yaml_hostname"
@@ -143,7 +145,7 @@ def test_load_from_yaml(yaml_file: Path) -> None:
     assert data["enabled"] is True
 
 
-def test_load_from_yml(yml_file: Path) -> None:
+def test_load_from_yml(yml_file) -> None:  # type: ignore
     data = settings._load_yaml(settings._list_settings(settings.Settings))
 
     assert data["server"]["hostname"] == "yml_hostname"
@@ -151,9 +153,12 @@ def test_load_from_yml(yml_file: Path) -> None:
     assert data["enabled"] is True
 
 
-def test_load_from_yaml_not_exists() -> None:
+def test_load_from_yaml_not_exists(tmpdir: str) -> None:
+    currend_directory = os.getcwd()
+    os.chdir(tmpdir)
     data = settings._load_yaml(settings._list_settings(settings.Settings))
     assert data == {}
+    os.chdir(currend_directory)
 
 
 def test_load_settings_env_only(env_variables) -> None:  # type: ignore

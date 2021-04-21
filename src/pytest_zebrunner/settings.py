@@ -36,6 +36,7 @@ class MilestoneSettings(BaseModel):
 class Settings(BaseModel):
     enabled: bool = True
     project_key: str = "UNKNOWN"
+    send_logs: bool = True
     server: ServerSettings
     run: TestRunSettings = TestRunSettings()
     notifications: NotificationsSettings = NotificationsSettings()
