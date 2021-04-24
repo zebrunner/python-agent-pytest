@@ -177,9 +177,12 @@ def test_load_settings_yaml_only(yaml_file) -> None:  # type: ignore
     assert data.enabled is True
 
 
-def test_load_settings_validation_error() -> None:
+def test_load_settings_validation_error(tmpdir: str) -> None:
+    current_path = os.getcwd()
+    os.chdir(tmpdir)
     with pytest.raises(ValueError):
         settings.load_settings()
+    os.chdir(current_path)
 
 
 def test_load_settings_overrides(yaml_file, env_variables) -> None:  # type: ignore
