@@ -47,6 +47,7 @@ class ReportingService:
             logging.root.addHandler(ZebrunnerHandler())
 
     def start_test(self, report: TestReport, item: Item) -> None:
+        self.authorize()
         test = Test(
             name=item.name,
             file=item.nodeid.split("::")[1],
@@ -78,6 +79,7 @@ class ReportingService:
             zebrunner_context.test = None
 
     def finish_test(self, report: TestReport, item: Item) -> None:
+        self.authorize()
         if zebrunner_context.test_is_active:
             if report.skipped:
                 self.api.finish_test(
@@ -97,6 +99,7 @@ class ReportingService:
             self.api.finish_test(zebrunner_context.test_run_id, zebrunner_context.test_id, body)
 
     def finish_test_run(self) -> None:
+        self.authorize()
         if zebrunner_context.test_run_is_active:
             self.api.finish_test_run(zebrunner_context.test_run_id)
 
@@ -108,6 +111,7 @@ class ReportingService:
         self.api.close()
 
     def start_test_session(self, session_id: str, capabilities: dict, desired_capabilities: dict) -> Optional[str]:
+        self.authorize()
         if zebrunner_context.test_run_is_active:
             zebrunner_session_id = self.api.start_test_session(
                 zebrunner_context.test_run_id,
@@ -119,6 +123,7 @@ class ReportingService:
         return None
 
     def finish_test_session(self, zebrunner_session_id: str, related_tests: List[str]) -> None:
+        self.authorize()
         if zebrunner_context.test_run_is_active:
             self.api.finish_test_session(
                 zebrunner_context.test_run_id,

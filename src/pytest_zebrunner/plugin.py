@@ -1,16 +1,17 @@
 import logging
 import warnings
-from typing import Any
+from typing import Union
 
+from _pytest.config import Config
 from pydantic import ValidationError
 
-from pytest_zebrunner.hooks import PytestZebrunnerHooks
+from pytest_zebrunner.hooks import PytestHooks, PytestXdistHooks
 from pytest_zebrunner.settings import load_settings
 
 logger = logging.getLogger(__name__)
 
 
-def pytest_configure(config: Any) -> None:
+def pytest_configure(config: Config) -> None:
 
     try:
         settings = load_settings()
@@ -25,9 +26,12 @@ def pytest_configure(config: Any) -> None:
         return
 
     if settings.enabled:
-        hooks = PytestZebrunnerHooks()
+        hooks: Union[PytestHooks, PytestXdistHooks]
+        if config.pluginmanager.has_plugin("xdist") and config.getoption("-n") is not None:
+            hooks = PytestXdistHooks()
+        else:
+            hooks = PytestHooks()
 
         config.pluginmanager.register(hooks)
-
         config.addinivalue_line("markers", "maintainer(name): Email or nickname of test maintainer")
         config.addinivalue_line("markers", "label(name, value): Test label")
