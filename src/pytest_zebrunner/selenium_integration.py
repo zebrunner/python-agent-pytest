@@ -1,38 +1,30 @@
 import logging
 from typing import Any, Dict
 
-from pytest_zebrunner.api.client import ZebrunnerAPI
-from pytest_zebrunner.api.models import FinishTestSessionModel, StartTestSessionModel
 from pytest_zebrunner.context import zebrunner_context
 
 logger = logging.getLogger(__name__)
 
 
 class SeleniumSession:
-    def __init__(self, api: ZebrunnerAPI) -> None:
+    def __init__(self, reporting_service) -> None:  # type: ignore
         self._active_sessions: Dict[str, Any] = {}
-        self.api = api
+        self.reporting_service = reporting_service
 
     def start_session(self, session_id: str, capabilities: dict, desired_capabilities: dict) -> None:
         self._active_sessions[session_id] = {"related_tests": []}
-
-        if zebrunner_context.test_run_is_active:
-            zebrunner_session_id = self.api.start_test_session(
-                zebrunner_context.test_run_id,
-                StartTestSessionModel(
-                    session_id=session_id, desired_capabilities=desired_capabilities, capabilities=capabilities
-                ),
-            )
+        zebrunner_session_id = self.reporting_service.start_test_session(
+            session_id, capabilities, desired_capabilities
+        )
+        if zebrunner_session_id:
             self._active_sessions[session_id]["zebrunner_session_id"] = zebrunner_session_id
 
     def finish_session(self, session_id: str) -> None:
-        if zebrunner_context.test_run_is_active:
-            self.api.finish_test_session(
-                zebrunner_context.test_run_id,
-                self._active_sessions[session_id]["zebrunner_session_id"],
-                FinishTestSessionModel(test_ids=self._active_sessions[session_id]["related_tests"]),
-            )
-            del self._active_sessions[session_id]
+        self.reporting_service.finish_test_session(
+            self._active_sessions[session_id]["zebrunner_session_id"],
+            self._active_sessions[session_id]["related_tests"],
+        )
+        del self._active_sessions[session_id]
 
     def finish_all_sessions(self) -> None:
         for session_id in list(self._active_sessions):
@@ -56,13 +48,15 @@ def inject_driver(session_manager: SeleniumSession) -> None:
         def init(session, *args, **kwargs) -> None:  # type: ignore
             base_init(session, *args, **kwargs)
             session_manager.start_session(session.session_id, session.capabilities, session.desired_capabilities)
+            if zebrunner_context.test_is_active:
+                session_manager.add_test(zebrunner_context.test_id)
 
-        def close(session) -> None:  # type: ignore
+        def quit(session) -> None:  # type: ignore
             session_manager.finish_session(session.session_id)
             base_close(session)
 
         WebDriver.__init__ = init
-        WebDriver.close = close
+        WebDriver.quit = quit
 
     except ImportError:
         logger.warning("Selenium library is not installed.")
