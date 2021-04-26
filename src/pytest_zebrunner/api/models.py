@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 from enum import Enum
-from typing import List, Optional
+from typing import Dict, List, Optional
 from uuid import uuid4
 
 from pydantic import BaseModel, Field
@@ -43,12 +43,25 @@ class TestRunConfigModel(CamelModel):
     build: Optional[str] = None
 
 
+class MilestoneModel(CamelModel):
+    id: int
+    name: str
+
+
+class CiContextModel(CamelModel):
+    ci_type: str
+    env_variables: Dict[str, str]
+
+
 class StartTestRunModel(CamelModel):
     name: str
     framework: str
     started_at: str = Field(default_factory=generate_datetime_str)
     uuid: str = Field(default_factory=generate_uuid)
+
     config: Optional[TestRunConfigModel] = None
+    milestone: Optional[MilestoneModel] = None
+    ci_context: Optional[CiContextModel] = None
 
 
 class LabelModel(CamelModel):
@@ -62,9 +75,10 @@ class StartTestModel(CamelModel):
     method_name: str
     uuid: str = Field(default_factory=generate_uuid)
     started_at: str = Field(default_factory=generate_datetime_str)
+
     maintainer: Optional[str] = None
     test_case: Optional[str] = None
-    labels: Optional[List[LabelModel]]
+    labels: Optional[List[LabelModel]] = []
 
 
 class FinishTestModel(CamelModel):

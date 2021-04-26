@@ -1,5 +1,9 @@
+from enum import Enum
 import os
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Type
+from abc import ABC, abstractclassmethod
+
+from pytest_zebrunner.api.models import CiContextModel
 
 
 class BaseContextLoader:
@@ -9,8 +13,17 @@ class BaseContextLoader:
         return {key: os.environ[key] for key in env_variable_names}
 
 
+class CiType(Enum):
+    JENKINS = "JENKINS"
+    TEAM_CITY = "TEAM_CITY"
+    CIRCLE_CI = "CIRCLE_CI"
+    TRAVIS_CI = "TRAVIS_CI"
+    BAMBOO = "BAMBOO"
+
+
 class JenkinsContextLoader(BaseContextLoader):
     CI_ENV_VARIABLE = "JENKINS_URL"
+    CI_TYPE = CiType.JENKINS
     ENV_VARIABLE_PREFIXES = [
         "CVS_",
         "SVN_",
@@ -35,6 +48,7 @@ class JenkinsContextLoader(BaseContextLoader):
 
 class TeamCityCiContextResolver(BaseContextLoader):
     CI_ENV_VARIABLE = "TEAMCITY_VERSION"
+    CI_TYPE = CiType.TEAM_CITY
     ENV_VARIABLE_PREFIXES = [
         "BUILD_",
         "HOSTNAME",
@@ -52,6 +66,7 @@ class TeamCityCiContextResolver(BaseContextLoader):
 
 class CircleCiContextResolver(BaseContextLoader):
     CI_ENV_VARIABLE = "CIRCLECI"
+    CI_TYPE = CiType.CIRCLE_CI
     ENV_VARIABLE_PREFIXES = ["CIRCLE", "HOSTNAME"]
 
     @classmethod
@@ -64,6 +79,7 @@ class CircleCiContextResolver(BaseContextLoader):
 
 class TravisCiContextResolver(BaseContextLoader):
     CI_ENV_VARIABLE = "TRAVIS"
+    CI_TYPE = CiType.TRAVIS_CI
     ENV_VARIABLE_PREFIXES = ["TRAVIS", "USER"]
 
     @classmethod
@@ -72,3 +88,21 @@ class TravisCiContextResolver(BaseContextLoader):
             return cls.load_context_variables(cls.ENV_VARIABLE_PREFIXES)
         else:
             return None
+
+
+def resolve_ci_context () -> CiContextModel:
+    ci_tools: List[Type[BaseContextLoader]] = [
+        JenkinsContextLoader,
+        TeamCityCiContextResolver,
+        CircleCiContextResolver,
+        TravisCiContextResolver,
+    ]
+
+    ci_context: Optional[Type] = None
+    for resolver in ci_tools:
+        env_variables = resolver.resolve()
+        if env_variables:
+            ci_context = resolver
+            break
+    
+    return CiContextModel(ci_type=ci_context.CI_TYPE.value, env_variables=ci_context.resolve())

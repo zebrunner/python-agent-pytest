@@ -154,19 +154,21 @@ def test_load_from_yml(yml_file) -> None:  # type: ignore
 
 
 def test_load_from_yaml_not_exists(tmpdir: str) -> None:
-    currend_directory = os.getcwd()
+    current_directory = os.getcwd()
     os.chdir(tmpdir)
     data = settings._load_yaml(settings._list_settings(settings.Settings))
     assert data == {}
-    os.chdir(currend_directory)
+    os.chdir(current_directory)
 
 
-def test_load_settings_env_only(env_variables) -> None:  # type: ignore
+def test_load_settings_env_only(env_variables, tmpdir: str) -> None:  # type: ignore
+    current_directory = os.getcwd()
+    os.chdir(tmpdir)
     data = settings.load_settings()
-
     assert data.enabled is True
     assert data.server.hostname == "env_hostname"
     assert data.server.access_token == "env_access_token"
+    os.chdir(current_directory)
 
 
 def test_load_settings_yaml_only(yaml_file) -> None:  # type: ignore

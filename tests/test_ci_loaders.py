@@ -33,3 +33,20 @@ def test_resolvers(resolver_cls: Type) -> None:
     os.environ[resolver_cls.CI_ENV_VARIABLE] = "ci"
     assert isinstance(resolver_cls.resolve(), dict)
     os.environ.pop(resolver_cls.CI_ENV_VARIABLE)
+
+
+@pytest.mark.parametrize(
+    "resolver_cls",
+    [
+        ci_loaders.JenkinsContextLoader,
+        ci_loaders.TravisCiContextResolver,
+        ci_loaders.CircleCiContextResolver,
+        ci_loaders.TeamCityCiContextResolver,
+    ],
+)
+def test_global_resolve(resolver_cls: Type) -> None:
+    env_name = resolver_cls.CI_ENV_VARIABLE
+    os.environ.update({env_name: "value"})
+    ci_context = ci_loaders.resolve_ci_context()
+    assert ci_context.ci_type == resolver_cls.CI_TYPE.value
+    os.environ.pop(env_name)

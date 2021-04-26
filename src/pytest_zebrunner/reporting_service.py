@@ -8,12 +8,14 @@ from pytest_zebrunner.api.client import ZebrunnerAPI
 from pytest_zebrunner.api.models import (
     FinishTestModel,
     FinishTestSessionModel,
+    MilestoneModel,
     StartTestModel,
     StartTestRunModel,
     StartTestSessionModel,
     TestRunConfigModel,
     TestStatus,
 )
+from pytest_zebrunner.ci_loaders import resolve_ci_context
 from pytest_zebrunner.context import Test, TestRun, zebrunner_context
 from pytest_zebrunner.zebrunner_logging import ZebrunnerHandler
 
@@ -41,6 +43,8 @@ class ReportingService:
                 name=test_run.name,
                 framework="pytest",
                 config=TestRunConfigModel(environment=test_run.environment, build=test_run.build),
+                milestone=MilestoneModel(),
+                ci_context=resolve_ci_context()
             ),
         )
         if settings.send_logs:
