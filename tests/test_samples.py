@@ -1,5 +1,5 @@
 import pytest
-from selenium.webdriver import Chrome, Firefox
+from selenium.webdriver import Chrome, Firefox, Remote
 
 from pytest_zebrunner import attachments
 
@@ -24,27 +24,42 @@ def test_xfail() -> None:
 
 
 def test_selenium_firefox() -> None:
-    firefox = Firefox()
+    firefox = Remote(
+        command_executor="http://localhost:4444/wd/hub/", 
+        desired_capabilities={"browserName": "firefox"}
+    )
     firefox.quit()
     assert True
 
 
 def test_selenium_chrome() -> None:
-    chrome = Chrome()
+    chrome = Remote(
+        command_executor="http://localhost:4444/wd/hub/", 
+        desired_capabilities={"browserName": "chrome"}
+    )
     chrome.quit()
     assert True
 
 
 def test_selenium_both() -> None:
-    chrome = Chrome()
-    firefox = Firefox()
+    chrome = Remote(
+        command_executor="http://localhost:4444/wd/hub/", 
+        desired_capabilities={"browserName": "chrome"}
+    )
+    firefox = Remote(
+        command_executor="http://localhost:4444/wd/hub/", 
+        desired_capabilities={"browserName": "firefox"}
+    )
     chrome.quit()
     firefox.quit()
     assert True
 
 
 def test_send_screenshot() -> None:
-    chrome = Chrome()
+    chrome = Remote(
+        command_executor="http://localhost:4444/wd/hub/", 
+        desired_capabilities={"browserName": "chrome"}
+    )
     chrome.get("https://www.google.com")
     chrome.save_screenshot("google.png")
     attachments.attach_test_screenshot("google.png")
@@ -53,7 +68,10 @@ def test_send_screenshot() -> None:
 
 
 def test_send_artifact() -> None:
-    firefox = Firefox()
+    firefox = Remote(
+        command_executor="http://localhost:4444/wd/hub/", 
+        desired_capabilities={"browserName": "firefox"}
+    )
     firefox.get("https://www.google.com")
     firefox.quit()
     attachments.attach_test_artifact("geckodriver.log")
