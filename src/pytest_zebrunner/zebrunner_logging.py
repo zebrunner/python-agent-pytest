@@ -1,4 +1,5 @@
 import time
+from datetime import datetime, timedelta
 from logging import LogRecord, StreamHandler
 from typing import List
 
@@ -8,15 +9,15 @@ from pytest_zebrunner.context import zebrunner_context
 
 
 class ZebrunnerHandler(StreamHandler):
-    BATСH_SIZE = 20
     logs: List[LogRecordModel] = []
 
     def __init__(self) -> None:
         super().__init__()
         self.api = ZebrunnerAPI()
+        self.last_push = datetime.utcnow()
 
     def emit(self, record: LogRecord) -> None:
-        if len(self.logs) >= self.BATСH_SIZE:
+        if datetime.utcnow() - self.last_push >= timedelta(seconds=1):
             self.push_logs()
 
         if zebrunner_context.test_is_active:
@@ -30,6 +31,7 @@ class ZebrunnerHandler(StreamHandler):
             )
 
     def push_logs(self) -> None:
+        self.last_push = datetime.utcnow()
         logs = self.logs
         self.logs = []
 
