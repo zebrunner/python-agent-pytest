@@ -90,7 +90,7 @@ class TravisCiContextResolver(BaseContextLoader):
             return None
 
 
-def resolve_ci_context () -> CiContextModel:
+def resolve_ci_context () -> Optional[CiContextModel]:
     ci_tools: List[Type[BaseContextLoader]] = [
         JenkinsContextLoader,
         TeamCityCiContextResolver,
@@ -104,5 +104,8 @@ def resolve_ci_context () -> CiContextModel:
         if env_variables:
             ci_context = resolver
             break
-    
-    return CiContextModel(ci_type=ci_context.CI_TYPE.value, env_variables=ci_context.resolve())
+
+    if ci_context:
+        return CiContextModel(ci_type=ci_context.CI_TYPE.value, env_variables=ci_context.resolve())
+    else:
+        return None

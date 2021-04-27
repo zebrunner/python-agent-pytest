@@ -24,6 +24,12 @@ class TestStatus(Enum):
     QUEUED = "QUEUED"
 
 
+class NotificationsType(Enum):
+    EMAIL_RECIPIENTS = "EMAIL_RECIPIENTS"
+    MS_TEAMS_CHANNELS = "MS_TEAMS_CHANNELS"
+    SLACK_CHANNELS = "SLACK_CHANNELS"
+
+
 def to_camel_case(key: str) -> str:
     parts = key.split("_")
     for i, part in enumerate(parts[1:]):
@@ -53,6 +59,11 @@ class CiContextModel(CamelModel):
     env_variables: Dict[str, str]
 
 
+class NotificationTargetModel(CamelModel):
+    type: str
+    value: str
+
+
 class StartTestRunModel(CamelModel):
     name: str
     framework: str
@@ -62,6 +73,7 @@ class StartTestRunModel(CamelModel):
     config: Optional[TestRunConfigModel] = None
     milestone: Optional[MilestoneModel] = None
     ci_context: Optional[CiContextModel] = None
+    notification_targets: Optional[List[NotificationTargetModel]] = None
 
 
 class LabelModel(CamelModel):

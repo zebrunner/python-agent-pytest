@@ -29,8 +29,8 @@ class NotificationsSettings(BaseModel):
 
 
 class MilestoneSettings(BaseModel):
-    id: Optional[str] = None
-    name: Optional[str] = None
+    id: str
+    name: str
 
 
 class Settings(BaseModel):
@@ -39,8 +39,8 @@ class Settings(BaseModel):
     send_logs: bool = True
     server: ServerSettings
     run: TestRunSettings = TestRunSettings()
-    notifications: NotificationsSettings = NotificationsSettings()
-    milestone: MilestoneSettings = MilestoneSettings()
+    notifications: Optional[NotificationsSettings] = None
+    milestone: Optional[MilestoneSettings] = None
 
 
 def _list_settings(model: Type[BaseModel]) -> List:

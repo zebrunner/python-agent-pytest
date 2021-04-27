@@ -9,6 +9,8 @@ from pytest_zebrunner.api.models import (
     FinishTestModel,
     FinishTestSessionModel,
     MilestoneModel,
+    NotificationTargetModel,
+    NotificationsType,
     StartTestModel,
     StartTestRunModel,
     StartTestSessionModel,
@@ -32,6 +34,29 @@ class ReportingService:
         if not self.api.authenticated:
             self.api.auth()
 
+    def get_notification_configurations(self) -> Optional[List[NotificationTargetModel]]:
+        settings = zebrunner_context.settings
+        if settings.notifications:
+            configs = []
+            if settings.notifications.emails:
+                configs.append(NotificationTargetModel(
+                    type=NotificationsType.EMAIL_RECIPIENTS.value,
+                    value=settings.notifications.emails
+                ))
+            if settings.notifications.slack_channels:
+                configs.append(NotificationTargetModel(
+                    type=NotificationsType.SLACK_CHANNELS.value,
+                    value=settings.notifications.slack_channels
+                ))
+            if settings.notifications.ms_teams_channels:
+                configs.append(NotificationTargetModel(
+                    type=NotificationsType.MS_TEAMS_CHANNELS.value,
+                    value=settings.notifications.ms_teams_channels
+                ))
+            return configs
+        else:
+            return None
+
     def start_test_run(self) -> None:
         self.authorize()
         settings = zebrunner_context.settings
@@ -43,8 +68,12 @@ class ReportingService:
                 name=test_run.name,
                 framework="pytest",
                 config=TestRunConfigModel(environment=test_run.environment, build=test_run.build),
-                milestone=MilestoneModel(),
-                ci_context=resolve_ci_context()
+                milestone=MilestoneModel(
+                    id=settings.milestone.id, 
+                    name=settings.milestone.name
+                ) if settings.milestone else None,
+                ci_context=resolve_ci_context(),
+                notification_targets=self.get_notification_configurations()
             ),
         )
         if settings.send_logs:
