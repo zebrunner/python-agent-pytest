@@ -9,8 +9,8 @@ from pytest_zebrunner.api.models import (
     FinishTestModel,
     FinishTestSessionModel,
     MilestoneModel,
-    NotificationTargetModel,
     NotificationsType,
+    NotificationTargetModel,
     StartTestModel,
     StartTestRunModel,
     StartTestSessionModel,
@@ -39,20 +39,23 @@ class ReportingService:
         if settings.notifications:
             configs = []
             if settings.notifications.emails:
-                configs.append(NotificationTargetModel(
-                    type=NotificationsType.EMAIL_RECIPIENTS.value,
-                    value=settings.notifications.emails
-                ))
+                configs.append(
+                    NotificationTargetModel(
+                        type=NotificationsType.EMAIL_RECIPIENTS.value, value=settings.notifications.emails
+                    )
+                )
             if settings.notifications.slack_channels:
-                configs.append(NotificationTargetModel(
-                    type=NotificationsType.SLACK_CHANNELS.value,
-                    value=settings.notifications.slack_channels
-                ))
+                configs.append(
+                    NotificationTargetModel(
+                        type=NotificationsType.SLACK_CHANNELS.value, value=settings.notifications.slack_channels
+                    )
+                )
             if settings.notifications.ms_teams_channels:
-                configs.append(NotificationTargetModel(
-                    type=NotificationsType.MS_TEAMS_CHANNELS.value,
-                    value=settings.notifications.ms_teams_channels
-                ))
+                configs.append(
+                    NotificationTargetModel(
+                        type=NotificationsType.MS_TEAMS_CHANNELS.value, value=settings.notifications.ms_teams_channels
+                    )
+                )
             return configs
         else:
             return None
@@ -68,12 +71,11 @@ class ReportingService:
                 name=test_run.name,
                 framework="pytest",
                 config=TestRunConfigModel(environment=test_run.environment, build=test_run.build),
-                milestone=MilestoneModel(
-                    id=settings.milestone.id, 
-                    name=settings.milestone.name
-                ) if settings.milestone else None,
+                milestone=MilestoneModel(id=settings.milestone.id, name=settings.milestone.name)
+                if settings.milestone
+                else None,
                 ci_context=resolve_ci_context(),
-                notification_targets=self.get_notification_configurations()
+                notification_targets=self.get_notification_configurations(),
             ),
         )
         if settings.send_logs:

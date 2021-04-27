@@ -1,7 +1,6 @@
-from enum import Enum
 import os
+from enum import Enum
 from typing import Dict, List, Optional, Type
-from abc import ABC, abstractclassmethod
 
 from pytest_zebrunner.api.models import CiContextModel
 
@@ -90,7 +89,7 @@ class TravisCiContextResolver(BaseContextLoader):
             return None
 
 
-def resolve_ci_context () -> Optional[CiContextModel]:
+def resolve_ci_context() -> Optional[CiContextModel]:
     ci_tools: List[Type[BaseContextLoader]] = [
         JenkinsContextLoader,
         TeamCityCiContextResolver,
@@ -100,7 +99,7 @@ def resolve_ci_context () -> Optional[CiContextModel]:
 
     ci_context: Optional[Type] = None
     for resolver in ci_tools:
-        env_variables = resolver.resolve()
+        env_variables = resolver.resolve()  # type: ignore
         if env_variables:
             ci_context = resolver
             break

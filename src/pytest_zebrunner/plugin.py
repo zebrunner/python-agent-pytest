@@ -4,7 +4,6 @@ from typing import Union
 
 from _pytest.config import Config
 from pydantic import ValidationError
-import xdist
 
 from pytest_zebrunner.hooks import PytestHooks, PytestXdistHooks
 from pytest_zebrunner.settings import load_settings
@@ -28,8 +27,9 @@ def pytest_configure(config: Config) -> None:
 
     if settings.enabled:
         hooks: Union[PytestHooks, PytestXdistHooks]
-        # config.pluginmanager.unregister(name="pytest-zebrunner")
-        if config.pluginmanager.has_plugin("xdist") and any([x.startswith("-n") for x in config.invocation_params.args]):
+        if config.pluginmanager.has_plugin("xdist") and any(
+            [x.startswith("-n") for x in config.invocation_params.args]
+        ):
             hooks = PytestXdistHooks()
         else:
             hooks = PytestHooks()
