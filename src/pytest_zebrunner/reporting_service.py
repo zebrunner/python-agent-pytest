@@ -65,15 +65,16 @@ class ReportingService:
         settings = zebrunner_context.settings
         test_run = TestRun(settings.run.display_name, settings.run.environment, settings.run.build)
         zebrunner_context.test_run = test_run
+        milestone = (
+            MilestoneModel(id=settings.milestone.id, name=settings.milestone.name) if settings.milestone else None
+        )
         test_run.zebrunner_id = self.api.start_test_run(
             settings.project_key,
             StartTestRunModel(
                 name=test_run.name,
                 framework="pytest",
                 config=TestRunConfigModel(environment=test_run.environment, build=test_run.build),
-                milestone=MilestoneModel(id=settings.milestone.id, name=settings.milestone.name)
-                if settings.milestone
-                else None,
+                milestone=milestone,
                 ci_context=resolve_ci_context(),
                 notification_targets=self.get_notification_configurations(),
             ),

@@ -50,8 +50,8 @@ class TestRunConfigModel(CamelModel):
 
 
 class MilestoneModel(CamelModel):
-    id: int
-    name: str
+    id: Optional[int]
+    name: Optional[str]
 
 
 class CiContextModel(CamelModel):

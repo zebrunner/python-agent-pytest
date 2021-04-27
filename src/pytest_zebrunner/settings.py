@@ -29,8 +29,8 @@ class NotificationsSettings(BaseModel):
 
 
 class MilestoneSettings(BaseModel):
-    id: str
-    name: str
+    id: Optional[str]
+    name: Optional[str]
 
 
 class Settings(BaseModel):
