@@ -2,7 +2,6 @@ import logging
 from typing import Union
 
 import pytest
-import xdist
 from _pytest.config import ExitCode
 from _pytest.main import Session
 from _pytest.nodes import Item
@@ -51,6 +50,8 @@ class PytestXdistHooks:
 
     @pytest.hookimpl
     def pytest_sessionstart(self, session: Session) -> None:
+        import xdist
+
         self.is_worker = xdist.is_xdist_worker(session)
         if not self.is_worker:
             self.service.start_test_run()
