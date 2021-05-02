@@ -122,7 +122,3 @@ class FinishTestSessionModel(CamelModel):
 class ArtifactReferenceModel(CamelModel):
     name: str
     value: str
-
-
-if __name__ == "__main__":
-    print()

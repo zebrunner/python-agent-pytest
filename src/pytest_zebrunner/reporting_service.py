@@ -115,24 +115,40 @@ class ReportingService:
             zebrunner_context.test = None
 
     def finish_test(self, report: TestReport, item: Item) -> None:
-        self.authorize()
         if zebrunner_context.test_is_active:
-            if report.skipped:
-                self.api.finish_test(
-                    zebrunner_context.test_run_id,
-                    zebrunner_context.test_id,
-                    FinishTestModel(result=TestStatus.SKIPPED.value, reason=report.wasxfail or None),
-                )
-                zebrunner_context.test = None
-                return
+            self.authorize()
+            xfail_markers = list(item.iter_markers("xfail"))
+            fail_reason = None
+            is_strict = False
+            if xfail_markers:
+                fail_reason = xfail_markers[0].kwargs.get("reason")
+                is_strict = xfail_markers[0].kwargs.get("strict", False)
 
             if report.passed:
                 status = TestStatus.PASSED
+                if xfail_markers:
+                    if is_strict:
+                        status = TestStatus.FAILED
+                        fail_reason = report.longreprtext
+                    else:
+                        status = TestStatus.SKIPPED
             else:
                 status = TestStatus.FAILED
+                fail_reason = report.longreprtext
+                if xfail_markers:
+                    status = TestStatus.SKIPPED
+                    fail_reason = xfail_markers[0].kwargs.get("reason")
 
-            body = FinishTestModel(result=status.value)
-            self.api.finish_test(zebrunner_context.test_run_id, zebrunner_context.test_id, body)
+            self.api.finish_test(
+                zebrunner_context.test_run_id,
+                zebrunner_context.test_id,
+                FinishTestModel(
+                    result=status.value,
+                    reason=fail_reason,
+                ),
+            )
+            zebrunner_context.test = None
+            return
 
     def finish_test_run(self) -> None:
         self.authorize()

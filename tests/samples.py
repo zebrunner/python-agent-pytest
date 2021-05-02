@@ -20,7 +20,11 @@ def test_skip() -> None:
 
 @pytest.mark.xfail(reason="This test should fail!")
 def test_xfail() -> None:
-    assert False
+    assert True
+
+
+def test_fail() -> None:
+    raise ValueError("This test fail by exception")
 
 
 def test_selenium_firefox() -> None:
