@@ -81,6 +81,10 @@ class LabelModel(CamelModel):
     value: str
 
 
+class CorrelationDataModel(CamelModel):
+    name: str
+
+
 class StartTestModel(CamelModel):
     name: str
     class_name: str
@@ -88,6 +92,7 @@ class StartTestModel(CamelModel):
     uuid: str = Field(default_factory=generate_uuid)
     started_at: str = Field(default_factory=generate_datetime_str)
 
+    correlation_data: Optional[str] = None
     maintainer: Optional[str] = None
     test_case: Optional[str] = None
     labels: Optional[List[LabelModel]] = []
@@ -122,3 +127,18 @@ class FinishTestSessionModel(CamelModel):
 class ArtifactReferenceModel(CamelModel):
     name: str
     value: str
+
+
+class TestModel(CamelModel):
+    name: str
+    correlation_data: Optional[CorrelationDataModel]
+    status: str
+    started_at: datetime
+    ended_at: datetime
+
+
+class RerunDataModel(CamelModel):
+    id: str
+    run_exists: bool
+    rerun_only_failed_tests: bool
+    tests: List[TestModel]

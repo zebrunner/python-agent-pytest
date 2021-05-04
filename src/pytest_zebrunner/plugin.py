@@ -28,7 +28,7 @@ def pytest_configure(config: Config) -> None:
     if settings.enabled:
         hooks: Union[PytestHooks, PytestXdistHooks]
         if config.pluginmanager.has_plugin("xdist") and any(
-            [x.startswith("-n") for x in config.invocation_params.args]
+            [x.startswith("-n ") for x in config.invocation_params.args]
         ):
             hooks = PytestXdistHooks()
         else:

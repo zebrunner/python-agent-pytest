@@ -1,4 +1,6 @@
+import json
 import logging
+import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from pprint import pformat
@@ -13,6 +15,7 @@ from pytest_zebrunner.api.models import (
     FinishTestSessionModel,
     LabelModel,
     LogRecordModel,
+    RerunDataModel,
     StartTestModel,
     StartTestRunModel,
     StartTestSessionModel,
@@ -56,7 +59,6 @@ class ZebrunnerAPI(metaclass=Singleton):
             return
 
         url = self.service_url + "/api/iam/v1/auth/refresh"
-
         try:
             response = self._client.post(url, json={"refreshToken": self.access_token})
         except httpx.RequestError as e:
@@ -139,7 +141,11 @@ class ZebrunnerAPI(metaclass=Singleton):
     def send_screenshot(self, test_run_id: int, test_id: int, image_path: Union[str, Path]) -> None:
         url = self.service_url + f"/api/reporting/v1/test-runs/{test_run_id}/tests/{test_id}/screenshots"
         with open(image_path, "rb") as image:
-            self._client.post(url, content=image.read(), headers={"Content-Type": "image/png"})
+            self._client.post(
+                url,
+                content=image.read(),
+                headers={"Content-Type": "image/png", "x-zbr-screenshot-captured-at": round(time.time() * 1000)},
+            )
 
     def send_artifact(self, filename: Union[str, Path], test_run_id: int, test_id: Optional[int] = None) -> None:
         if test_id:
@@ -179,6 +185,12 @@ class ZebrunnerAPI(metaclass=Singleton):
     def finish_test_session(self, test_run_id: int, zebrunner_id: str, body: FinishTestSessionModel) -> None:
         url = self.service_url + f"/api/reporting/v1/test-runs/{test_run_id}/test-sessions/{zebrunner_id}"
         self._client.put(url, json=body.dict(exclude_none=True, by_alias=True))
+
+    def get_rerun_tests(self, run_context: str) -> RerunDataModel:
+        url = self.service_url + "/api/reporting/v1/run-context-exchanges"
+        run_context_dict = json.loads(run_context)
+        response = self._client.post(url, json=run_context_dict)
+        return RerunDataModel(**response.json())
 
     def close(self) -> None:
         self._client.close()

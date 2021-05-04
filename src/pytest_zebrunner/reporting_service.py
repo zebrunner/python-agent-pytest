@@ -6,6 +6,7 @@ from _pytest.reports import TestReport
 
 from pytest_zebrunner.api.client import ZebrunnerAPI
 from pytest_zebrunner.api.models import (
+    CorrelationDataModel,
     FinishTestModel,
     FinishTestSessionModel,
     MilestoneModel,
@@ -101,6 +102,7 @@ class ReportingService:
                     method_name=test.name,
                     maintainer=",".join(test.maintainers),
                     labels=[{"key": label[0], "value": label[1]} for label in test.labels],
+                    correlation_data=CorrelationDataModel(name=test.name).json(),
                 ),
             )
 
@@ -182,3 +184,13 @@ class ReportingService:
                 zebrunner_session_id,
                 FinishTestSessionModel(test_ids=related_tests),
             )
+
+    def filter_test_items(self, items: List[Item]) -> List[Item]:
+        run_context = zebrunner_context.settings.run.context
+        if run_context is not None:
+            self.authorize()
+            context_data = self.api.get_rerun_tests(run_context)
+            rerun_names = {x.correlation_data.name for x in context_data.tests if x.correlation_data is not None}
+            return list(filter(lambda x: x.name in rerun_names, items))
+        else:
+            return items
