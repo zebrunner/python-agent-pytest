@@ -11,7 +11,7 @@ PREFIX = "reporting"
 
 
 class TestRunSettings(BaseModel):
-    display_name: str = "Unnamed"
+    display_name: str = "Default Suite"
     build: Optional[str] = None
     environment: Optional[str] = None
     context: Optional[str] = None
@@ -35,7 +35,7 @@ class MilestoneSettings(BaseModel):
 
 class Settings(BaseModel):
     enabled: bool = True
-    project_key: str = "UNKNOWN"
+    project_key: str = "DEF"
     send_logs: bool = True
     server: ServerSettings
     run: TestRunSettings = TestRunSettings()

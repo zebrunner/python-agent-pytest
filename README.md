@@ -12,40 +12,65 @@ Including reporting into your project is easy - just install the agent and provi
 
     pip install pytest-zebrunner
 
+or for parallel tests support:
+
+    pip install pytest-zebrunner[xdist]
+
 ## Configuration
 After the installation, reporting is disabled by default. It won't send any data to the Zebrunner service without a valid configuration.
-To configure the app, you need to specify environment variables. It can also be done by specifying variables in the `.env` file in the root path of your project.
-You can configure the agent **only** with environment variables. Other formats like `yaml`, `ini` and program arguments will be added in future.
+
+It is currently possible to provide the configuration via:
+1. Environment variables
+2. YAML file
+
+`pyproject.toml`, `command arguments` are in plans for future releases.
+
+
 
 <!-- groups:start -->
 ### Environment variables
-```dosini
-REPORTING_SERVICE_URL=<zebrunner url>
-ACCESS_TOKEN=<access_token>
-ZEBRUNNER_PROJECT=ProjectName
-ZEBRUNNER_ENABLED=true
-TEST_RUN_NAME=Testing new features
-BUILD=1.25.16
-ENV=stage
-SEND_LOGS=true
-```
+The following configuration parameters are recognized by the agent:
 
-- `SERVICE_URL` - [required] It is the Zebrunner server hostname. It can be obtained in Zebrunner on the 'Account & profile' page under the 'Service URL' section;
+- `REPORTING_ENABLED` - enables or disables reporting. The default value is `true`.
+- `REPORTING_SERVER_HOSTNAME` - mandatory if reporting is enabled. It is Zebrunner server hostname. It can be obtained in Zebrunner on the 'Account & profile' page under the 'Service URL' section;
+- `REPORTING_SERVER_ACCESS_TOKEN` - mandatory if reporting is enabled. Access token must be used to perform API calls. It can be obtained in Zebrunner on the 'Account & profile' page under the 'Token' section;
+- `REPORTING_PROJECT_KEY` - optional value. It is the project that the test run belongs to. The default value is `DEF`. You can manage projects in Zebrunner in the appropriate section;
+- `REPORTING_RUN_DISPLAY_NAME` - optional value. It is the display name of the test run. The default value is `Default Suite`;
+- `REPORTING_RUN_BUILD` - optional value. It is the build number that is associated with the test run. It can depict either the test build number or the application build number;
+- `REPORTING_RUN_ENVIRONMENT` - optional value. It is the environment where the tests will run;
+- `REPORTING_SEND_LOGS` - Sends test logs to Zebrunner. Default: `true`;
 
-- `ACCESS_TOKEN` - [required] Access token must be used to perform API calls. It can be obtained in Zebrunner on the 'Account & profile' page under the 'Token' section;
-
-- `ZEBRUNNER_PROJECT` - [required] It is the project that the test run belongs to. The default value is `UNKNOWN`. You can manage projects in Zebrunner in the appropriate section;
-
-- `REPORTING_ENABLED` - You can disable the agent if it has side effects on you project or doesn't work. *Default*: `true`
-
-- `TEST_RUN_NAME` - It is the display name of the test run. *Default*: `Unnamed-%time`
-
-- `BUILD` -  It is the build number that is associated with the test run. It can depict either the test build number or the application build number;
-
-- `ENV` - It is the environment where the tests will run.
-
-- `SEND_LOGS` - Sends test logs to Zebrunner. *Default*: `false`
+Agent also recognizes `.env` file in the resources root folder.
 <!-- groups:end -->
+
+<!-- groups:start -->
+### Yaml file
+Agent recognizes agent.yaml or agent.yml file in the resources root folder. It is currently not possible to configure an alternative file location.
+
+Below is a sample configuration file:
+```yaml
+reporting:
+  enabled: true
+  project-key: DEF
+  send-logs: true
+  server:
+    hostname: localhost:8080
+    access-token: <token>
+  run:
+    display-name: Nightly Regression Suite
+    build: 1.12.1.96-SNAPSHOT
+    environment: TEST-1
+```
+<!-- groups:end -->
+
+- `reporting.enabled` - enables or disables reporting. The default value is `true`;
+- `reporting.server.hostname` - mandatory if reporting is enabled. Zebrunner server hostname. Can be obtained in Zebrunner on the 'Account & profile' page under the 'Service URL' section;
+- `reporting.server.access-token` - mandatory if reporting is enabled. Access token must be used to perform API calls. Can be obtained in Zebrunner on the 'Account & profile' page under the 'Token' section;
+- `reporting.project-key` - optional value. The project that the test run belongs to. The default value is UNKNOWN. You can manage projects in Zebrunner in the appropriate section;
+- `reporting.send-logs` - Sends test logs to Zebrunner. Default: `true`
+- `reporting.run.display-name` - optional value. The display name of the test run. The default value is Default Suite;
+- `reporting.run.build` - optional value. The build number that is associated with the test run. It can depict either the test build number or the application build number;
+- `reporting.run.environment` - optional value. The environment in which the tests will run.
 
 If the required configurations are not provided, there is a warning displayed in logs with the problem description and the names of options
 which need to be specified. Parameter names are case insensitive and can be written in upper and lower registers.
