@@ -20,7 +20,7 @@ You can configure the agent **only** with environment variables. Other formats l
 <!-- groups:start -->
 ### Environment variables
 ```dosini
-SERVICE_URL=<zebrunner url>
+REPORTING_SERVICE_URL=<zebrunner url>
 ACCESS_TOKEN=<access_token>
 ZEBRUNNER_PROJECT=ProjectName
 ZEBRUNNER_ENABLED=true
@@ -66,7 +66,7 @@ Sometimes it may be useful to have the ability to track captured screenshots in 
 with the API allowing you to send your screenshots to Zebrunner, so that they could be attached to the test.
 
 ```python
-from pytest_zebrunner.attachments import attach_test_screenshot
+from pytest_zebrunner import attach_test_screenshot
 
 
 def test_something():
@@ -86,7 +86,7 @@ saved in Zebrunner. Artifact reference can have an arbitrary name.
 
 #### Attaching artifact to test
 ```python
-from pytest_zebrunner.attachments import attach_test_artifact
+from pytest_zebrunner import attach_test_artifact
 
 
 def test_something():
@@ -97,7 +97,7 @@ def test_something():
 
 ### Attaching artifact reference to test
 ```python
-from pytest_zebrunner.attachments import attach_test_artifact_reference
+from pytest_zebrunner import attach_test_artifact_reference
 
 
 def test_something():
@@ -108,7 +108,7 @@ def test_something():
 
 ### Attaching artifact to test run
 ```python
-from pytest_zebrunner.attachments import attach_test_run_artifact
+from pytest_zebrunner import attach_test_run_artifact
 
 
 attach_test_run_artifact("path_to_artifact")
@@ -116,7 +116,7 @@ attach_test_run_artifact("path_to_artifact")
 
 ### Attaching artifact reference to test run
 ```python
-from pytest_zebrunner.attachments import attach_test_run_artifact_reference
+from pytest_zebrunner import attach_test_run_artifact_reference
 
 
 attach_test_run_artifact_reference("name", "reference")
@@ -138,7 +138,7 @@ def test_something():
 ```
 or
 ```python
-from pytest_zebrunner.attachments import attach_test_label
+from pytest_zebrunner import attach_test_label
 
 
 def test_something():
@@ -150,7 +150,7 @@ def test_something():
 
 For test run:
 ```python
-from pytest_zebrunner.attachments import attach_test_run_label
+from pytest_zebrunner import attach_test_run_label
 
 attach_test_run_label("name", "value")
 ```
