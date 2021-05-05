@@ -66,7 +66,7 @@ reporting:
 - `reporting.enabled` - enables or disables reporting. The default value is `true`;
 - `reporting.server.hostname` - mandatory if reporting is enabled. Zebrunner server hostname. Can be obtained in Zebrunner on the 'Account & profile' page under the 'Service URL' section;
 - `reporting.server.access-token` - mandatory if reporting is enabled. Access token must be used to perform API calls. Can be obtained in Zebrunner on the 'Account & profile' page under the 'Token' section;
-- `reporting.project-key` - optional value. The project that the test run belongs to. The default value is UNKNOWN. You can manage projects in Zebrunner in the appropriate section;
+- `reporting.project-key` - optional value. The project that the test run belongs to. The default value is `DEF`. You can manage projects in Zebrunner in the appropriate section;
 - `reporting.send-logs` - Sends test logs to Zebrunner. Default: `true`
 - `reporting.run.display-name` - optional value. The display name of the test run. The default value is Default Suite;
 - `reporting.run.build` - optional value. The build number that is associated with the test run. It can depict either the test build number or the application build number;
