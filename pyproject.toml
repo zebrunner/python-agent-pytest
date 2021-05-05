@@ -50,6 +50,9 @@ selenium = "^3.141.0"
 setuptools = "^56.0.0"
 pytest-xdist = "^2.2.1"
 
+[tool.poetry.extras]
+xdist = ["pytest-xdist"]
+
 [tool.coverage.paths]
 source = ["src", "*/site-packages"]
 

@@ -70,6 +70,10 @@ class PytestXdistHooks:
         inject_driver(self.session_manager)
 
     @pytest.hookimpl
+    def pytest_collection_finish(self, session: Session) -> None:
+        session.items = self.service.filter_test_items(session.items)
+
+    @pytest.hookimpl
     def pytest_sessionfinish(self, session: Session, exitstatus: Union[int, ExitCode]) -> None:
         if not self.is_worker:
             self.service.finish_test_run()
