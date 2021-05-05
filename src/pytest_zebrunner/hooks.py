@@ -41,6 +41,10 @@ class PytestHooks:
             self.service.finish_test(report, item)
         return report
 
+    @pytest.hookimpl
+    def pytest_collection_finish(self, session: Session) -> None:
+        session.items = self.service.filter_test_items(session.items)
+
 
 class PytestXdistHooks:
     def __init__(self) -> None:

@@ -190,7 +190,12 @@ class ZebrunnerAPI(metaclass=Singleton):
         url = self.service_url + "/api/reporting/v1/run-context-exchanges"
         run_context_dict = json.loads(run_context)
         response = self._client.post(url, json=run_context_dict)
-        return RerunDataModel(**response.json())
+        response_data = response.json()
+        for test in response_data["tests"]:
+            correlation_data = test["correlationData"]
+            if correlation_data is not None:
+                test["correlationData"] = json.loads(correlation_data)
+        return RerunDataModel(**response_data)
 
     def close(self) -> None:
         self._client.close()
