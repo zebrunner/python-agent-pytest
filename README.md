@@ -73,11 +73,11 @@ reporting:
 - `reporting.run.environment` - optional value. The environment in which the tests will run.
 
 If the required configurations are not provided, there is a warning displayed in logs with the problem description and the names of options
-which need to be specified. Parameter names are case insensitive and can be written in upper and lower registers.
+which need to be specified. Parameter names are not case sensitive and can be written in upper and lower characters.
 
 ## Collecting logs
-It is also possible to enable the log collection for your tests. All you have to do to enable logging is to enable it in the configuration.
-The agent connects to pythons root logger and collects the logs from there. In future, more options are expected to be available for configuring logs sending.
+It is also possible to enable the log collection for your tests. All you have to do to enable the logging is to enable it in the configuration.
+The agent connects to python's root logger and collects the logs from there. In future, more options are expected to be available for configuring logs sending.
 
 
 ## Additional functionality
@@ -194,7 +194,7 @@ def test_something():
     ...
 ```
 
-### Tracking web driver sessions
+### Tracking of web driver sessions
 The Zebrunner test agent has a great ability to track tests along with remote driver sessions. You don't have to do anything.
 The agent automatically injects the tracking functionality to the Selenium driver if the Selenium library is installed. The agent sends
 driver capabilities to Zebrunner when the driver starts and the finish time when the driver stops.
