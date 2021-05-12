@@ -12,9 +12,6 @@ Including reporting into your project is easy - just install the agent and provi
 
     pip install pytest-zebrunner
 
-or for parallel tests support:
-
-    pip install pytest-zebrunner[xdist]
 
 ## Configuration
 After the installation, reporting is disabled by default. It won't send any data to the Zebrunner service without a valid configuration.

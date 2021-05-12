@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pytest-zebrunner"
-version = "0.1.1"
+version = "1.0.0.dev4"
 description = "Pytest connector for Zebrunner reporting"
 authors = ["Anatoliy Platonov <p4m.dev@gmail.com>"]
 license = "Apache"
@@ -24,6 +24,7 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
 ]
 
 
@@ -38,7 +39,7 @@ httpx = "^0.16.1"
 pydantic = "^1.7.2"
 python-dotenv = "^0.15.0"
 PyYAML = "^5.4.1"
-
+pytest-xdist = "^2.2"
 
 [tool.poetry.dev-dependencies]
 black = "^20.8b1"
@@ -48,10 +49,6 @@ pre-commit = "^2.7.1"
 pytest-cov = "^2.10.1"
 selenium = "^3.141.0"
 setuptools = "^56.0.0"
-pytest-xdist = "^2.2.1"
-
-[tool.poetry.extras]
-xdist = ["pytest-xdist"]
 
 [tool.coverage.paths]
 source = ["src", "*/site-packages"]
