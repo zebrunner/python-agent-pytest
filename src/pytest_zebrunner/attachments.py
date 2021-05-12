@@ -5,7 +5,7 @@ from pytest_zebrunner.api.client import ZebrunnerAPI
 from pytest_zebrunner.api.models import ArtifactReferenceModel, LabelModel
 from pytest_zebrunner.context import zebrunner_context
 
-api = ZebrunnerAPI()
+api = ZebrunnerAPI(zebrunner_context.settings.server.hostname, zebrunner_context.settings.server.access_token)
 
 
 def attach_test_screenshot(path: Union[str, Path]) -> None:

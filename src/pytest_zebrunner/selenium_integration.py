@@ -47,7 +47,9 @@ def inject_driver(session_manager: SeleniumSession) -> None:
 
         def init(session, *args, **kwargs) -> None:  # type: ignore
             base_init(session, *args, **kwargs)
-            session_manager.start_session(session.session_id, session.capabilities, session.desired_capabilities)
+            session_manager.start_session(
+                session.session_id, session.capabilities, kwargs.get("desired_capabilities", {})
+            )
             if zebrunner_context.test_is_active:
                 session_manager.add_test(zebrunner_context.test_id)
 
