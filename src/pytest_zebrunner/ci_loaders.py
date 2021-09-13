@@ -21,6 +21,14 @@ class CiType(Enum):
 
 
 class JenkinsContextLoader(BaseContextLoader):
+    """
+    A class that inherit from BaseContextLoader,used to represent JenkinsContext with its own environment variables.
+
+    Attributes:
+        CI_ENV_VARIABLE (str):
+        CI_TYPE (CiType):
+        ENV_VARIABLE_PREFIXES (List[str]): List of prefixes to find and load Jenkins environment variables.
+    """
     CI_ENV_VARIABLE = "JENKINS_URL"
     CI_TYPE = CiType.JENKINS
     ENV_VARIABLE_PREFIXES = [
@@ -39,6 +47,17 @@ class JenkinsContextLoader(BaseContextLoader):
 
     @classmethod
     def resolve(cls) -> Optional[Dict[str, str]]:
+        """
+        Returns a dictionary with Jenkins environment variables if 'cls.JENKINS_URL' exists
+        in operating system environment. Otherwise returns None.
+
+        Args:
+            cls (JenkinsContextLoader):
+
+        Returns:
+            Union(Dict[str, str], optional): Jenkins environment variables in key-value format or None if 'JENKINS_URL'
+            does not exists in os.environment.
+        """
         if cls.CI_ENV_VARIABLE in os.environ:
             return cls.load_context_variables(cls.ENV_VARIABLE_PREFIXES)
         else:
@@ -46,6 +65,14 @@ class JenkinsContextLoader(BaseContextLoader):
 
 
 class TeamCityCiContextResolver(BaseContextLoader):
+    """
+    A class that inherit from BaseContextLoader,used to represent TeamCityCIContext with its own environment variables.
+
+    Attributes:
+        CI_ENV_VARIABLE (str):
+        CI_TYPE (CiType):
+        ENV_VARIABLE_PREFIXES (List[str]): List of prefixes to find and load Team City environment variables
+    """
     CI_ENV_VARIABLE = "TEAMCITY_VERSION"
     CI_TYPE = CiType.TEAM_CITY
     ENV_VARIABLE_PREFIXES = [
@@ -57,6 +84,17 @@ class TeamCityCiContextResolver(BaseContextLoader):
 
     @classmethod
     def resolve(cls) -> Optional[Dict[str, str]]:
+        """
+        Returns a dictionary with Jenkins environment variable if 'cls.TEAMCITY_VERSION' exists
+        in operating system environment. Otherwise returns None.
+
+        Args:
+            cls (JenkinsContextLoader):
+
+        Returns:
+            Union(Dict[str, str], None): Team City environment variables in key-value format or None if
+            'cls.TEAMCITY_VERSION' does not exists in os.environment.
+        """
         if cls.CI_ENV_VARIABLE in os.environ:
             return cls.load_context_variables(cls.ENV_VARIABLE_PREFIXES)
         else:
