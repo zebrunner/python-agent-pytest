@@ -7,10 +7,22 @@ from pydantic import BaseModel, Field
 
 
 def generate_uuid() -> str:
+    """
+    Generate an universal unique identifier.
+
+    Returns:
+         (str): Universal unique identifier (uuid).
+    """
     return str(uuid4())
 
 
 def generate_datetime_str() -> str:
+    """
+    Generate a DateTime string in ISO format.
+
+    Returns:
+        (str): DateTime in ISO format.
+    """
     return (datetime.utcnow()).replace(tzinfo=timezone.utc).isoformat()
 
 
@@ -31,6 +43,19 @@ class NotificationsType(Enum):
 
 
 def to_camel_case(key: str) -> str:
+    """
+    Convert a string from snake case to camel case.
+
+    Args:
+        key (str): String to be converted to camel case.
+
+    Returns:
+        (str): New string in camel case.
+
+    Example:
+        this_is_snake_case.
+        ThisIsCamelCase.
+    """
     parts = key.split("_")
     for i, part in enumerate(parts[1:]):
         parts[i + 1] = part.capitalize()

@@ -9,6 +9,12 @@ from pytest_zebrunner.context import zebrunner_context
 
 
 class ZebrunnerHandler(StreamHandler):
+    """
+    A class that inherit from StreamHandler useful for recording logs.
+
+    Attributes:
+        logs (List[LorRecordModel]): List of logs to be handled.
+    """
     logs: List[LogRecordModel] = []
 
     def __init__(self) -> None:
@@ -17,6 +23,13 @@ class ZebrunnerHandler(StreamHandler):
         self.last_push = datetime.utcnow()
 
     def emit(self, record: LogRecord) -> None:
+        """
+        Try to send logs to test_run_id if the last attempt was more than a second ago. If not, and test is active,
+        adds a new log to the list.
+
+        Args:
+            record (LogRecord): The log to be recorded.
+        """
         if datetime.utcnow() - self.last_push >= timedelta(seconds=1):
             self.push_logs()
 
@@ -31,6 +44,11 @@ class ZebrunnerHandler(StreamHandler):
             )
 
     def push_logs(self) -> None:
+        """
+        Updates last_push datetime, resets logs list and send the to Zebrunner API
+        for reporting if test_run_id is active.
+
+        """
         self.last_push = datetime.utcnow()
         logs = self.logs
         self.logs = []

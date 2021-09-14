@@ -1,4 +1,7 @@
 class Singleton(type):
+    """
+    A class that inherit form 'type' and allows to implement Singleton Pattern.
+    """
     __instance = None
 
     def __call__(cls, *args, **kwargs):  # type: ignore
