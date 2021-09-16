@@ -157,3 +157,6 @@ fabric.properties
 examples/pytest_example/conftest.py
 *.png
 agent.yaml
+
+#Apple Inc
+.DS_Store
