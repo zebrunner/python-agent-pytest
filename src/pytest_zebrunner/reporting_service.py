@@ -1,5 +1,6 @@
 import logging
 from typing import List, Optional
+from _pytest._code.code import ExceptionChainRepr, ReprExceptionInfo
 
 from _pytest.nodes import Item
 from _pytest.reports import TestReport
@@ -80,8 +81,6 @@ class ReportingService:
                 notification_targets=self.get_notification_configurations(),
             ),
         )
-        if settings.send_logs:
-            logging.root.addHandler(ZebrunnerHandler())
 
     def start_test(self, report: TestReport, item: Item) -> None:
         self.authorize()
@@ -136,7 +135,13 @@ class ReportingService:
                         status = TestStatus.SKIPPED
             else:
                 status = TestStatus.FAILED
-                fail_reason = report.longreprtext
+
+                # Following this changelog check if it's string or ReprExceptionInfo
+                # https://docs.pytest.org/en/6.2.x/changelog.html?highlight=reprexceptioninfo#pytest-6-0-0rc1-2020-07-08
+                fail_reason = str(report.longrepr)
+                if isinstance(report.longrepr, ReprExceptionInfo) or isinstance(report.longrepr, ExceptionChainRepr):
+                    fail_reason = report.longrepr.reprcrash.message + "\n\n" + fail_reason
+                
                 if xfail_markers:
                     status = TestStatus.SKIPPED
                     fail_reason = xfail_markers[0].kwargs.get("reason")
