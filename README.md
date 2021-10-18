@@ -73,8 +73,25 @@ If the required configurations are not provided, there is a warning displayed in
 which need to be specified. Parameter names are case insensitive and can be written in upper and lower registers.
 
 ## Collecting logs
-It is also possible to enable the log collection for your tests. All you have to do to enable logging is to enable it in the configuration.
-The agent connects to pythons root logger and collects the logs from there. In future, more options are expected to be available for configuring logs sending.
+For sending logs to zebrunner you need to add ZebrunnerHandler to yours logger.
+Example:
+```python
+import logging
+
+from pytest_zebrunner.zebrunner_logging import ZebrunnerHandler
+
+logger = logging.getLogger(__name__)
+logger.addHandler(ZebrunnerHandler())
+```
+
+To send all logs to zebrunner you can add `ZebrunnerHandler` to root logger.
+```python
+import logging
+
+from pytest_zebrunner.zebrunner_logging import ZebrunnerHandler
+
+logging.root.addHandler(ZebrunnerHandler())
+```
 
 
 ## Additional functionality
