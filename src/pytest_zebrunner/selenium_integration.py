@@ -17,7 +17,7 @@ class SeleniumSession:
             self._active_sessions[session_id]["related_tests"].append(zebrunner_context.test_id)
 
         zebrunner_session_id = self.reporting_service.start_test_session(
-            session_id, capabilities, desired_capabilities
+            session_id, capabilities, desired_capabilities, self._active_sessions[session_id]["related_tests"]
         )
         if zebrunner_session_id:
             self._active_sessions[session_id]["zebrunner_session_id"] = zebrunner_session_id

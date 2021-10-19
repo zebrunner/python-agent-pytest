@@ -1,7 +1,7 @@
 import logging
 from typing import List, Optional
-from _pytest._code.code import ExceptionChainRepr, ReprExceptionInfo
 
+from _pytest._code.code import ExceptionChainRepr, ReprExceptionInfo
 from _pytest.nodes import Item
 from _pytest.reports import TestReport
 
@@ -141,7 +141,7 @@ class ReportingService:
                 fail_reason = str(report.longrepr)
                 if isinstance(report.longrepr, ReprExceptionInfo) or isinstance(report.longrepr, ExceptionChainRepr):
                     fail_reason = report.longrepr.reprcrash.message + "\n\n" + fail_reason
-                
+
                 if xfail_markers:
                     status = TestStatus.SKIPPED
                     fail_reason = xfail_markers[0].kwargs.get("reason")
@@ -169,13 +169,18 @@ class ReportingService:
 
         self.api.close()
 
-    def start_test_session(self, session_id: str, capabilities: dict, desired_capabilities: dict) -> Optional[str]:
+    def start_test_session(
+        self, session_id: str, capabilities: dict, desired_capabilities: dict, test_ids: List[int]
+    ) -> Optional[str]:
         self.authorize()
         if zebrunner_context.test_run_is_active:
             zebrunner_session_id = self.api.start_test_session(
                 zebrunner_context.test_run_id,
                 StartTestSessionModel(
-                    session_id=session_id, desired_capabilities=desired_capabilities, capabilities=capabilities
+                    session_id=session_id,
+                    desired_capabilities=desired_capabilities,
+                    capabilities=capabilities,
+                    test_ids=test_ids,
                 ),
             )
             return zebrunner_session_id
