@@ -212,3 +212,39 @@ def test_something():
 The Zebrunner test agent has a great ability to track tests along with remote driver sessions. You don't have to do anything.
 The agent automatically injects the tracking functionality to the Selenium driver if the Selenium library is installed. The agent sends
 driver capabilities to Zebrunner when the driver starts and the finish time when the driver stops.
+
+Zebrunner can automatically collect your test artifacts like videos or selenium session logs if you are using
+test running providers like ZebrunnerHub, BrowserStack, Lambdatest, etc. To enable this you need to enable integration in your project in Zebrunner
+and also specify the `provider` capability.
+
+#### Zebrunner
+Example:
+```python
+def test_something():
+    hub_url = 'https://username:password@engine.zebrunner.com/wd/hub'
+    capabilities = {
+        'browserName': 'firefox',
+        'enableVideo': True,
+        'enableLog': True,
+        'enableVNC': True,
+        'provider': 'zebrunner',
+        ...
+    }
+    driver = Remote(command_executor=hub_url, desired_capabilities=capabilities)
+    ...
+```
+
+### BrowserStack
+BrowserStack saves video and logs by default so you need just to specify capability.
+Example:
+```python
+def test_something():
+    hub_url = 'https://username:password@hub-cloud.browserstack.com/wd/hub'
+    capabilities = {
+        'browser': 'firefox',
+        'provider': 'BROWSERSTACK',
+        ...
+    }
+    driver = Remote(command_executor=hub_url, desired_capabilities=capabilities)
+    ...
+```
