@@ -42,7 +42,7 @@ class ZebrunnerHandler(StreamHandler):
                     test_id=str(zebrunner_context.test_id),
                     timestamp=str(round(time.time() * 1000)),
                     level=record.levelname,
-                    message=record.msg,
+                    message=str(record.msg),
                 )
             )
 
