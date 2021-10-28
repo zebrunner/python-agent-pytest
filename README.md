@@ -72,6 +72,47 @@ reporting:
 If the required configurations are not provided, there is a warning displayed in logs with the problem description and the names of options
 which need to be specified. Parameter names are case insensitive and can be written in upper and lower registers.
 
+### Advanced configuration example
+Sometimes there is need to change configuration from run to run. This can be done with changing environment variables
+before each run.
+```python
+import os
+from datetime import datetime
+import random
+
+import dotenv
+import pytest
+
+
+# Generate your run name here
+def get_run_name():
+    return f"Regression [{datetime.now()}] [Other helpull stuff]"
+
+# Generate your build number here
+def get_build_number():
+    return f"{random.randint(1, 10)}.{random.randint(1, 10)}.{random.randint(1, 10)}"
+
+def load_access_token():
+    return dotenv.dotenv_values("secrets/secrets.txt")["REPORTING_SERVER_ACCESS_TOKEN"]
+
+
+def run_tests():
+    os.environ["REPORTING_RUN_DISPLAY_NAME"] = get_run_name()
+    os.environ["REPORTING_RUN_BUILD"] = get_build_number()
+
+    # If you store your secrets seperately you can load it here
+    dotenv.load_dotenv("secrets/secrets.env")
+    # or you can set directly
+    os.environ["REPORTING_SERVER_ACCESS_TOKEN"] = load_access_token()
+
+    # Here you can pass arguments to pytest
+    pytest.main(["-n", "-2"])
+
+
+if __name__ == "__main__":
+    run_tests()
+```
+
 ## Collecting logs
 For sending logs to zebrunner you need to add ZebrunnerHandler to yours logger.
 Example:
