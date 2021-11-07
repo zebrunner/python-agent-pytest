@@ -201,6 +201,6 @@ class ReportingService:
             self.authorize()
             context_data = self.api.get_rerun_tests(run_context)
             rerun_names = {x.correlation_data.name for x in context_data.tests if x.correlation_data is not None}
-            return list(filter(lambda x: x.name in rerun_names, items))
+            return list(filter(lambda x: x.name in rerun_names, items)) if rerun_names else items
         else:
             return items
