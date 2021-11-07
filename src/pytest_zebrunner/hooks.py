@@ -57,5 +57,7 @@ class PytestHooks:
 
         return report
 
+
+class XdistHooks:
     def pytest_configure_node(self, node):  # type: ignore
         node.workerinput["test_run_id"] = zebrunner_context.test_run.zebrunner_id

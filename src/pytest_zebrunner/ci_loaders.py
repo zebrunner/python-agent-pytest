@@ -9,6 +9,7 @@ class BaseContextLoader:
     """
     A class use as base to load environment variables.
     """
+
     @staticmethod
     def load_context_variables(prefixes: List[str]) -> Dict[str, str]:
         """
@@ -28,6 +29,7 @@ class CiType(Enum):
     """
     A class that inherit from Enum, used to represent CI constants
     """
+
     JENKINS = "JENKINS"
     TEAM_CITY = "TEAM_CITY"
     CIRCLE_CI = "CIRCLE_CI"
@@ -44,6 +46,7 @@ class JenkinsContextLoader(BaseContextLoader):
         CI_TYPE (CiType):
         ENV_VARIABLE_PREFIXES (List[str]): List of prefixes to find and load Jenkins environment variables.
     """
+
     CI_ENV_VARIABLE = "JENKINS_URL"
     CI_TYPE = CiType.JENKINS
     ENV_VARIABLE_PREFIXES = [
@@ -88,6 +91,7 @@ class TeamCityCiContextResolver(BaseContextLoader):
         CI_TYPE (CiType):
         ENV_VARIABLE_PREFIXES (List[str]): List of prefixes to find and load Team City environment variables
     """
+
     CI_ENV_VARIABLE = "TEAMCITY_VERSION"
     CI_TYPE = CiType.TEAM_CITY
     ENV_VARIABLE_PREFIXES = [
@@ -125,6 +129,7 @@ class CircleCiContextResolver(BaseContextLoader):
         CI_TYPE (CiType):
         ENV_VARIABLE_PREFIXES (List[str]): List of prefixes to find and load Circle CI environment variables.
     """
+
     CI_ENV_VARIABLE = "CIRCLECI"
     CI_TYPE = CiType.CIRCLE_CI
     ENV_VARIABLE_PREFIXES = ["CIRCLE", "HOSTNAME"]
@@ -157,6 +162,7 @@ class TravisCiContextResolver(BaseContextLoader):
         CI_TYPE (CiType):
         ENV_VARIABLE_PREFIXES (List[str]): List of prefixes to find and load TRAVIS environment variables.
     """
+
     CI_ENV_VARIABLE = "TRAVIS"
     CI_TYPE = CiType.TRAVIS_CI
     ENV_VARIABLE_PREFIXES = ["TRAVIS", "USER"]

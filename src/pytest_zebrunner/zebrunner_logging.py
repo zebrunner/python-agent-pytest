@@ -18,11 +18,14 @@ class ZebrunnerHandler(StreamHandler):
     Attributes:
         logs (List[LorRecordModel]): List of logs to be handled.
     """
+
     logs: List[LogRecordModel] = []
 
     def __init__(self) -> None:
         super().__init__()
-        self.api = ZebrunnerAPI()
+        self.api = ZebrunnerAPI(
+            zebrunner_context.settings.server.hostname, zebrunner_context.settings.server.access_token
+        )
         self.last_push = datetime.utcnow()
 
     def emit(self, record: LogRecord) -> None:
@@ -52,7 +55,7 @@ class ZebrunnerHandler(StreamHandler):
         for reporting if test_run_id is active.
 
         """
-        try:    
+        try:
             if zebrunner_context.test_run_id and zebrunner_context.settings.send_logs:
                 self.api.send_logs(zebrunner_context.test_run_id, self.logs)
         except httpx.HTTPError as e:

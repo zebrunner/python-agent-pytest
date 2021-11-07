@@ -58,6 +58,7 @@ class ZebrunnerAPI(metaclass=Singleton):
         authenticated (bool): True when a valid access token is given.
 
     """
+
     authenticated = False
 
     def __init__(self, service_url: str = None, access_token: str = None):
@@ -344,8 +345,7 @@ class ZebrunnerAPI(metaclass=Singleton):
         self._client.put(url, json=body.dict(exclude_none=True, by_alias=True))
 
     def get_rerun_tests(self, run_context: str) -> RerunDataModel:
-        """
-        """
+        """"""
         url = self.service_url + "/api/reporting/v1/run-context-exchanges"
         run_context_dict = json.loads(run_context)
         response = self._client.post(url, json=run_context_dict)

@@ -14,6 +14,7 @@ class TestRunSettings(BaseModel):
     """
     A class that inherit from BaseModel and represents test_run settings.
     """
+
     display_name: str = "Default Suite"
     build: Optional[str] = None
     environment: Optional[str] = None
@@ -24,6 +25,7 @@ class ServerSettings(BaseModel):
     """
     A class that inherit from BaseModel and represents server settings.
     """
+
     hostname: str
     access_token: str
 
@@ -32,6 +34,7 @@ class NotificationsSettings(BaseModel):
     """
     A class that inherit from BaseModel and represents notifications settings.
     """
+
     slack_channels: Optional[str] = None
     ms_teams_channels: Optional[str] = None
     emails: Optional[str] = None
@@ -41,6 +44,7 @@ class MilestoneSettings(BaseModel):
     """
     A class that inherit from BaseModel and represents milestone settings.
     """
+
     id: Optional[str]
     name: Optional[str]
 
@@ -49,6 +53,7 @@ class Settings(BaseModel):
     """
     A class that inherit from BaseModel and represents some settings.
     """
+
     enabled: bool = True
     project_key: str = "DEF"
     send_logs: bool = True
@@ -119,9 +124,7 @@ def _get_by_path(settings_dict: dict, path: List[str], default_value: Any = None
 
 
 def _load_env(path_list: List[List[str]]) -> dict:
-    """
-
-    """
+    """"""
     dotenv.load_dotenv(".env")
     settings: Dict[str, Any] = {}
     for path in path_list:
