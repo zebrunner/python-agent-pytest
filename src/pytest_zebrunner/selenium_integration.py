@@ -46,7 +46,7 @@ def inject_driver(session_manager: SeleniumSession) -> None:
         from selenium.webdriver.remote.webdriver import WebDriver
 
         base_init = WebDriver.__init__
-        base_close = WebDriver.close
+        base_quit = WebDriver.quit
 
         def init(session, *args, **kwargs) -> None:  # type: ignore
             base_init(session, *args, **kwargs)
@@ -58,7 +58,7 @@ def inject_driver(session_manager: SeleniumSession) -> None:
 
         def quit(session) -> None:  # type: ignore
             session_manager.finish_session(session.session_id)
-            base_close(session)
+            base_quit(session)
 
         WebDriver.__init__ = init
         WebDriver.quit = quit
