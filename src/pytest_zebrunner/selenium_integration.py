@@ -48,11 +48,27 @@ def inject_driver(session_manager: SeleniumSession) -> None:
         base_init = WebDriver.__init__
         base_quit = WebDriver.quit
 
-        def init(session, *args, **kwargs) -> None:  # type: ignore
-            base_init(session, *args, **kwargs)
-            session_manager.start_session(
-                session.session_id, session.capabilities, kwargs.get("desired_capabilities", {})
+        def init(
+            session,  # type: ignore
+            command_executor="http://127.0.0.1:4444/wd/hub",
+            desired_capabilities=None,
+            browser_profile=None,
+            proxy=None,
+            keep_alive=False,
+            file_detector=None,
+            options=None,
+        ) -> None:  # type: ignore
+            base_init(
+                session,
+                command_executor,
+                desired_capabilities,
+                browser_profile,
+                proxy,
+                keep_alive,
+                file_detector,
+                options,
             )
+            session_manager.start_session(session.session_id, session.capabilities, desired_capabilities or {})
             if zebrunner_context.test_is_active:
                 session_manager.add_test(zebrunner_context.test_id)
 
