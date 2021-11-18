@@ -82,13 +82,13 @@ class ReportingService:
             ),
         )
 
-    def start_test(self, report: TestReport, item: Item) -> None:
+    def start_test(self, report: TestReport) -> None:
         self.authorize()
         test = Test(
-            name=item.name,
-            file=item.nodeid.split("::")[1],
-            maintainers=[mark.args[0] for mark in item.iter_markers("maintainer")],
-            labels=[(str(mark.args[0]), str(mark.args[1])) for mark in item.iter_markers("label")],
+            name=report.nodeid.split("::")[1],
+            file=report.nodeid.split("::")[0],
+            maintainers=report.maintainers,
+            labels=report.labels,
         )
         zebrunner_context.test = test
 
@@ -105,57 +105,40 @@ class ReportingService:
                 ),
             )
 
-        if report.skipped and zebrunner_context.test_is_active:
-            skip_markers = list(filter(lambda x: x.name == "skip", item.own_markers))
-            skip_reason = skip_markers[0].kwargs.get("reason") if skip_markers else None
-            self.api.finish_test(
-                zebrunner_context.test_run_id,
-                zebrunner_context.test_id,
-                FinishTestModel(reason=skip_reason, result=TestStatus.SKIPPED.value),
-            )
-            zebrunner_context.test = None
-
-    def finish_test(self, report: TestReport, item: Item) -> None:
+    def finish_test(self, report: TestReport) -> None:
         if zebrunner_context.test_is_active:
             self.authorize()
-            xfail_markers = list(item.iter_markers("xfail"))
-            fail_reason = None
-            is_strict = False
-            if xfail_markers:
-                fail_reason = xfail_markers[0].kwargs.get("reason")
-                is_strict = xfail_markers[0].kwargs.get("strict", False)
+            is_skip = report.when == "setup" and report.outcome == "skipped"
+            is_xfail = hasattr(report, "wasxfail")
 
+            reason = None
             if report.passed:
                 status = TestStatus.PASSED
-                if xfail_markers:
-                    if is_strict:
-                        status = TestStatus.FAILED
-                        fail_reason = report.longreprtext
-                    else:
-                        status = TestStatus.SKIPPED
+            elif is_skip or is_xfail:
+                status = TestStatus.SKIPPED
             else:
                 status = TestStatus.FAILED
 
+            if is_xfail:
+                reason = report.wasxfail
+            elif is_skip:
+                reason = report.longrepr[-1] if isinstance(report.longrepr, tuple) else str(report.longrepr)
+            else:
                 # Following this changelog check if it's string or ReprExceptionInfo
                 # https://docs.pytest.org/en/6.2.x/changelog.html?highlight=reprexceptioninfo#pytest-6-0-0rc1-2020-07-08
-                fail_reason = str(report.longrepr)
+                reason = str(report.longrepr)
                 if isinstance(report.longrepr, ReprExceptionInfo) or isinstance(report.longrepr, ExceptionChainRepr):
-                    fail_reason = report.longrepr.reprcrash.message + "\n\n" + fail_reason
-
-                if xfail_markers:
-                    status = TestStatus.SKIPPED
-                    fail_reason = xfail_markers[0].kwargs.get("reason")
+                    reason = report.longrepr.reprcrash.message + "\n\n" + reason
 
             self.api.finish_test(
                 zebrunner_context.test_run_id,
                 zebrunner_context.test_id,
                 FinishTestModel(
                     result=status.value,
-                    reason=fail_reason,
+                    reason=reason,
                 ),
             )
             zebrunner_context.test = None
-            return
 
     def finish_test_run(self) -> None:
         self.authorize()
