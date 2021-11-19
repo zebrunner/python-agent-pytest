@@ -192,7 +192,7 @@ def test_something():
     ...
 ```
 or with mark:
-```
+```python
 @pytest.mark.artifact_reference("name", "reference")
 def test_something():
     ...
