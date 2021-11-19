@@ -174,6 +174,12 @@ def test_something():
     attach_test_artifact("path_to_artifact")
     ...
 ```
+or with mark:
+```python
+@pytest.mark.artifact("path_to_artifact")
+def test_something():
+    ...
+```
 
 ### Attaching artifact reference to test
 ```python
@@ -183,6 +189,12 @@ from pytest_zebrunner import attach_test_artifact_reference
 def test_something():
     ...
     attach_test_artifact_reference("name", "reference")
+    ...
+```
+or with mark:
+```
+@pytest.mark.artifact_reference("name", "reference")
+def test_something():
     ...
 ```
 
