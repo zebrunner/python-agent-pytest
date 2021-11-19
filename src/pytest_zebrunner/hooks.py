@@ -45,17 +45,24 @@ class PytestHooks:
             self.service.finish_test_run()
             self.session_manager.finish_all_sessions()
 
-    @pytest.hookimpl
+    @pytest.mark.hookwrapper
     def pytest_runtest_makereport(self, item: Item, call: CallInfo) -> TestReport:
-        report = TestReport.from_item_and_call(item, call)
-        if report.when == "setup":
-            self.service.start_test(report, item)
-        elif report.when == "call":
-            if zebrunner_context.test_is_active:
-                self.session_manager.add_test(zebrunner_context.test_id)
-            self.service.finish_test(report, item)
+        outcome = yield
+        report: TestReport = outcome.get_result()
 
-        return report
+        report.maintainers = [mark.args[0] for mark in item.iter_markers("maintainer")]
+        report.labels = [(str(mark.args[0]), str(mark.args[1])) for mark in item.iter_markers("label")]
+
+    @pytest.hookimpl
+    def pytest_runtest_logreport(self, report: TestReport) -> None:
+        is_setup_rerun = hasattr(report, "rerun") and report.rerun > 0
+        is_call_rerun = report.outcome == "rerun"
+        if report.when == "setup" and not is_setup_rerun:
+            self.service.start_test(report)
+            if report.outcome == "skipped":
+                self.service.finish_test(report)
+        elif report.when == "call" and not is_call_rerun:
+            self.service.finish_test(report)
 
 
 class XdistHooks:

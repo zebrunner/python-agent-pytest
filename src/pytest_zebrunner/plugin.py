@@ -26,6 +26,7 @@ def pytest_configure(config: Config) -> None:
 
     if settings.enabled:
         hooks = PytestHooks()
+
         config.pluginmanager.register(hooks)
         if config.pluginmanager.get_plugin("xdist") is not None:
             config.pluginmanager.register(XdistHooks())
