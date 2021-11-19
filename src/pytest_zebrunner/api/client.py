@@ -193,9 +193,6 @@ class ZebrunnerAPI(metaclass=Singleton):
         if response.status_code != 200:
             log_response(response, logging.ERROR)
 
-    def update_test(self) -> None:
-        pass
-
     def finish_test_run(self, test_run_id: int) -> None:
         """
         Execute an http put with the given test_run_id.
