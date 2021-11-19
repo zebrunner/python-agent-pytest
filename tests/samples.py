@@ -27,7 +27,7 @@ def test_skip() -> None:
 
 @pytest.mark.xfail(reason="This test should fail!")
 def test_xfail() -> None:
-    assert True
+    assert False
 
 
 def test_fail() -> None:

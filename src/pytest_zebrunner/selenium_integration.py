@@ -48,8 +48,8 @@ def inject_driver(session_manager: SeleniumSession) -> None:
         base_init = WebDriver.__init__
         base_quit = WebDriver.quit
 
-        def init(
-            session,  # type: ignore
+        def init(  # type: ignore
+            session,
             command_executor="http://127.0.0.1:4444/wd/hub",
             desired_capabilities=None,
             browser_profile=None,

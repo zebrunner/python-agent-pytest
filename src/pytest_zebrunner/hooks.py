@@ -55,14 +55,15 @@ class PytestHooks:
 
     @pytest.hookimpl
     def pytest_runtest_logreport(self, report: TestReport) -> None:
-        is_setup_rerun = hasattr(report, "rerun") and report.rerun > 0
-        is_call_rerun = report.outcome == "rerun"
-        if report.when == "setup" and not is_setup_rerun:
-            self.service.start_test(report)
-            if report.outcome == "skipped":
+        if self.is_worker:
+            is_setup_rerun = hasattr(report, "rerun") and report.rerun > 0
+            is_call_rerun = report.outcome == "rerun"
+            if report.when == "setup" and not is_setup_rerun:
+                self.service.start_test(report)
+                if report.outcome == "skipped":
+                    self.service.finish_test(report)
+            elif report.when == "call" and not is_call_rerun:
                 self.service.finish_test(report)
-        elif report.when == "call" and not is_call_rerun:
-            self.service.finish_test(report)
 
 
 class XdistHooks:
