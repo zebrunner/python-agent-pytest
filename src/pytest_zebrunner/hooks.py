@@ -52,8 +52,12 @@ class PytestHooks:
         outcome = yield
         report: TestReport = outcome.get_result()
 
-        report.maintainers = [mark.args[0] for mark in item.iter_markers("maintainer")]
+        report.maintainers = [str(mark.args[0]) for mark in item.iter_markers("maintainer")]
         report.labels = [(str(mark.args[0]), str(mark.args[1])) for mark in item.iter_markers("label")]
+        report.artifact_references = [
+            (str(mark.args[0]), str(mark.args[1])) for mark in item.iter_markers("artifact_reference")
+        ]
+        report.artifacts = [mark.args[0] for mark in item.iter_markers("artifact")]
 
     @pytest.hookimpl
     def pytest_runtest_logreport(self, report: TestReport) -> None:

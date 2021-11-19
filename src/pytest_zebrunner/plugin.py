@@ -33,3 +33,5 @@ def pytest_configure(config: Config) -> None:
 
         config.addinivalue_line("markers", "maintainer(name): Email or nickname of test maintainer")
         config.addinivalue_line("markers", "label(name, value): Test label")
+        config.addinivalue_line("markers", "artifact(path): Attach file to the test")
+        config.addinivalue_line("markers", "artifact_reference(name, value): Attach reference to the test")

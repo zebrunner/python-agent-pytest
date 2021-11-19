@@ -79,3 +79,20 @@ def test_labels() -> None:
     attach_test_label("body", "label")
     attach_test_run_label("body", "test_run_label")
     assert True
+
+
+@pytest.mark.artifact("pyproject.toml")
+def test_artifact() -> None:
+    assert True
+
+
+@pytest.mark.artifact("pyproject.toml")
+@pytest.mark.artifact("mypy.ini")
+def test_multiple_artifact() -> None:
+    assert True
+
+
+@pytest.mark.artifact_reference("github", "https://www.github.com")
+@pytest.mark.artifact_reference("google", "https://google.com")
+def test_artifact_reference() -> None:
+    assert True

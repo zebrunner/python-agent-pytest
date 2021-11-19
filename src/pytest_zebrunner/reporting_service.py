@@ -7,6 +7,7 @@ from _pytest.reports import TestReport
 
 from pytest_zebrunner.api.client import ZebrunnerAPI
 from pytest_zebrunner.api.models import (
+    ArtifactReferenceModel,
     CorrelationDataModel,
     FinishTestModel,
     FinishTestSessionModel,
@@ -104,6 +105,13 @@ class ReportingService:
                     correlation_data=CorrelationDataModel(name=test.name).json(),
                 ),
             )
+
+            if report.artifact_references:
+                references = [ArtifactReferenceModel(name=x[0], value=x[1]) for x in report.artifact_references]
+                self.api.send_artifact_references(references, zebrunner_context.test_run_id, zebrunner_context.test_id)
+            if report.artifacts:
+                for artifact in report.artifacts:
+                    self.api.send_artifact(artifact, zebrunner_context.test_run_id, zebrunner_context.test_id)
 
     def finish_test(self, report: TestReport) -> None:
         if zebrunner_context.test_is_active:
