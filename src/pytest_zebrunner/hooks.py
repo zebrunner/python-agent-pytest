@@ -18,10 +18,12 @@ class PytestHooks:
         self.service = ReportingService()
         self.session_manager = SeleniumSession(self.service)
         self.is_worker = True
+        self.is_controller = False
 
     @pytest.hookimpl
     def pytest_sessionstart(self, session: Session) -> None:
         self.is_worker = hasattr(session.config, "workerinput")
+        self.is_controller = getattr(session.config.option, "dist", "no") != "no"
         if self.is_worker:
             test_run = TestRun(
                 zebrunner_context.settings.run.display_name,
@@ -55,7 +57,7 @@ class PytestHooks:
 
     @pytest.hookimpl
     def pytest_runtest_logreport(self, report: TestReport) -> None:
-        if self.is_worker:
+        if self.is_worker or not self.is_controller:
             is_setup_rerun = hasattr(report, "rerun") and report.rerun > 0
             is_call_rerun = report.outcome == "rerun"
             if report.when == "setup" and not is_setup_rerun:
