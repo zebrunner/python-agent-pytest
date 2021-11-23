@@ -1,6 +1,7 @@
 import logging
 from typing import List, Optional
 
+import pytest
 from _pytest._code.code import ExceptionChainRepr, ReprExceptionInfo
 from _pytest.nodes import Item
 from _pytest.reports import TestReport
@@ -71,11 +72,20 @@ class ReportingService:
         milestone = (
             MilestoneModel(id=settings.milestone.id, name=settings.milestone.name) if settings.milestone else None
         )
+
+        if settings.run.context:
+            zebrunner_run_context = self.api.get_rerun_tests(settings.run.context)
+            if zebrunner_run_context.run_allowed:
+                pytest.exit(f"Run not allowed by zebrunner! Reason: {zebrunner_run_context.reason}")
+            if zebrunner_run_context.run_only_specific_tests and not zebrunner_run_context.tests_to_run:
+                pytest.exit("Aborted. No tests to run!!")
+
         test_run.zebrunner_id = self.api.start_test_run(
             settings.project_key,
             StartTestRunModel(
                 name=test_run.name,
                 framework="pytest",
+                uuid=zebrunner_run_context.test_run_uuid,
                 config=TestRunConfigModel(environment=test_run.environment, build=test_run.build),
                 milestone=milestone,
                 ci_context=resolve_ci_context(),
@@ -191,7 +201,9 @@ class ReportingService:
         if run_context is not None:
             self.authorize()
             context_data = self.api.get_rerun_tests(run_context)
-            rerun_names = {x.correlation_data.name for x in context_data.tests if x.correlation_data is not None}
+            rerun_names = {
+                x.correlation_data.name for x in context_data.tests_to_run if x.correlation_data is not None
+            }
             return list(filter(lambda x: x.name in rerun_names, items)) if rerun_names else items
         else:
             return items

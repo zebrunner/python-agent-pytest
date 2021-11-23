@@ -149,8 +149,13 @@ def _load_env(path_list: List[List[str]]) -> dict:
     dotenv.load_dotenv(".env")
     settings: Dict[str, Any] = {}
     for path in path_list:
-        env_name = "_".join([PREFIX] + path).upper()
+        env_name = "_".join(path).upper()
         env_variable = os.getenv(env_name)
+        prefix_env_name = "_".join([PREFIX] + path).upper()
+        prefix_env_value = os.getenv(prefix_env_name)
+        if prefix_env_value is not None:
+            env_variable = prefix_env_value
+
         if env_variable is not None:
             _put_by_path(settings, path, env_variable)
 
@@ -167,8 +172,14 @@ def _load_yaml(path_list: List[List[str]]) -> Dict[str, Any]:
 
     yaml_settings = yaml.safe_load(filename.read_text())
     for setting_path in path_list:
-        yaml_path = [name.replace("_", "-") for name in [PREFIX] + setting_path]
+        yaml_path = [name.replace("_", "-") for name in setting_path]
         setting_value = _get_by_path(yaml_settings, yaml_path)
+
+        prefix_yaml_path = [name.replace("_", "-") for name in [PREFIX] + setting_path]
+        prefix_settings_value = _get_by_path(yaml_settings, prefix_yaml_path)
+        if prefix_settings_value is not None:
+            setting_value = prefix_settings_value
+
         if setting_value is not None:
             _put_by_path(settings, setting_path, setting_value)
 

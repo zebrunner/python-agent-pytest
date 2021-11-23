@@ -163,7 +163,8 @@ class TestModel(CamelModel):
 
 
 class RerunDataModel(CamelModel):
-    id: str
-    run_exists: bool
-    rerun_only_failed_tests: bool
-    tests: List[TestModel]
+    test_run_uuid: str
+    run_allowed: bool
+    reason: str
+    run_only_specific_tests: bool
+    tests_to_run: List[TestModel]
