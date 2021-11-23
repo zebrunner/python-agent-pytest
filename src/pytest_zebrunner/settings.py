@@ -1,3 +1,5 @@
+import json
+import logging
 import os
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Type
@@ -8,6 +10,7 @@ from pydantic import BaseModel
 from pydantic.utils import deep_update
 
 PREFIX = "reporting"
+logger = logging.getLogger(__name__)
 
 
 class TestRunSettings(BaseModel):
@@ -49,6 +52,23 @@ class MilestoneSettings(BaseModel):
     name: Optional[str]
 
 
+class ZebrunnerSettings(BaseModel):
+    """
+    Zebrunner settings provided by launcher
+    """
+
+    @property
+    def desired_capabilities(self) -> Optional[dict]:
+        try:
+            return json.loads(self.capabilities)  # type: ignore
+        except ValueError:
+            logger.log(logging.WARN, "Failed to serialize ZEBRUNNER_CAPABILITIES option")
+            return None
+
+    capabilities: Optional[str] = None
+    hub_url: Optional[str] = None
+
+
 class Settings(BaseModel):
     """
     A class that inherit from BaseModel and represents some settings.
@@ -61,6 +81,7 @@ class Settings(BaseModel):
     run: TestRunSettings = TestRunSettings()
     notifications: Optional[NotificationsSettings] = None
     milestone: Optional[MilestoneSettings] = None
+    zebrunner: Optional[ZebrunnerSettings] = None
 
 
 def _list_settings(model: Type[BaseModel]) -> List:

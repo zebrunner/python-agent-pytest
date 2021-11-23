@@ -1,3 +1,4 @@
+import copy
 import logging
 from typing import Any, Dict
 
@@ -49,19 +50,28 @@ def inject_driver(session_manager: SeleniumSession) -> None:
         base_quit = WebDriver.quit
 
         def init(  # type: ignore
-            session,
-            command_executor="http://127.0.0.1:4444/wd/hub",
-            desired_capabilities=None,
+            session: WebDriver,
+            command_executor: str = "http://127.0.0.1:4444/wd/hub",
+            desired_capabilities: dict = None,
             browser_profile=None,
             proxy=None,
-            keep_alive=False,
+            keep_alive: bool = False,
             file_detector=None,
             options=None,
         ) -> None:  # type: ignore
+            # Override capabilities and command_executor with new ones provided by zebrunner.
+            caps = copy.deepcopy(desired_capabilities)
+            if zebrunner_context.settings.zebrunner:
+                zeb_settings = zebrunner_context.settings.zebrunner
+                if zeb_settings.hub_url:
+                    command_executor = zeb_settings.hub_url
+                if zeb_settings.desired_capabilities and caps:
+                    caps.update(zeb_settings.desired_capabilities)
+
             base_init(
                 session,
                 command_executor,
-                desired_capabilities,
+                caps,
                 browser_profile,
                 proxy,
                 keep_alive,
