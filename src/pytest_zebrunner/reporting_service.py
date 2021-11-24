@@ -75,7 +75,7 @@ class ReportingService:
 
         if settings.run.context:
             zebrunner_run_context = self.api.get_rerun_tests(settings.run.context)
-            if zebrunner_run_context.run_allowed:
+            if not zebrunner_run_context.run_allowed:
                 pytest.exit(f"Run not allowed by zebrunner! Reason: {zebrunner_run_context.reason}")
             if zebrunner_run_context.run_only_specific_tests and not zebrunner_run_context.tests_to_run:
                 pytest.exit("Aborted. No tests to run!!")

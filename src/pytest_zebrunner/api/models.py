@@ -165,6 +165,6 @@ class TestModel(CamelModel):
 class RerunDataModel(CamelModel):
     test_run_uuid: str
     run_allowed: bool
-    reason: str
+    reason: Optional[str]
     run_only_specific_tests: bool
     tests_to_run: List[TestModel]
