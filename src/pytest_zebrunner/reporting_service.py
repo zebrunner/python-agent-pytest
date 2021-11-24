@@ -73,25 +73,23 @@ class ReportingService:
             MilestoneModel(id=settings.milestone.id, name=settings.milestone.name) if settings.milestone else None
         )
 
+        start_run_model = StartTestRunModel(
+            name=test_run.name,
+            framework="pytest",
+            config=TestRunConfigModel(environment=test_run.environment, build=test_run.build),
+            milestone=milestone,
+            ci_context=resolve_ci_context(),
+            notification_targets=self.get_notification_configurations(),
+        )
+
         if settings.run.context:
             zebrunner_run_context = self.api.get_rerun_tests(settings.run.context)
+            start_run_model.uuid = zebrunner_run_context.test_run_uuid
             if not zebrunner_run_context.run_allowed:
                 pytest.exit(f"Run not allowed by zebrunner! Reason: {zebrunner_run_context.reason}")
             if zebrunner_run_context.run_only_specific_tests and not zebrunner_run_context.tests_to_run:
                 pytest.exit("Aborted. No tests to run!!")
-
-        test_run.zebrunner_id = self.api.start_test_run(
-            settings.project_key,
-            StartTestRunModel(
-                name=test_run.name,
-                framework="pytest",
-                uuid=zebrunner_run_context.test_run_uuid,
-                config=TestRunConfigModel(environment=test_run.environment, build=test_run.build),
-                milestone=milestone,
-                ci_context=resolve_ci_context(),
-                notification_targets=self.get_notification_configurations(),
-            ),
-        )
+        test_run.zebrunner_id = self.api.start_test_run(settings.project_key, start_run_model)
 
     def start_test(self, report: TestReport) -> None:
         self.authorize()
