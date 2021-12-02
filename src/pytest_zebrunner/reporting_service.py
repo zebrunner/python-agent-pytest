@@ -142,7 +142,7 @@ class ReportingService:
             else:
                 # Following this changelog check if it's string or ReprExceptionInfo
                 # https://docs.pytest.org/en/6.2.x/changelog.html?highlight=reprexceptioninfo#pytest-6-0-0rc1-2020-07-08
-                reason = str(report.longrepr)
+                reason = report.longrepr
                 if isinstance(report.longrepr, ReprExceptionInfo) or isinstance(report.longrepr, ExceptionChainRepr):
                     reason = report.longrepr.reprcrash.message + "\n\n" + reason
 
