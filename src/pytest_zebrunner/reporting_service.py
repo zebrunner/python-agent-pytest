@@ -144,7 +144,7 @@ class ReportingService:
                 # https://docs.pytest.org/en/6.2.x/changelog.html?highlight=reprexceptioninfo#pytest-6-0-0rc1-2020-07-08
                 reason = report.longrepr
                 if isinstance(report.longrepr, ReprExceptionInfo) or isinstance(report.longrepr, ExceptionChainRepr):
-                    reason = report.longrepr.reprcrash.message + "\n\n" + reason
+                    reason = report.longrepr.reprcrash.message + "\n\n" + (str(reason) if reason else "")
 
             self.api.finish_test(
                 zebrunner_context.test_run_id,
