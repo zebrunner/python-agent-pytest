@@ -33,12 +33,16 @@ class ZebrunnerContext:
             self.settings = None  # type: ignore
 
     @property
+    def is_configured(self) -> bool:
+        return self.settings is not None
+
+    @property
     def test_is_active(self) -> bool:
-        return self.test_run_is_active and self.test_id is not None
+        return self.is_configured and self.test_run_is_active and self.test_id is not None
 
     @property
     def test_run_is_active(self) -> bool:
-        return self.test_run_id is not None
+        return self.is_configured and self.test_run_id is not None
 
     @property
     def test_id(self) -> int:
