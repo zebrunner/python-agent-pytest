@@ -23,9 +23,12 @@ class ZebrunnerHandler(StreamHandler):
 
     def __init__(self) -> None:
         super().__init__()
-        self.api = ZebrunnerAPI(
-            zebrunner_context.settings.server.hostname, zebrunner_context.settings.server.access_token
-        )
+        if zebrunner_context.is_configured:
+            self.api = ZebrunnerAPI(
+                zebrunner_context.settings.server.hostname, zebrunner_context.settings.server.access_token
+            )
+        else:
+            self.api = None  # type: ignore
         self.last_push = datetime.utcnow()
 
     def emit(self, record: LogRecord) -> None:
