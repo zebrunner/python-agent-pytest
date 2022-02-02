@@ -146,7 +146,7 @@ class StartTestSessionModel(CamelModel):
 
 class FinishTestSessionModel(CamelModel):
     ended_at: str = Field(default_factory=generate_datetime_str)
-    test_ids: List[str] = []
+    test_ids: List[int] = []
 
 
 class ArtifactReferenceModel(CamelModel):

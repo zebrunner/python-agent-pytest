@@ -8,7 +8,7 @@ from _pytest.runner import CallInfo
 
 from pytest_zebrunner.context import TestRun, zebrunner_context
 from pytest_zebrunner.reporting_service import ReportingService
-from pytest_zebrunner.selenium_integration import SeleniumSession, inject_driver
+from pytest_zebrunner.selenium_integration import SeleniumSessionManager, inject_driver
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 class PytestHooks:
     def __init__(self) -> None:
         self.service = ReportingService()
-        self.session_manager = SeleniumSession(self.service)
+        self.session_manager = SeleniumSessionManager(self.service)
         self.is_worker = True
         self.is_controller = False
 
@@ -44,8 +44,9 @@ class PytestHooks:
     @pytest.hookimpl
     def pytest_sessionfinish(self, session: Session, exitstatus: int) -> None:
         if not self.is_worker:
-            self.service.finish_test_run()
             self.session_manager.finish_all_sessions()
+            self.service.finish_test_run()
+            self.service.api.close()
 
     @pytest.mark.hookwrapper
     def pytest_runtest_makereport(self, item: Item, call: CallInfo) -> TestReport:

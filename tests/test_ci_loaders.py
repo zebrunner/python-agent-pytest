@@ -48,5 +48,5 @@ def test_global_resolve(resolver_cls: Type) -> None:
     env_name = resolver_cls.CI_ENV_VARIABLE
     os.environ.update({env_name: "value"})
     ci_context = ci_loaders.resolve_ci_context()
-    assert ci_context.ci_type == resolver_cls.CI_TYPE.value
+    assert ci_context is not None and ci_context.ci_type == resolver_cls.CI_TYPE.value
     os.environ.pop(env_name)

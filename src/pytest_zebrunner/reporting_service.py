@@ -166,8 +166,6 @@ class ReportingService:
                 zebrunner_handler: ZebrunnerHandler = handlers[0]  # type: ignore
                 zebrunner_handler.push_logs()
 
-        self.api.close()
-
     def start_test_session(
         self, session_id: str, capabilities: dict, desired_capabilities: dict, test_ids: List[int]
     ) -> Optional[str]:
@@ -185,7 +183,7 @@ class ReportingService:
             return zebrunner_session_id
         return None
 
-    def finish_test_session(self, zebrunner_session_id: str, related_tests: List[str]) -> None:
+    def finish_test_session(self, zebrunner_session_id: str, related_tests: List[int]) -> None:
         self.authorize()
         if zebrunner_context.test_run_is_active:
             self.api.finish_test_session(
