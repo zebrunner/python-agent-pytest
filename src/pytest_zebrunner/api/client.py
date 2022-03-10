@@ -350,7 +350,7 @@ class ZebrunnerAPI(metaclass=Singleton):
         run_context_dict = json.loads(run_context)
         response = self._client.post(url, json=run_context_dict)
         response_data = response.json()
-        for test in response_data["tests"]:
+        for test in response_data["testsToRun"]:
             correlation_data = test["correlationData"]
             if correlation_data is not None:
                 test["correlationData"] = json.loads(correlation_data)
