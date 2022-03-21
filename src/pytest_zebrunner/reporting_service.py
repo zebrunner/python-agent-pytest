@@ -213,6 +213,9 @@ class ReportingService:
         context_data = self.api.get_rerun_tests(run_context)
         rerun_tests = {x.name: x for x in context_data.tests_to_run if x.correlation_data is not None}
 
+        if not context_data.tests_to_run:
+            return items
+
         rerun_items: List[Item] = []
         for item in items:
             if item.name in rerun_tests:
