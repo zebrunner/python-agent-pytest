@@ -41,6 +41,7 @@ class NotificationsSettings(BaseModel):
     slack_channels: Optional[str] = None
     ms_teams_channels: Optional[str] = None
     emails: Optional[str] = None
+    notify_on_each_failure: bool = False
 
 
 class MilestoneSettings(BaseModel):
@@ -79,7 +80,7 @@ class Settings(BaseModel):
     send_logs: bool = True
     server: ServerSettings
     run: TestRunSettings = TestRunSettings()
-    notifications: Optional[NotificationsSettings] = None
+    notification: Optional[NotificationsSettings] = None
     milestone: Optional[MilestoneSettings] = None
     zebrunner: Optional[ZebrunnerSettings] = None
 

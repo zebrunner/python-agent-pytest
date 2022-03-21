@@ -89,6 +89,11 @@ class NotificationTargetModel(CamelModel):
     value: str
 
 
+class NotificationsModel(CamelModel):
+    notify_on_each_failure: bool = False
+    targets: Optional[List[NotificationTargetModel]] = None
+
+
 class StartTestRunModel(CamelModel):
     name: str
     framework: str
@@ -98,7 +103,7 @@ class StartTestRunModel(CamelModel):
     config: Optional[TestRunConfigModel] = None
     milestone: Optional[MilestoneModel] = None
     ci_context: Optional[CiContextModel] = None
-    notification_targets: Optional[List[NotificationTargetModel]] = None
+    notifications: Optional[NotificationsModel] = None
 
 
 class LabelModel(CamelModel):
@@ -155,6 +160,7 @@ class ArtifactReferenceModel(CamelModel):
 
 
 class TestModel(CamelModel):
+    id: int
     name: str
     correlation_data: Optional[CorrelationDataModel]
     status: str

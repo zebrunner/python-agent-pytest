@@ -1,5 +1,5 @@
 import logging
-from typing import List, Optional
+from typing import Any, List, Optional, Tuple
 
 import pytest
 from _pytest._code.code import ExceptionChainRepr, ReprExceptionInfo
@@ -13,6 +13,7 @@ from pytest_zebrunner.api.models import (
     FinishTestModel,
     FinishTestSessionModel,
     MilestoneModel,
+    NotificationsModel,
     NotificationsType,
     NotificationTargetModel,
     StartTestModel,
@@ -38,31 +39,31 @@ class ReportingService:
         if not self.api.authenticated:
             self.api.auth()
 
-    def get_notification_configurations(self) -> Optional[List[NotificationTargetModel]]:
+    def get_notification_configurations(self) -> Optional[NotificationsModel]:
         settings = zebrunner_context.settings
-        if settings.notifications:
-            configs = []
-            if settings.notifications.emails:
-                configs.append(
-                    NotificationTargetModel(
-                        type=NotificationsType.EMAIL_RECIPIENTS.value, value=settings.notifications.emails
-                    )
-                )
-            if settings.notifications.slack_channels:
-                configs.append(
-                    NotificationTargetModel(
-                        type=NotificationsType.SLACK_CHANNELS.value, value=settings.notifications.slack_channels
-                    )
-                )
-            if settings.notifications.ms_teams_channels:
-                configs.append(
-                    NotificationTargetModel(
-                        type=NotificationsType.MS_TEAMS_CHANNELS.value, value=settings.notifications.ms_teams_channels
-                    )
-                )
-            return configs
-        else:
+        if not settings.notification:
             return None
+
+        targets = []
+        if settings.notification.emails:
+            targets.append(
+                NotificationTargetModel(
+                    type=NotificationsType.EMAIL_RECIPIENTS.value, value=settings.notification.emails
+                )
+            )
+        if settings.notification.slack_channels:
+            targets.append(
+                NotificationTargetModel(
+                    type=NotificationsType.SLACK_CHANNELS.value, value=settings.notification.slack_channels
+                )
+            )
+        if settings.notification.ms_teams_channels:
+            targets.append(
+                NotificationTargetModel(
+                    type=NotificationsType.MS_TEAMS_CHANNELS.value, value=settings.notification.ms_teams_channels
+                )
+            )
+        return NotificationsModel(notify_on_each_failure=settings.notification.notify_on_each_failure, targets=targets)
 
     def start_test_run(self) -> None:
         self.authorize()
@@ -79,7 +80,7 @@ class ReportingService:
             config=TestRunConfigModel(environment=test_run.environment, build=test_run.build),
             milestone=milestone,
             ci_context=resolve_ci_context(),
-            notification_targets=self.get_notification_configurations(),
+            notifications=self.get_notification_configurations(),
         )
 
         if settings.run.context:
@@ -92,6 +93,9 @@ class ReportingService:
         test_run.zebrunner_id = self.api.start_test_run(settings.project_key, start_run_model)
 
     def start_test(self, report: TestReport) -> None:
+        if not zebrunner_context.test_run_is_active:
+            return
+
         self.authorize()
         test = Test(
             name=report.nodeid.split("::")[1],
@@ -100,26 +104,27 @@ class ReportingService:
             labels=report.labels,
         )
         zebrunner_context.test = test
+        start_model = StartTestModel(
+            name=test.name,
+            class_name=test.file,
+            method_name=test.name,
+            maintainer=",".join(test.maintainers),
+            labels=[{"key": label[0], "value": label[1]} for label in test.labels],
+            correlation_data=CorrelationDataModel(name=test.name).json(),
+        )
 
-        if zebrunner_context.test_run_is_active:
-            test.zebrunner_id = self.api.start_test(
-                zebrunner_context.test_run_id,
-                StartTestModel(
-                    name=test.name,
-                    class_name=test.file,
-                    method_name=test.name,
-                    maintainer=",".join(test.maintainers),
-                    labels=[{"key": label[0], "value": label[1]} for label in test.labels],
-                    correlation_data=CorrelationDataModel(name=test.name).json(),
-                ),
-            )
+        test_id = self._find_attribute(report.user_properties, "zebrunner_id")
+        if test_id:
+            test.zebrunner_id = self.api.update_test(zebrunner_context.test_run_id, int(test_id), start_model)
+        else:
+            test.zebrunner_id = self.api.start_test(zebrunner_context.test_run_id, start_model)
 
-            if report.artifact_references:
-                references = [ArtifactReferenceModel(name=x[0], value=x[1]) for x in report.artifact_references]
-                self.api.send_artifact_references(references, zebrunner_context.test_run_id, zebrunner_context.test_id)
-            if report.artifacts:
-                for artifact in report.artifacts:
-                    self.api.send_artifact(artifact, zebrunner_context.test_run_id, zebrunner_context.test_id)
+        if report.artifact_references:
+            references = [ArtifactReferenceModel(name=x[0], value=x[1]) for x in report.artifact_references]
+            self.api.send_artifact_references(references, zebrunner_context.test_run_id, zebrunner_context.test_id)
+        if report.artifacts:
+            for artifact in report.artifacts:
+                self.api.send_artifact(artifact, zebrunner_context.test_run_id, zebrunner_context.test_id)
 
     def finish_test(self, report: TestReport) -> None:
         if zebrunner_context.test_is_active:
@@ -192,14 +197,27 @@ class ReportingService:
                 FinishTestSessionModel(test_ids=related_tests),
             )
 
+    def _find_attribute(self, properties: List[Tuple[str, Any]], name: str) -> Any:
+        for property_name, value in properties:
+            if property_name == name:
+                return value
+
+        return None
+
     def filter_test_items(self, items: List[Item]) -> List[Item]:
         run_context = zebrunner_context.settings.run.context
-        if run_context is not None:
-            self.authorize()
-            context_data = self.api.get_rerun_tests(run_context)
-            rerun_names = {
-                x.correlation_data.name for x in context_data.tests_to_run if x.correlation_data is not None
-            }
-            return list(filter(lambda x: x.name in rerun_names, items)) if rerun_names else items
-        else:
+        if run_context is None:
             return items
+
+        self.authorize()
+        context_data = self.api.get_rerun_tests(run_context)
+        rerun_tests = {x.name: x for x in context_data.tests_to_run if x.correlation_data is not None}
+
+        rerun_items: List[Item] = []
+        for item in items:
+            if item.name in rerun_tests:
+                test = rerun_tests[item.name]
+                item.user_properties.append(("zebrunner_id", test.id))
+                rerun_items.append(item)
+
+        return rerun_items

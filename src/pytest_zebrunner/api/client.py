@@ -171,6 +171,20 @@ class ZebrunnerAPI(metaclass=Singleton):
 
         return response.json()["id"]
 
+    def update_test(self, test_run_id: int, test_id: int, test: StartTestModel) -> Optional[int]:
+        url = self.service_url + f"/api/reporting/v1/test-runs/{test_run_id}/tests/{test_id}/"
+        try:
+            response = self._client.post(url, json=test.dict(exclude_none=True, by_alias=True))
+        except httpx.RequestError as e:
+            logger.warning("Error while sending request to zebrunner.", exc_info=e)
+            return None
+
+        if response.status_code != 200:
+            log_response(response, logging.ERROR)
+            return None
+
+        return response.json()["id"]
+
     def finish_test(self, test_run_id: int, test_id: int, body: FinishTestModel) -> None:
         """
         Execute an http put with the given test_run_id, test_id, and body, which contains FinishTestModel.
@@ -332,7 +346,7 @@ class ZebrunnerAPI(metaclass=Singleton):
 
         return response.json().get("id")
 
-    def finish_test_session(self, test_run_id: int, zebrunner_id: str, body: FinishTestSessionModel) -> None:
+    def finish_test_session(self, test_run_id: int, test_id: str, body: FinishTestSessionModel) -> None:
         """
         Execute an http put with the given test_run_id, zebrunner_id and body, which contains FinishTestSessionModel.
         If everything is OK, finish the test_session.
@@ -341,7 +355,7 @@ class ZebrunnerAPI(metaclass=Singleton):
             test_run_id (int): Number that identifies test_run.
             zebrunner_id (str): String that identifies session.
         """
-        url = self.service_url + f"/api/reporting/v1/test-runs/{test_run_id}/test-sessions/{zebrunner_id}"
+        url = self.service_url + f"/api/reporting/v1/test-runs/{test_run_id}/test-sessions/{test_id}"
         self._client.put(url, json=body.dict(exclude_none=True, by_alias=True))
 
     def get_rerun_tests(self, run_context: str) -> RerunDataModel:
