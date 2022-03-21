@@ -25,6 +25,7 @@ It is currently possible to provide the configuration via:
 
 
 <!-- groups:start -->
+
 ### Environment variables
 The following configuration parameters are recognized by the agent:
 
@@ -36,11 +37,16 @@ The following configuration parameters are recognized by the agent:
 - `REPORTING_RUN_BUILD` - optional value. It is the build number that is associated with the test run. It can depict either the test build number or the application build number;
 - `REPORTING_RUN_ENVIRONMENT` - optional value. It is the environment where the tests will run;
 - `REPORTING_SEND_LOGS` - Sends test logs to Zebrunner. Default: `true`;
+- `REPORTING_NOTIFICATION_NOTIFY_ON_EACH_FAILURE` - optional value. Specifies whether Zebrunner should send notification to Slack/Teams on each test failure. The notifications will be sent even if the suite is still running. The default value is `false`;
+- `REPORTING_NOTIFICATION_SLACK_CHANNELS` - optional value. The list of comma-separated Slack channels to send notifications to. Notification will be sent only if Slack integration is properly configured in Zebrunner with valid credentials for the project the tests are reported to. Zebrunner can send two type of notifications: on each test failure (if appropriate property is enabled) and on suite finish;
+- `REPORTING_NOTIFICATION_MS_TEAMS_CHANNELS` - optional value. The list of comma-separated Microsoft Teams channels to send notifications to. Notification will be sent only if Teams integration is configured in Zebrunner project with valid webhooks for the channels. Zebrunner can send two type of notifications: on each test failure (if appropriate property is enabled) and on suite finish;
+- `REPORTING_NOTIFICATION_EMAILS` - optional value. The list of comma-separated emails to send notifications to. This type of notification does not require further configuration on Zebrunner side. Unlike other notification mechanisms, Zebrunner can send emails only on suite finish;
 
 Agent also recognizes `.env` file in the resources root folder.
 <!-- groups:end -->
 
 <!-- groups:start -->
+
 ### Yaml file
 Agent recognizes agent.yaml or agent.yml file in the resources root folder. It is currently not possible to configure an alternative file location.
 
@@ -53,6 +59,11 @@ reporting:
   server:
     hostname: localhost:8080
     access-token: <token>
+  notification:
+    notify-on-each-failure: true
+    slack-channels: automation, dev-team
+    ms-teams-channels: automation, qa-team
+    emails: example@example.com
   run:
     display-name: Nightly Regression Suite
     build: 1.12.1.96-SNAPSHOT
@@ -68,6 +79,10 @@ reporting:
 - `reporting.run.display-name` - optional value. The display name of the test run. The default value is Default Suite;
 - `reporting.run.build` - optional value. The build number that is associated with the test run. It can depict either the test build number or the application build number;
 - `reporting.run.environment` - optional value. The environment in which the tests will run.
+- `reporting.notification.notify-on-each-failure` - optional value. Specifies whether Zebrunner should send notification to Slack/Teams on each test failure. The notifications will be sent even if the suite is still running. The default value is `false`;
+- `reporting.notification.slack-channels` - optional value. The list of comma-separated Slack channels to send notifications to. Notification will be sent only if Slack integration is properly configured in Zebrunner with valid credentials for the project the tests are reported to. Zebrunner can send two type of notifications: on each test failure (if appropriate property is enabled) and on suite finish;
+- `reporting.notification.ms-teams-channels` - optional value. The list of comma-separated Microsoft Teams channels to send notifications to. Notification will be sent only if Teams integration is configured in Zebrunner project with valid webhooks for the channels. Zebrunner can send two type of notifications: on each test failure (if appropriate property is enabled) and on suite finish;
+- `reporting.notification.emails` - optional value. The list of comma-separated emails to send notifications to. This type of notification does not require further configuration on Zebrunner side. Unlike other notification mechanisms, Zebrunner can send emails only on suite finish;
 
 If the required configurations are not provided, there is a warning displayed in logs with the problem description and the names of options
 which need to be specified. Parameter names are case insensitive and can be written in upper and lower registers.
