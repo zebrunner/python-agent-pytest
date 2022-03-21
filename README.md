@@ -43,9 +43,6 @@ The following configuration parameters are recognized by the agent:
 - `REPORTING_NOTIFICATION_EMAILS` - optional value. The list of comma-separated emails to send notifications to. This type of notification does not require further configuration on Zebrunner side. Unlike other notification mechanisms, Zebrunner can send emails only on suite finish;
 
 Agent also recognizes `.env` file in the resources root folder.
-<!-- groups:end -->
-
-<!-- groups:start -->
 
 ### Yaml file
 Agent recognizes agent.yaml or agent.yml file in the resources root folder. It is currently not possible to configure an alternative file location.
@@ -69,7 +66,6 @@ reporting:
     build: 1.12.1.96-SNAPSHOT
     environment: TEST-1
 ```
-<!-- groups:end -->
 
 - `reporting.enabled` - enables or disables reporting. The default value is `true`;
 - `reporting.server.hostname` - mandatory if reporting is enabled. Zebrunner server hostname. Can be obtained in Zebrunner on the 'Account & profile' page under the 'Service URL' section;
@@ -86,6 +82,8 @@ reporting:
 
 If the required configurations are not provided, there is a warning displayed in logs with the problem description and the names of options
 which need to be specified. Parameter names are case insensitive and can be written in upper and lower registers.
+
+<!-- groups:end -->
 
 ### Advanced configuration example
 Sometimes there is need to change configuration from run to run. This can be done with changing environment variables
