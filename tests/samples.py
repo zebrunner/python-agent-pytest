@@ -96,3 +96,11 @@ def test_multiple_artifact() -> None:
 @pytest.mark.artifact_reference("google", "https://google.com")
 def test_artifact_reference() -> None:
     assert True
+
+
+class TestGroup:
+    def test_class_method1(self) -> None:
+        assert True
+
+    def test_class_method2(self) -> None:
+        assert True

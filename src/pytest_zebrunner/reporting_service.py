@@ -98,7 +98,7 @@ class ReportingService:
 
         self.authorize()
         test = Test(
-            name=report.nodeid.split("::")[1],
+            name=".".join(report.nodeid.split("::")[1:]),
             file=report.nodeid.split("::")[0],
             maintainers=report.maintainers,
             labels=report.labels,
