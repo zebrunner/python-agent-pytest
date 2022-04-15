@@ -77,7 +77,11 @@ class ReportingService:
         start_run_model = StartTestRunModel(
             name=test_run.name,
             framework="pytest",
-            config=TestRunConfigModel(environment=test_run.environment, build=test_run.build),
+            config=TestRunConfigModel(
+                environment=test_run.environment,
+                build=test_run.build,
+                treat_skips_as_failures=settings.run.treat_skips_as_failures,
+            ),
             milestone=milestone,
             ci_context=resolve_ci_context(),
             notifications=self.get_notification_configurations(),

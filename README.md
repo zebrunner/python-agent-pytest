@@ -41,6 +41,8 @@ The following configuration parameters are recognized by the agent:
 - `REPORTING_NOTIFICATION_SLACK_CHANNELS` - optional value. The list of comma-separated Slack channels to send notifications to. Notification will be sent only if Slack integration is properly configured in Zebrunner with valid credentials for the project the tests are reported to. Zebrunner can send two type of notifications: on each test failure (if appropriate property is enabled) and on suite finish;
 - `REPORTING_NOTIFICATION_MS_TEAMS_CHANNELS` - optional value. The list of comma-separated Microsoft Teams channels to send notifications to. Notification will be sent only if Teams integration is configured in Zebrunner project with valid webhooks for the channels. Zebrunner can send two type of notifications: on each test failure (if appropriate property is enabled) and on suite finish;
 - `REPORTING_NOTIFICATION_EMAILS` - optional value. The list of comma-separated emails to send notifications to. This type of notification does not require further configuration on Zebrunner side. Unlike other notification mechanisms, Zebrunner can send emails only on suite finish;
+ - `REPORTING_RUN_TREAT_SKIPS_AS_FAILURES` - optional value. If value is false all test-runs with skipped & passed tests
+ would be marked as passed.
 
 Agent also recognizes `.env` file in the resources root folder.
 
@@ -62,6 +64,7 @@ reporting:
     ms-teams-channels: automation, qa-team
     emails: example@example.com
   run:
+    treat_skips_as_failures: false
     display-name: Nightly Regression Suite
     build: 1.12.1.96-SNAPSHOT
     environment: TEST-1
@@ -79,6 +82,8 @@ reporting:
 - `reporting.notification.slack-channels` - optional value. The list of comma-separated Slack channels to send notifications to. Notification will be sent only if Slack integration is properly configured in Zebrunner with valid credentials for the project the tests are reported to. Zebrunner can send two type of notifications: on each test failure (if appropriate property is enabled) and on suite finish;
 - `reporting.notification.ms-teams-channels` - optional value. The list of comma-separated Microsoft Teams channels to send notifications to. Notification will be sent only if Teams integration is configured in Zebrunner project with valid webhooks for the channels. Zebrunner can send two type of notifications: on each test failure (if appropriate property is enabled) and on suite finish;
 - `reporting.notification.emails` - optional value. The list of comma-separated emails to send notifications to. This type of notification does not require further configuration on Zebrunner side. Unlike other notification mechanisms, Zebrunner can send emails only on suite finish;
+ - `reporting.run.treat_skips_as_failures` - optional value. If value is false all test-runs with skipped & passed tests
+ would be marked as passed.
 
 If the required configurations are not provided, there is a warning displayed in logs with the problem description and the names of options
 which need to be specified. Parameter names are case insensitive and can be written in upper and lower registers.
