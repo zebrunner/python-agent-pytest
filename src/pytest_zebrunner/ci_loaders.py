@@ -5,31 +5,7 @@ from typing import Dict, List, Optional, Type
 from pytest_zebrunner.api.models import CiContextModel
 
 
-class BaseContextLoader:
-    """
-    A class use as base to load environment variables.
-    """
-
-    @staticmethod
-    def load_context_variables(prefixes: List[str]) -> Dict[str, str]:
-        """
-        Returns a dictionary with environment variables that start with some prefix.
-
-        Args:
-            prefixes (List[str]): List of prefixes to find environment variables.
-
-        Returns:
-            (Dict[str,str]): Environment variables in key-value format.
-        """
-        env_variable_names = list(filter(lambda name: any([name.startswith(x) for x in prefixes]), os.environ))
-        return {key: os.environ[key] for key in env_variable_names}
-
-
 class CiType(Enum):
-    """
-    A class that inherit from Enum, used to represent CI constants
-    """
-
     JENKINS = "JENKINS"
     TEAM_CITY = "TEAM_CITY"
     CIRCLE_CI = "CIRCLE_CI"
@@ -37,14 +13,15 @@ class CiType(Enum):
     BAMBOO = "BAMBOO"
 
 
-class JenkinsContextLoader(BaseContextLoader):
-    """
-    A class that inherit from BaseContextLoader,used to represent JenkinsContext with its own environment variables.
+class CiVariables:
+    CI_ENV_VARIABLE: str
+    CI_TYPE: CiType
+    ENV_VARIABLE_PREFIXES: List[str]
 
-    Attributes:
-        CI_ENV_VARIABLE (str): 'JENKINS_URL'.
-        CI_TYPE (CiType):
-        ENV_VARIABLE_PREFIXES (List[str]): List of prefixes to find and load Jenkins environment variables.
+
+class Jenkins(CiVariables):
+    """
+    Jenkins env variables
     """
 
     CI_ENV_VARIABLE = "JENKINS_URL"
@@ -63,33 +40,10 @@ class JenkinsContextLoader(BaseContextLoader):
         "WORKSPACE",
     ]
 
-    @classmethod
-    def resolve(cls) -> Optional[Dict[str, str]]:
-        """
-        Returns a dictionary with Jenkins environment variables if 'cls.JENKINS_URL' exists
-        in operating system environment. Otherwise returns None.
 
-        Args:
-            cls (JenkinsContextLoader):
-
-        Returns:
-            Union(Dict[str, str], optional): Jenkins environment variables in key-value format or None if 'JENKINS_URL'
-            does not exists in os.environment.
-        """
-        if cls.CI_ENV_VARIABLE in os.environ:
-            return cls.load_context_variables(cls.ENV_VARIABLE_PREFIXES)
-        else:
-            return None
-
-
-class TeamCityCiContextResolver(BaseContextLoader):
+class TeamCity(CiVariables):
     """
-    A class that inherit from BaseContextLoader,used to represent TeamCityCIContext with its own environment variables.
-
-    Attributes:
-        CI_ENV_VARIABLE (str): 'TEAMCITY_VERSION'
-        CI_TYPE (CiType):
-        ENV_VARIABLE_PREFIXES (List[str]): List of prefixes to find and load Team City environment variables
+    TeamCity environemt variables
     """
 
     CI_ENV_VARIABLE = "TEAMCITY_VERSION"
@@ -101,107 +55,57 @@ class TeamCityCiContextResolver(BaseContextLoader):
         "TEAMCITY_",
     ]
 
-    @classmethod
-    def resolve(cls) -> Optional[Dict[str, str]]:
-        """
-        Returns a dictionary with Jenkins environment variable if 'cls.TEAMCITY_VERSION' exists
-        in operating system environment. Otherwise returns None.
 
-        Args:
-            cls (JenkinsContextLoader):
-
-        Returns:
-            Union(Dict[str, str], optional): Team City environment variables in key-value format or None if
-            'cls.TEAMCITY_VERSION' does not exists in os.environment.
-        """
-        if cls.CI_ENV_VARIABLE in os.environ:
-            return cls.load_context_variables(cls.ENV_VARIABLE_PREFIXES)
-        else:
-            return None
-
-
-class CircleCiContextResolver(BaseContextLoader):
+class CircleCi(CiVariables):
     """
-    A class that inherit from BaseContextLoader,used to represent TeamCityCIContext with its own environment variables.
-
-    Attributes:
-        CI_ENV_VARIABLE (str): 'CIRCLECI'
-        CI_TYPE (CiType):
-        ENV_VARIABLE_PREFIXES (List[str]): List of prefixes to find and load Circle CI environment variables.
+    CircleCI environemt variables
     """
 
     CI_ENV_VARIABLE = "CIRCLECI"
     CI_TYPE = CiType.CIRCLE_CI
     ENV_VARIABLE_PREFIXES = ["CIRCLE", "HOSTNAME"]
 
-    @classmethod
-    def resolve(cls) -> Optional[Dict[str, str]]:
-        """
-        Returns a dictionary with CIRCLECI environment variable if 'cls.CI_ENV_VARIABLE' exists
-        in operating system environment. Otherwise returns None.
 
-        Args:
-            cls (JenkinsContextLoader):
-
-        Returns:
-            Union(Dict[str, str], optional): CIRCLECI environment variables in key-value format or None if
-            'cls.CI_ENV_VARIABLE' does not exists in os.environment.
-        """
-        if cls.CI_ENV_VARIABLE in os.environ:
-            return cls.load_context_variables(cls.ENV_VARIABLE_PREFIXES)
-        else:
-            return None
-
-
-class TravisCiContextResolver(BaseContextLoader):
+class TravisCi(CiVariables):
     """
-    A class that inherit from BaseContextLoader,used to represent TravisCiContext with its own environment variables.
-
-    Attributes:
-        CI_ENV_VARIABLE (str): 'TRAVIS'
-        CI_TYPE (CiType):
-        ENV_VARIABLE_PREFIXES (List[str]): List of prefixes to find and load TRAVIS environment variables.
+    CircleCI environemt variables
     """
 
     CI_ENV_VARIABLE = "TRAVIS"
     CI_TYPE = CiType.TRAVIS_CI
     ENV_VARIABLE_PREFIXES = ["TRAVIS", "USER"]
 
-    @classmethod
-    def resolve(cls) -> Optional[Dict[str, str]]:
+
+class CiContextLoader:
+    @staticmethod
+    def load_context_variables(prefixes: List[str]) -> Dict[str, str]:
         """
-        Returns a dictionary with TRAVIS environment variable if 'cls.CI_ENV_VARIABLE' exists
-        in operating system environment. Otherwise returns None.
-
-        Args:
-            cls (JenkinsContextLoader):
-
-        Returns:
-            Union(Dict[str, str], optional): TRAVIS environment variables in key-value format or None if
-            'cls.CI_ENV_VARIABLE' does not exists in os.environment.
+        Returns a dictionary with environment variables that start with one of prefixes
         """
-        if cls.CI_ENV_VARIABLE in os.environ:
-            return cls.load_context_variables(cls.ENV_VARIABLE_PREFIXES)
-        else:
-            return None
+        env_variable_names = list(filter(lambda name: any([name.startswith(x) for x in prefixes]), os.environ))
+        return {key: os.environ[key] for key in env_variable_names}
 
+    @staticmethod
+    def resolve_ci_context() -> Optional[CiContextModel]:
+        """
+        Go through list of ci variables definitions and try to load variables related to this definition.
+        Return first found ci context
+        """
 
-def resolve_ci_context() -> Optional[CiContextModel]:
-    ci_tools: List[Type[BaseContextLoader]] = [
-        JenkinsContextLoader,
-        TeamCityCiContextResolver,
-        CircleCiContextResolver,
-        TravisCiContextResolver,
-    ]
+        ci_services_variables: List[Type[CiVariables]] = [
+            Jenkins,
+            TeamCity,
+            CircleCi,
+            TravisCi,
+        ]
 
-    ci_context: Optional[Type] = None
-    for resolver in ci_tools:
-        env_variables = resolver.resolve()  # type: ignore
-        if env_variables:
-            ci_context = resolver
-            break
+        for ci_variables in ci_services_variables:
+            if ci_variables.CI_ENV_VARIABLE not in os.environ:
+                continue
 
-    if ci_context:
-        return CiContextModel(ci_type=ci_context.CI_TYPE.value, env_variables=ci_context.resolve())
-    else:
+            return CiContextModel(
+                ci_type=ci_variables.CI_TYPE.value,
+                env_variables=CiContextLoader.load_context_variables(ci_variables.ENV_VARIABLE_PREFIXES),
+            )
+
         return None

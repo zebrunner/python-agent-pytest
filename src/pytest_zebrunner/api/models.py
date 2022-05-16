@@ -175,3 +175,8 @@ class RerunDataModel(CamelModel):
     reason: Optional[str]
     run_only_specific_tests: bool
     tests_to_run: List[TestModel]
+
+
+class PlatformModel(CamelModel):
+    name: str
+    version: Optional[str]

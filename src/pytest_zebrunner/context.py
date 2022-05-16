@@ -21,6 +21,7 @@ class Test:
         self.file = file
         self.maintainers = maintainers
         self.labels = labels
+        self.is_reverted = False
 
 
 class ZebrunnerContext:

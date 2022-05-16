@@ -16,6 +16,10 @@ def pytest_configure(config: Config) -> None:
     config.addinivalue_line("markers", "label(name, value): Test label")
     config.addinivalue_line("markers", "artifact(path): Attach file to the test")
     config.addinivalue_line("markers", "artifact_reference(name, value): Attach reference to the test")
+    config.addinivalue_line("markers", "test_rail_case_id(id): Attach test rail case id")
+    config.addinivalue_line("markers", "xray_test_key(id): Attach xray case id")
+    config.addinivalue_line("markers", "zephyr_test_case_key(id): Attach zephyr case id")
+
     try:
         settings = load_settings()
         zebrunner_context.settings = settings

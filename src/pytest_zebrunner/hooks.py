@@ -1,4 +1,6 @@
+import itertools
 import logging
+from typing import Generator
 
 import pytest
 from _pytest.main import Session
@@ -49,16 +51,20 @@ class PytestHooks:
             self.service.api.close()
 
     @pytest.mark.hookwrapper
-    def pytest_runtest_makereport(self, item: Item, call: CallInfo) -> TestReport:
+    def pytest_runtest_makereport(self, item: Item, call: CallInfo) -> Generator:
         outcome = yield
         report: TestReport = outcome.get_result()
 
         report.maintainers = [str(mark.args[0]) for mark in item.iter_markers("maintainer")]
         report.labels = [(str(mark.args[0]), str(mark.args[1])) for mark in item.iter_markers("label")]
         report.artifact_references = [
-            (str(mark.args[0]), str(mark.args[1])) for mark in item.iter_markers("artifact_reference")
+            (str(m.args[0]), str(m.args[1])) for m in item.iter_markers("artifact_reference")
         ]
         report.artifacts = [mark.args[0] for mark in item.iter_markers("artifact")]
+
+        report.test_rail_case_ids = itertools.chain(*[mark.args for mark in item.iter_markers("test_rail_case_id")])
+        report.xray_case_ids = itertools.chain(*[mark.args for mark in item.iter_markers("xray_test_key")])
+        report.zephyr_case_ids = itertools.chain(*[mark.args for mark in item.iter_markers("zephyr_test_case_key")])
 
     @pytest.hookimpl
     def pytest_runtest_logreport(self, report: TestReport) -> None:

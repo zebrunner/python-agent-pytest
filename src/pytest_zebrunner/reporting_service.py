@@ -22,8 +22,12 @@ from pytest_zebrunner.api.models import (
     TestRunConfigModel,
     TestStatus,
 )
-from pytest_zebrunner.ci_loaders import resolve_ci_context
+from pytest_zebrunner.ci_loaders import CiContextLoader
 from pytest_zebrunner.context import Test, TestRun, zebrunner_context
+from pytest_zebrunner.errors import AgentApiError
+from pytest_zebrunner.tcm.test_rail import TestRail
+from pytest_zebrunner.tcm.xray import Xray
+from pytest_zebrunner.tcm.zephyr import Zephyr
 from pytest_zebrunner.zebrunner_logging import ZebrunnerHandler
 
 logger = logging.getLogger(__name__)
@@ -36,7 +40,7 @@ class ReportingService:
         )
 
     def authorize(self) -> None:
-        if not self.api.authenticated:
+        if not self.api._authenticated:
             self.api.auth()
 
     def get_notification_configurations(self) -> Optional[NotificationsModel]:
@@ -83,18 +87,27 @@ class ReportingService:
                 treat_skips_as_failures=settings.run.treat_skips_as_failures,
             ),
             milestone=milestone,
-            ci_context=resolve_ci_context(),
+            ci_context=CiContextLoader.resolve_ci_context(),
             notifications=self.get_notification_configurations(),
         )
 
         if settings.run.context:
-            zebrunner_run_context = self.api.get_rerun_tests(settings.run.context)
+            try:
+                zebrunner_run_context = self.api.get_rerun_tests(settings.run.context)
+            except AgentApiError as e:
+                logging.error("Failed to get rerun tests", exc_info=e)
+                pytest.exit("Failed to get rerun tests")
+
             start_run_model.uuid = zebrunner_run_context.test_run_uuid
             if not zebrunner_run_context.run_allowed:
                 pytest.exit(f"Run not allowed by zebrunner! Reason: {zebrunner_run_context.reason}")
             if zebrunner_run_context.run_only_specific_tests and not zebrunner_run_context.tests_to_run:
                 pytest.exit("Aborted. No tests to run!!")
-        test_run.zebrunner_id = self.api.start_test_run(settings.project_key, start_run_model)
+        try:
+            test_run.zebrunner_id = self.api.start_test_run(settings.project_key, start_run_model)
+        except AgentApiError as e:
+            logging.error("Failed to start test run", exc_info=e)
+            pytest.exit("Failed to start test run")
 
     def start_test(self, report: TestReport) -> None:
         if not zebrunner_context.test_run_is_active:
@@ -118,19 +131,34 @@ class ReportingService:
         )
 
         test_id = self._find_attribute(report.user_properties, "zebrunner_id")
-        if test_id:
-            test.zebrunner_id = self.api.update_test(zebrunner_context.test_run_id, int(test_id), start_model)
-        else:
-            test.zebrunner_id = self.api.start_test(zebrunner_context.test_run_id, start_model)
+        try:
+            if test_id:
+                test.zebrunner_id = self.api.update_test(zebrunner_context.test_run_id, int(test_id), start_model)
+            else:
+                test.zebrunner_id = self.api.start_test(zebrunner_context.test_run_id, start_model)
+        except AgentApiError as e:
+            logging.error("Failed to start test", exc_info=e)
+            return
 
         if report.artifact_references:
             references = [ArtifactReferenceModel(name=x[0], value=x[1]) for x in report.artifact_references]
-            self.api.send_artifact_references(references, zebrunner_context.test_run_id, zebrunner_context.test_id)
+            try:
+                self.api.send_artifact_references(references, zebrunner_context.test_run_id, zebrunner_context.test_id)
+            except AgentApiError as e:
+                logging.error("Failed to send artifact reference", exc_info=e)
+
         if report.artifacts:
             for artifact in report.artifacts:
-                self.api.send_artifact(artifact, zebrunner_context.test_run_id, zebrunner_context.test_id)
+                try:
+                    self.api.send_artifact(artifact, zebrunner_context.test_run_id, zebrunner_context.test_id)
+                except AgentApiError as e:
+                    logging.error("Failed to send artifact", exc_info=e)
 
     def finish_test(self, report: TestReport) -> None:
+        # Test was reverted skip finishing
+        if zebrunner_context.test and zebrunner_context.test.is_reverted:
+            return
+
         if zebrunner_context.test_is_active:
             self.authorize()
             is_skip = report.when == "setup" and report.outcome == "skipped"
@@ -153,22 +181,46 @@ class ReportingService:
                 # https://docs.pytest.org/en/6.2.x/changelog.html?highlight=reprexceptioninfo#pytest-6-0-0rc1-2020-07-08
                 reason = report.longrepr
                 if isinstance(report.longrepr, ReprExceptionInfo) or isinstance(report.longrepr, ExceptionChainRepr):
-                    reason = report.longrepr.reprcrash.message + "\n\n" + (str(reason) if reason else "")
+                    reason = (
+                        report.longrepr.reprcrash.message + "\n\n" + (str(reason) if reason else "")  # type: ignore
+                    )
 
-            self.api.finish_test(
-                zebrunner_context.test_run_id,
-                zebrunner_context.test_id,
-                FinishTestModel(
-                    result=status.value,
-                    reason=reason,
-                ),
-            )
+            test_rail_case_ids = getattr(report, "test_rail_case_ids", None)
+            if test_rail_case_ids:
+                for case_id in test_rail_case_ids:
+                    TestRail.set_case_id(case_id)
+
+            xray_case_ids = getattr(report, "xray_case_ids", None)
+            if xray_case_ids:
+                for case_id in xray_case_ids:
+                    Xray.set_test_key(case_id)
+
+            zephyr_case_ids = getattr(report, "zephyr_case_ids", None)
+            if zephyr_case_ids:
+                for case_id in zephyr_case_ids:
+                    Zephyr.set_test_case_key(case_id)
+
+            try:
+                self.api.finish_test(
+                    zebrunner_context.test_run_id,
+                    zebrunner_context.test_id,
+                    FinishTestModel(
+                        result=status.value,
+                        reason=reason,
+                    ),
+                )
+            except AgentApiError as e:
+                logging.error("failed to finish test", exc_info=e)
+
             zebrunner_context.test = None
 
     def finish_test_run(self) -> None:
         self.authorize()
         if zebrunner_context.test_run_is_active:
-            self.api.finish_test_run(zebrunner_context.test_run_id)
+            try:
+                self.api.finish_test_run(zebrunner_context.test_run_id)
+            except AgentApiError as e:
+                logging.error("failed to finish test run", exc_info=e)
 
             handlers = list(filter(lambda x: isinstance(x, ZebrunnerHandler), logging.root.handlers))
             if len(handlers) > 0:
@@ -180,26 +232,34 @@ class ReportingService:
     ) -> Optional[str]:
         self.authorize()
         if zebrunner_context.test_run_is_active:
-            zebrunner_session_id = self.api.start_test_session(
-                zebrunner_context.test_run_id,
-                StartTestSessionModel(
-                    session_id=session_id,
-                    desired_capabilities=desired_capabilities,
-                    capabilities=capabilities,
-                    test_ids=test_ids,
-                ),
-            )
+            try:
+                zebrunner_session_id = self.api.start_test_session(
+                    zebrunner_context.test_run_id,
+                    StartTestSessionModel(
+                        session_id=session_id,
+                        desired_capabilities=desired_capabilities,
+                        capabilities=capabilities,
+                        test_ids=test_ids,
+                    ),
+                )
+            except AgentApiError as e:
+                logging.error("failed to start test session", exc_info=e)
+                return None
+
             return zebrunner_session_id
         return None
 
     def finish_test_session(self, zebrunner_session_id: str, related_tests: List[int]) -> None:
         self.authorize()
         if zebrunner_context.test_run_is_active:
-            self.api.finish_test_session(
-                zebrunner_context.test_run_id,
-                zebrunner_session_id,
-                FinishTestSessionModel(test_ids=related_tests),
-            )
+            try:
+                self.api.finish_test_session(
+                    zebrunner_context.test_run_id,
+                    zebrunner_session_id,
+                    FinishTestSessionModel(test_ids=related_tests),
+                )
+            except AgentApiError as e:
+                logging.error("failed to finish test session", exc_info=e)
 
     def _find_attribute(self, properties: List[Tuple[str, Any]], name: str) -> Any:
         for property_name, value in properties:
@@ -213,8 +273,13 @@ class ReportingService:
         if run_context is None:
             return items
 
-        self.authorize()
-        context_data = self.api.get_rerun_tests(run_context)
+        try:
+            self.authorize()
+            context_data = self.api.get_rerun_tests(run_context)
+        except AgentApiError as e:
+            logging.error("failed to filter tests", exc_info=e)
+            return items
+
         rerun_tests = {x.name: x for x in context_data.tests_to_run if x.correlation_data is not None}
 
         if not context_data.tests_to_run:
