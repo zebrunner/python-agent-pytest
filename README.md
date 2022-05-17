@@ -584,33 +584,33 @@ def init_driver() -> Remote:
 ```
 
 === "Zebrunner Selenium Grid"
-    ```python
-    def test_something():
-        hub_url = 'https://username:password@engine.zebrunner.com/wd/hub'
-        capabilities = {
-            'browserName': 'firefox',
-            'enableVideo': True,
-            'enableLog': True,
-            'enableVNC': True,
-            'provider': 'zebrunner',
-            ...
-        }
-        driver = Remote(command_executor=hub_url, desired_capabilities=capabilities)
+```python
+def test_something():
+    hub_url = 'https://username:password@engine.zebrunner.com/wd/hub'
+    capabilities = {
+        'browserName': 'firefox',
+        'enableVideo': True,
+        'enableLog': True,
+        'enableVNC': True,
+        'provider': 'zebrunner',
         ...
-    ```
+    }
+    driver = Remote(command_executor=hub_url, desired_capabilities=capabilities)
+    ...
+```
 
 === "BrowserStack"
-    ```python title="BrowserStack"
-    def test_something():
-        hub_url = 'https://username:password@hub-cloud.browserstack.com/wd/hub'
-        capabilities = {
-            'browser': 'firefox',
-            'provider': 'BROWSERSTACK',
-            ...
-        }
-        driver = Remote(command_executor=hub_url, desired_capabilities=capabilities)
+```python title="BrowserStack"
+def test_something():
+    hub_url = 'https://username:password@hub-cloud.browserstack.com/wd/hub'
+    capabilities = {
+        'browser': 'firefox',
+        'provider': 'BROWSERSTACK',
         ...
-    ```
+    }
+    driver = Remote(command_executor=hub_url, desired_capabilities=capabilities)
+    ...
+```
 
 ## Contribution
 
