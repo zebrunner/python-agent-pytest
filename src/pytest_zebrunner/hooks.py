@@ -73,6 +73,9 @@ class PytestHooks:
             is_call_rerun = report.outcome == "rerun"
             if report.when == "setup" and not is_setup_rerun:
                 self.service.start_test(report)
+                if zebrunner_context.test_is_active:
+                    self.session_manager.add_test(zebrunner_context.test_id)
+
                 if report.outcome == "skipped":
                     self.service.finish_test(report)
             elif report.when == "call" and not is_call_rerun:

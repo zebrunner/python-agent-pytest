@@ -155,6 +155,10 @@ class FinishTestSessionModel(CamelModel):
     test_ids: List[int] = []
 
 
+class AttachTestsToSessionModel(CamelModel):
+    test_ids: List[int] = []
+
+
 class ArtifactReferenceModel(CamelModel):
     name: str
     value: str

@@ -11,6 +11,7 @@ from httpx import Client, Request, Response
 
 from pytest_zebrunner.api.models import (
     ArtifactReferenceModel,
+    AttachTestsToSessionModel,
     FinishTestModel,
     FinishTestSessionModel,
     LabelModel,
@@ -101,7 +102,7 @@ class ZebrunnerAPI(metaclass=Singleton):
 
         if not response.is_success:
             raise AgentApiError(
-                "Failed to create test run. Non successfull response code",
+                "Failed to create test run. Non successful response code",
                 {"status_code": response.status_code, "body": response.json()},
             )
 
@@ -120,7 +121,7 @@ class ZebrunnerAPI(metaclass=Singleton):
 
         if not response.is_success:
             raise AgentApiError(
-                "Failed to create test. Non successfull response code",
+                "Failed to create test. Non successful response code",
                 {"status_code": response.status_code, "body": response.json()},
             )
 
@@ -139,7 +140,7 @@ class ZebrunnerAPI(metaclass=Singleton):
 
         if not response.is_success:
             raise AgentApiError(
-                "Failed to update test. Non successfull status code",
+                "Failed to update test. Non successful status code",
                 {"status_code": response.status_code, "body": response.json()},
             )
 
@@ -158,7 +159,7 @@ class ZebrunnerAPI(metaclass=Singleton):
 
         if not response.is_success:
             raise AgentApiError(
-                "Failed to finish test. Non  successfull status code",
+                "Failed to finish test. Non  successful status code",
                 {"status_code": response.status_code, "body": response.json()},
             )
 
@@ -177,7 +178,7 @@ class ZebrunnerAPI(metaclass=Singleton):
 
         if not response.is_success:
             raise AgentApiError(
-                "Failed to finish test run. Non  successfull status code",
+                "Failed to finish test run. Non  successful status code",
                 {"status_code": response.status_code, "body": response.json()},
             )
 
@@ -195,7 +196,7 @@ class ZebrunnerAPI(metaclass=Singleton):
 
         if not response.is_success:
             raise AgentApiError(
-                "Failed to send logs. Non successfull status code",
+                "Failed to send logs. Non successful status code",
                 {"status_code": response.status_code, "body": response.json()},
             )
 
@@ -219,7 +220,7 @@ class ZebrunnerAPI(metaclass=Singleton):
 
             if not response.is_success:
                 raise AgentApiError(
-                    "Failed to send screenshot. Non successfull status code",
+                    "Failed to send screenshot. Non successful status code",
                     {"status_code": response.status_code, "body": response.json()},
                 )
 
@@ -241,7 +242,7 @@ class ZebrunnerAPI(metaclass=Singleton):
 
             if not response.is_success:
                 raise AgentApiError(
-                    "Failed to send artifact. Non successfull status code",
+                    "Failed to send artifact. Non successful status code",
                     {"status_code": response.status_code, "body": response.json()},
                 )
 
@@ -265,7 +266,7 @@ class ZebrunnerAPI(metaclass=Singleton):
 
         if not response.is_success:
             raise AgentApiError(
-                "Failed to send artifact reference. Non successfull status code",
+                "Failed to send artifact reference. Non successful status code",
                 {"status_code": response.status_code, "body": response.json()},
             )
 
@@ -287,7 +288,7 @@ class ZebrunnerAPI(metaclass=Singleton):
 
         if not response.is_success:
             raise AgentApiError(
-                "Failed to send labels. Non successfull status code",
+                "Failed to send labels. Non successful status code",
                 {"status_code": response.status_code, "body": response.json()},
             )
 
@@ -300,15 +301,32 @@ class ZebrunnerAPI(metaclass=Singleton):
         try:
             response = self._client.post(url, json=body.dict(exclude_none=True, by_alias=True))
         except httpx.RequestError as e:
-            raise AgentApiError("Failed to start settion", e)
+            raise AgentApiError("Failed to start session", e)
 
         if not response.status_code == 200:
             raise AgentApiError(
-                "Failed to start session. Non successfull status code",
+                "Failed to start session. Non successful status code",
                 {"status_code": response.status_code, "body": response.json()},
             )
 
         return response.json().get("id")
+
+    def add_tests_to_session(self, test_run_id: int, session_id: str, related_tests: List[int]) -> None:
+        """
+        Send PUT request attaching new test to test session. Raise AgentApiError in case of any exceptions
+        """
+        url = f"{self.service_url}/api/reporting/v1/test-runs/{test_run_id}/test-sessions/{session_id}"
+        body = AttachTestsToSessionModel(test_ids=related_tests)
+        try:
+            response = self._client.put(url, json=body.dict(exclude_none=True, by_alias=True))
+        except httpx.RequestError as e:
+            raise AgentApiError("Failed to attach tests to session", e)
+
+        if not response.is_success:
+            raise AgentApiError(
+                "Failed to attach tests to session. Non successful status code",
+                {"status_code": response.status_code, "body": response.json()},
+            )
 
     def finish_test_session(self, test_run_id: int, test_id: str, body: FinishTestSessionModel) -> None:
         """
@@ -318,16 +336,16 @@ class ZebrunnerAPI(metaclass=Singleton):
         try:
             response = self._client.put(url, json=body.dict(exclude_none=True, by_alias=True))
         except httpx.RequestError as e:
-            raise AgentApiError("Failed to start settion", e)
+            raise AgentApiError("Failed to start session", e)
 
-        if not response.status_code == 200:
+        if not response.is_success:
             raise AgentApiError(
-                "Failed to finish session. Non successfull status code",
+                "Failed to finish session. Non successful status code",
                 {"status_code": response.status_code, "body": response.json()},
             )
 
     def get_rerun_tests(self, run_context: str) -> RerunDataModel:
-        """Exchange run rontext on tests to run. Raise AgentApiError in case of any exceptions"""
+        """Exchange run context on tests to run. Raise AgentApiError in case of any exceptions"""
         url = f"{self.service_url}/api/reporting/v1/run-context-exchanges"
         run_context_dict = json.loads(run_context)
         try:
@@ -337,7 +355,7 @@ class ZebrunnerAPI(metaclass=Singleton):
 
         if not response.is_success:
             raise AgentApiError(
-                "Failed to get rerun tests. Non successfull status code",
+                "Failed to get rerun tests. Non successful status code",
                 {"status_code": response.status_code, "body": response.json()},
             )
 
@@ -359,7 +377,7 @@ class ZebrunnerAPI(metaclass=Singleton):
 
         if not response.is_success:
             raise AgentApiError(
-                "Failed to revert test registration. Non successfull status code",
+                "Failed to revert test registration. Non successful status code",
                 {"status_code": response.status_code, "body": response.json()},
             )
 
@@ -374,7 +392,7 @@ class ZebrunnerAPI(metaclass=Singleton):
 
         if not response.is_success:
             raise AgentApiError(
-                "Failed to set test run platform. Non successfull status code",
+                "Failed to set test run platform. Non successful status code",
                 {"status_code": response.status_code, "body": response.json()},
             )
 
@@ -395,7 +413,7 @@ class ZebrunnerAPI(metaclass=Singleton):
 
         if not response.is_success:
             raise AgentApiError(
-                "Failed to patch test run platform. Non successfull status code",
+                "Failed to patch test run platform. Non successful status code",
                 {"status_code": response.status_code, "body": response.json()},
             )
 

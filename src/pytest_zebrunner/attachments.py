@@ -12,7 +12,7 @@ def attach_test_screenshot(path: Union[str, Path]) -> None:
     """
     Send screenshot to zebrunner and attach it to test
     """
-    if zebrunner_context.test_is_active:
+    if not zebrunner_context.test_is_active:
         raise AgentError("There is no active test to attach screenshot")
 
     try:
@@ -40,7 +40,7 @@ def attach_test_run_artifact(path: Union[str, Path]) -> None:
     """
     Send artifact to zebrunner and attach it to test run. Artifact is any file from disk
     """
-    if zebrunner_context.test_run_is_active:
+    if not zebrunner_context.test_run_is_active:
         raise AgentError("There is no active test run to attach artifact")
 
     try:
@@ -54,7 +54,7 @@ def attach_test_artifact_reference(name: str, ref: str) -> None:
     """
     Send artifact reference to zebrunner and attach it to test. Artifact reference is a URL
     """
-    if zebrunner_context.test_is_active:
+    if not zebrunner_context.test_is_active:
         raise AgentError("There is no active test to attach artifact reference")
 
     try:
@@ -70,7 +70,7 @@ def attach_test_run_artifact_reference(name: str, ref: str) -> None:
     """
     Send artifact reference to zebrunner and attach it to test run. Artifact reference is a URL
     """
-    if zebrunner_context.test_run_is_active:
+    if not zebrunner_context.test_run_is_active:
         raise AgentError("There is no active test run to attach artifact reference")
 
     try:
@@ -84,7 +84,7 @@ def attach_test_label(name: str, value: str) -> None:
     """
     Attach label to test in zebrunner
     """
-    if zebrunner_context.test_is_active:
+    if not zebrunner_context.test_is_active:
         raise AgentError("There is no active test to attach label")
 
     try:
@@ -98,7 +98,7 @@ def attach_test_run_label(name: str, value: str) -> None:
     """
     Attach label to test run in zebrunner
     """
-    if zebrunner_context.test_run_is_active:
+    if not zebrunner_context.test_run_is_active:
         raise AgentError("There is no active test run to attach label")
 
     try:

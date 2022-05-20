@@ -156,110 +156,128 @@ class ReportingService:
 
     def finish_test(self, report: TestReport) -> None:
         # Test was reverted skip finishing
+        if not zebrunner_context.test_is_active:
+            return
+
         if zebrunner_context.test and zebrunner_context.test.is_reverted:
             return
 
-        if zebrunner_context.test_is_active:
-            self.authorize()
-            is_skip = report.when == "setup" and report.outcome == "skipped"
-            is_xfail = hasattr(report, "wasxfail")
+        self.authorize()
+        is_skip = report.when == "setup" and report.outcome == "skipped"
+        is_xfail = hasattr(report, "wasxfail")
 
-            reason = None
-            if report.passed:
-                status = TestStatus.PASSED
-            elif is_skip or is_xfail:
-                status = TestStatus.SKIPPED
-            else:
-                status = TestStatus.FAILED
+        reason = None
+        if report.passed:
+            status = TestStatus.PASSED
+        elif is_skip or is_xfail:
+            status = TestStatus.SKIPPED
+        else:
+            status = TestStatus.FAILED
 
-            if is_xfail:
-                reason = report.wasxfail
-            elif is_skip:
-                reason = report.longrepr[-1] if isinstance(report.longrepr, tuple) else str(report.longrepr)
-            else:
-                # Following this changelog check if it's string or ReprExceptionInfo
-                # https://docs.pytest.org/en/6.2.x/changelog.html?highlight=reprexceptioninfo#pytest-6-0-0rc1-2020-07-08
-                reason = report.longrepr
-                if isinstance(report.longrepr, ReprExceptionInfo) or isinstance(report.longrepr, ExceptionChainRepr):
-                    reason = (
-                        report.longrepr.reprcrash.message + "\n\n" + (str(reason) if reason else "")  # type: ignore
-                    )
+        if is_xfail:
+            reason = report.wasxfail
+        elif is_skip:
+            reason = report.longrepr[-1] if isinstance(report.longrepr, tuple) else str(report.longrepr)
+        else:
+            # Following this changelog check if it's string or ReprExceptionInfo
+            # https://docs.pytest.org/en/6.2.x/changelog.html?highlight=reprexceptioninfo#pytest-6-0-0rc1-2020-07-08
+            reason = report.longrepr
+            if isinstance(report.longrepr, ReprExceptionInfo) or isinstance(report.longrepr, ExceptionChainRepr):
+                reason = report.longrepr.reprcrash.message + "\n\n" + (str(reason) if reason else "")  # type: ignore
 
-            test_rail_case_ids = getattr(report, "test_rail_case_ids", None)
-            if test_rail_case_ids:
-                for case_id in test_rail_case_ids:
-                    TestRail.set_case_id(case_id)
+        test_rail_case_ids = getattr(report, "test_rail_case_ids", None)
+        if test_rail_case_ids:
+            for case_id in test_rail_case_ids:
+                TestRail.set_case_id(case_id)
 
-            xray_case_ids = getattr(report, "xray_case_ids", None)
-            if xray_case_ids:
-                for case_id in xray_case_ids:
-                    Xray.set_test_key(case_id)
+        xray_case_ids = getattr(report, "xray_case_ids", None)
+        if xray_case_ids:
+            for case_id in xray_case_ids:
+                Xray.set_test_key(case_id)
 
-            zephyr_case_ids = getattr(report, "zephyr_case_ids", None)
-            if zephyr_case_ids:
-                for case_id in zephyr_case_ids:
-                    Zephyr.set_test_case_key(case_id)
+        zephyr_case_ids = getattr(report, "zephyr_case_ids", None)
+        if zephyr_case_ids:
+            for case_id in zephyr_case_ids:
+                Zephyr.set_test_case_key(case_id)
 
-            try:
-                self.api.finish_test(
-                    zebrunner_context.test_run_id,
-                    zebrunner_context.test_id,
-                    FinishTestModel(
-                        result=status.value,
-                        reason=reason,
-                    ),
-                )
-            except AgentApiError as e:
-                logging.error("failed to finish test", exc_info=e)
+        try:
+            self.api.finish_test(
+                zebrunner_context.test_run_id,
+                zebrunner_context.test_id,
+                FinishTestModel(
+                    result=status.value,
+                    reason=reason,
+                ),
+            )
+        except AgentApiError as e:
+            logging.error("failed to finish test", exc_info=e)
 
-            zebrunner_context.test = None
+        zebrunner_context.test = None
 
     def finish_test_run(self) -> None:
-        self.authorize()
-        if zebrunner_context.test_run_is_active:
-            try:
-                self.api.finish_test_run(zebrunner_context.test_run_id)
-            except AgentApiError as e:
-                logging.error("failed to finish test run", exc_info=e)
+        if not zebrunner_context.test_run_is_active:
+            return
 
-            handlers = list(filter(lambda x: isinstance(x, ZebrunnerHandler), logging.root.handlers))
-            if len(handlers) > 0:
-                zebrunner_handler: ZebrunnerHandler = handlers[0]  # type: ignore
-                zebrunner_handler.push_logs()
+        self.authorize()
+        try:
+            self.api.finish_test_run(zebrunner_context.test_run_id)
+        except AgentApiError as e:
+            logging.error("failed to finish test run", exc_info=e)
+
+        loggers = [logging.getLogger(name) for name in logging.root.manager.loggerDict]  # type: ignore
+        handlers: List[ZebrunnerHandler] = []
+        for logger in loggers:
+            handlers += [handler for handler in logger.handlers if isinstance(handler, ZebrunnerHandler)]
+
+        for handler in handlers:
+            handler.push_logs()
 
     def start_test_session(
         self, session_id: str, capabilities: dict, desired_capabilities: dict, test_ids: List[int]
     ) -> Optional[str]:
-        self.authorize()
-        if zebrunner_context.test_run_is_active:
-            try:
-                zebrunner_session_id = self.api.start_test_session(
-                    zebrunner_context.test_run_id,
-                    StartTestSessionModel(
-                        session_id=session_id,
-                        desired_capabilities=desired_capabilities,
-                        capabilities=capabilities,
-                        test_ids=test_ids,
-                    ),
-                )
-            except AgentApiError as e:
-                logging.error("failed to start test session", exc_info=e)
-                return None
+        if not zebrunner_context.test_run_is_active:
+            return None
 
-            return zebrunner_session_id
-        return None
+        self.authorize()
+        try:
+            zebrunner_session_id = self.api.start_test_session(
+                zebrunner_context.test_run_id,
+                StartTestSessionModel(
+                    session_id=session_id,
+                    desired_capabilities=desired_capabilities,
+                    capabilities=capabilities,
+                    test_ids=test_ids,
+                ),
+            )
+        except AgentApiError as e:
+            logging.error("failed to start test session", exc_info=e)
+            return None
+
+        return zebrunner_session_id
+
+    def add_test_to_session(self, zebrunner_session_id: str, related_tests: List[int]) -> None:
+        if not zebrunner_context.test_run_is_active:
+            return
+
+        self.authorize()
+        try:
+            self.api.add_tests_to_session(zebrunner_context.test_run_id, zebrunner_session_id, related_tests)
+        except AgentApiError as e:
+            logging.error("failed to add tests to session", exc_info=e)
 
     def finish_test_session(self, zebrunner_session_id: str, related_tests: List[int]) -> None:
+        if not zebrunner_context.test_run_is_active:
+            return
+
         self.authorize()
-        if zebrunner_context.test_run_is_active:
-            try:
-                self.api.finish_test_session(
-                    zebrunner_context.test_run_id,
-                    zebrunner_session_id,
-                    FinishTestSessionModel(test_ids=related_tests),
-                )
-            except AgentApiError as e:
-                logging.error("failed to finish test session", exc_info=e)
+        try:
+            self.api.finish_test_session(
+                zebrunner_context.test_run_id,
+                zebrunner_session_id,
+                FinishTestSessionModel(test_ids=related_tests),
+            )
+        except AgentApiError as e:
+            logging.error("failed to finish test session", exc_info=e)
 
     def _find_attribute(self, properties: List[Tuple[str, Any]], name: str) -> Any:
         for property_name, value in properties:

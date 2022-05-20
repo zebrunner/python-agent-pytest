@@ -47,6 +47,7 @@ class SeleniumSessionManager:
     def add_test(self, test_id: int) -> None:
         for session in self._active_sessions.values():
             session.tests.append(test_id)
+            self._reporting_service.add_test_to_session(session.zebrunner_id, [test_id])
 
 
 def inject_driver(session_manager: SeleniumSessionManager) -> None:
