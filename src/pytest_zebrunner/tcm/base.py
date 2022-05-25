@@ -10,15 +10,14 @@ class AgentException(Exception):
 
 
 class BaseTcm:
-    _api = ZebrunnerAPI(zebrunner_context.settings.server.hostname, zebrunner_context.settings.server.access_token)
-
     @staticmethod
     def _attach_label(name: str, value: str) -> None:
+        api = ZebrunnerAPI(zebrunner_context.settings.server.hostname, zebrunner_context.settings.server.access_token)
         if not zebrunner_context.test_run_is_active:
             logging.error(f"Failed to attach label '{name}: {value}' to test run because it has not been started yet.")
             return
         label = LabelModel(key=name, value=value)
-        BaseTcm._api.send_labels([label], zebrunner_context.test_run_id, zebrunner_context.test_id)
+        api.send_labels([label], zebrunner_context.test_run_id, zebrunner_context.test_id)
 
     @staticmethod
     def _verify_no_tests() -> None:
