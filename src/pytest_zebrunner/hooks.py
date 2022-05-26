@@ -61,10 +61,13 @@ class PytestHooks:
             (str(m.args[0]), str(m.args[1])) for m in item.iter_markers("artifact_reference")
         ]
         report.artifacts = [mark.args[0] for mark in item.iter_markers("artifact")]
-
-        report.test_rail_case_ids = itertools.chain(*[mark.args for mark in item.iter_markers("test_rail_case_id")])
-        report.xray_case_ids = itertools.chain(*[mark.args for mark in item.iter_markers("xray_test_key")])
-        report.zephyr_case_ids = itertools.chain(*[mark.args for mark in item.iter_markers("zephyr_test_case_key")])
+        report.test_rail_case_ids = list(
+            itertools.chain(*[mark.args for mark in item.iter_markers("test_rail_case_id")])
+        )
+        report.xray_case_ids = list(itertools.chain(*[mark.args for mark in item.iter_markers("xray_test_key")]))
+        report.zephyr_case_ids = list(
+            itertools.chain(*[mark.args for mark in item.iter_markers("zephyr_test_case_key")])
+        )
 
     @pytest.hookimpl
     def pytest_runtest_logreport(self, report: TestReport) -> None:
