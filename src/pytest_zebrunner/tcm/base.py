@@ -13,6 +13,7 @@ class BaseTcm:
     @staticmethod
     def _attach_label(name: str, value: str) -> None:
         api = ZebrunnerAPI(zebrunner_context.settings.server.hostname, zebrunner_context.settings.server.access_token)
+        api.auth()
         if not zebrunner_context.test_run_is_active:
             logging.error(f"Failed to attach label '{name}: {value}' to test run because it has not been started yet.")
             return
