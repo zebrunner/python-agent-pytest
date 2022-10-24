@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pytest-zebrunner"
-version = "1.5.6"
+version = "1.5.7.dev2"
 description = "Pytest connector for Zebrunner reporting"
 authors = ["Anatoliy Platonov <p4m.dev@gmail.com>"]
 license = "Apache"

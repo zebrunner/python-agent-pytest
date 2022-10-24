@@ -44,20 +44,20 @@ def log_response(response: Response, log_level: int = logging.DEBUG) -> None:
     )
 
 
-def retry(method, times: int = 5, wait: float = 5):
+def retry(method, times: int = 6, first_wait: float = 5):
     """
     Wrapper for retry to connect and wait between retries.
     """
     @functools.wraps(method)
-    def wrapper(self):
-        for x in range(times + 1):
+    def wrapper(self, *args, **kwargs):
+        for x in range(times):
             try:
-                method(self)
+                method(self, *args, **kwargs)
             except AgentApiError as e:
                 logger.error(e)
                 if x != times:
                     logger.info(f"Retry number: {x + 1}")
-                    time.sleep(wait * (2 ** x))
+                    time.sleep(first_wait * (2 ** x))
             else:
                 break
     return wrapper
