@@ -1,7 +1,8 @@
+import functools
 import json
 import logging
 import time
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from pathlib import Path
 from pprint import pformat
 from typing import List, Optional, Union
@@ -43,6 +44,24 @@ def log_response(response: Response, log_level: int = logging.DEBUG) -> None:
     )
 
 
+def retry(method, times: int = 6, first_wait: float = 5):
+    """
+    Wrapper for retry to connect and wait between retries.
+    """
+    def wrapper(*args, **kwargs):
+        for x in range(times):
+            try:
+                result = method(*args, **kwargs)
+            except AgentApiError as e:
+                logger.error(e)
+                if x != times:
+                    logger.info(f"Retry number: {x + 1}")
+                    time.sleep(first_wait * (2 ** x))
+            else:
+                return result
+    return wrapper
+
+
 class ZebrunnerAPI(metaclass=Singleton):
     """
     A singleton Zebrunner API representation
@@ -54,7 +73,7 @@ class ZebrunnerAPI(metaclass=Singleton):
         if service_url and access_token:
             self.service_url = service_url.rstrip("/")
             self.access_token = access_token
-            self._client = Client()
+            self._client = Client(timeout=60.0)
             self._auth_token = None
             self._authenticated = False
 
@@ -65,6 +84,7 @@ class ZebrunnerAPI(metaclass=Singleton):
         request.headers["Authorization"] = f"Bearer {self._auth_token}"
         return request
 
+    @retry
     def auth(self) -> None:
         """
         Validates the user access token with http post method and if it is correct, authenticates the user.
@@ -171,7 +191,7 @@ class ZebrunnerAPI(metaclass=Singleton):
         try:
             response = self._client.put(
                 url,
-                json={"endedAt": (datetime.utcnow().replace(tzinfo=timezone.utc) - timedelta(seconds=1)).isoformat()},
+                json={"endedAt": (datetime.utcnow().replace(tzinfo=timezone.utc).isoformat())},
             )
         except httpx.RequestError as e:
             raise AgentApiError("Failed to finish test run", e)
@@ -344,6 +364,7 @@ class ZebrunnerAPI(metaclass=Singleton):
                 {"status_code": response.status_code, "body": response.json()},
             )
 
+    @retry
     def get_rerun_tests(self, run_context: str) -> RerunDataModel:
         """Exchange run context on tests to run. Raise AgentApiError in case of any exceptions"""
         url = f"{self.service_url}/api/reporting/v1/run-context-exchanges"
