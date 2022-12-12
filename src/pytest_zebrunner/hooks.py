@@ -50,7 +50,7 @@ class PytestHooks:
             self.service.finish_test_run()
             self.service.api.close()
 
-    @pytest.mark.hookwrapper
+    @pytest.hookimpl(hookwrapper=True)
     def pytest_runtest_makereport(self, item: Item, call: CallInfo) -> Generator:
         outcome = yield
         report: TestReport = outcome.get_result()
