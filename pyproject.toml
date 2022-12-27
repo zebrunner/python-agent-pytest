@@ -47,7 +47,7 @@ mypy = "^0.790"
 pre-commit = "^2.7.1"
 pytest-cov = "^2.10.1"
 selenium = "^3.141.0"
-setuptools = "^65.3.0"
+setuptools = "^65.5.1"
 
 [tool.coverage.paths]
 source = ["src", "*/site-packages"]
