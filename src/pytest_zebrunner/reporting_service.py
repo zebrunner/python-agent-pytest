@@ -5,6 +5,7 @@ import pytest
 from _pytest._code.code import ExceptionChainRepr, ReprExceptionInfo
 from _pytest.nodes import Item
 from _pytest.reports import TestReport
+from selenium.webdriver.common.options import BaseOptions
 
 from pytest_zebrunner.api.client import ZebrunnerAPI
 from pytest_zebrunner.api.models import (
@@ -233,7 +234,7 @@ class ReportingService:
             handler.push_logs()
 
     def start_test_session(
-        self, session_id: str, capabilities: dict, desired_capabilities: dict, test_ids: List[int]
+        self, session_id: str, options: BaseOptions, test_ids: List[int]
     ) -> Optional[str]:
         if not zebrunner_context.test_run_is_active:
             return None
@@ -244,8 +245,8 @@ class ReportingService:
                 zebrunner_context.test_run_id,
                 StartTestSessionModel(
                     session_id=session_id,
-                    desired_capabilities=desired_capabilities,
-                    capabilities=capabilities,
+                    desired_capabilities=options.to_capabilities(),
+                    capabilities=options.capabilities,
                     test_ids=test_ids,
                 ),
             )

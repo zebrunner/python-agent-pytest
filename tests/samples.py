@@ -1,5 +1,7 @@
 import pytest
 from selenium.webdriver import Remote
+from selenium.webdriver.chrome.options import Options as ChromeOptions
+from selenium.webdriver.firefox.options import Options as FirefoxOptions
 
 from pytest_zebrunner import (
     attach_test_artifact,
@@ -35,27 +37,27 @@ def test_fail() -> None:
 
 
 def test_selenium_firefox() -> None:
-    firefox = Remote(command_executor="http://localhost:4444/wd/hub", desired_capabilities={"browserName": "firefox"})
+    firefox = Remote(command_executor="http://localhost:4444/wd/hub", options=FirefoxOptions())
     firefox.quit()
     assert True
 
 
 def test_selenium_chrome() -> None:
-    chrome = Remote(command_executor="http://localhost:4444/wd/hub", desired_capabilities={"browserName": "chrome"})
+    chrome = Remote(command_executor="http://localhost:4444/wd/hub", options=ChromeOptions())
     chrome.quit()
     assert True
 
 
 def test_selenium_both() -> None:
-    chrome = Remote(command_executor="http://localhost:4444/wd/hub", desired_capabilities={"browserName": "chrome"})
-    firefox = Remote(command_executor="http://localhost:4444/wd/hub", desired_capabilities={"browserName": "firefox"})
+    chrome = Remote(command_executor="http://localhost:4444/wd/hub", options=ChromeOptions())
+    firefox = Remote(command_executor="http://localhost:4444/wd/hub", options=FirefoxOptions())
     chrome.quit()
     firefox.quit()
     assert True
 
 
 def test_send_screenshot() -> None:
-    chrome = Remote(command_executor="http://localhost:4444/wd/hub", desired_capabilities={"browserName": "chrome"})
+    chrome = Remote(command_executor="http://localhost:4444/wd/hub", options=ChromeOptions())
     chrome.get("https://www.google.com")
     chrome.save_screenshot("google.png")
     attach_test_screenshot("google.png")
@@ -64,7 +66,7 @@ def test_send_screenshot() -> None:
 
 
 def test_send_artifact() -> None:
-    firefox = Remote(command_executor="http://localhost:4444/wd/hub", desired_capabilities={"browserName": "firefox"})
+    firefox = Remote(command_executor="http://localhost:4444/wd/hub", options=FirefoxOptions())
     firefox.get("https://www.google.com")
     firefox.quit()
     attach_test_artifact("geckodriver.log")

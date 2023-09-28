@@ -63,8 +63,9 @@ class ZebrunnerSettings(BaseModel):
     def desired_capabilities(self) -> Optional[dict]:
         try:
             return json.loads(self.capabilities)  # type: ignore
-        except ValueError:
+        except (ValueError, TypeError) as e:
             logger.log(logging.WARN, "Failed to serialize ZEBRUNNER_CAPABILITIES option")
+            logger.log(logging.WARN, e)
             return None
 
     capabilities: Optional[str] = None
