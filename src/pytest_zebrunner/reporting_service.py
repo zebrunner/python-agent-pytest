@@ -233,9 +233,7 @@ class ReportingService:
         for handler in handlers:
             handler.push_logs()
 
-    def start_test_session(
-        self, session_id: str, options: BaseOptions, test_ids: List[int]
-    ) -> Optional[str]:
+    def start_test_session(self, session_id: str, options: BaseOptions, test_ids: List[int]) -> Optional[str]:
         if not zebrunner_context.test_run_is_active:
             return None
 
