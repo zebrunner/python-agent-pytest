@@ -2,11 +2,26 @@ import copy
 import logging
 from typing import Dict, List
 
-from pytest_zebrunner.context import zebrunner_context
-from pytest_zebrunner.reporting_service import ReportingService
 from selenium.webdriver.common.options import BaseOptions
 
+from pytest_zebrunner.context import zebrunner_context
+from pytest_zebrunner.reporting_service import ReportingService
+
 logger = logging.getLogger(__name__)
+
+# List of allowed WebDriver capabilities
+# https://www.w3.org/TR/webdriver1/#capabilities
+allowed_capabilities: List = [
+    "browserName",
+    "browserVersion",
+    "platformName",
+    "acceptInsecureCerts",
+    "pageLoadStrategy",
+    "proxy",
+    "setWindowRect",
+    "timeouts",
+    "unhandledPromptBehavior",
+]
 
 
 class SeleniumSession:
@@ -74,7 +89,10 @@ def inject_driver(session_manager: SeleniumSessionManager) -> None:
                 zeb_desired_capabilities = zeb_settings.desired_capabilities
                 if zeb_desired_capabilities and opts:
                     for capability_name, capability_value in zeb_desired_capabilities.items():
-                        opts.set_capability(capability_name, capability_value)
+                        if (capability_name in allowed_capabilities) or (":" in capability_name):
+                            opts.set_capability(capability_name, capability_value)
+                        else:
+                            logger.warning(f"Capability '{capability_name}':'{capability_value}' was not set")
 
             base_init(
                 session,
