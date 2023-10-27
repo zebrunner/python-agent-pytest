@@ -147,7 +147,7 @@ class StartTestSessionModel(CamelModel):
     started_at: str = Field(default_factory=generate_datetime_str)
     desired_capabilities: dict
     capabilities: dict
-    test_ids: List[str] = []
+    test_ids: List[int] = []
 
 
 class FinishTestSessionModel(CamelModel):

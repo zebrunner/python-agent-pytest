@@ -48,6 +48,7 @@ def retry(method, times: int = 6, first_wait: float = 5):
     """
     Wrapper for retry to connect and wait between retries.
     """
+
     def wrapper(*args, **kwargs):
         for x in range(times):
             try:
@@ -56,9 +57,10 @@ def retry(method, times: int = 6, first_wait: float = 5):
                 logger.error(e)
                 if x != times:
                     logger.info(f"Retry number: {x + 1}")
-                    time.sleep(first_wait * (2 ** x))
+                    time.sleep(first_wait * (2**x))
             else:
                 return result
+
     return wrapper
 
 

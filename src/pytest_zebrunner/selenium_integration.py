@@ -2,10 +2,26 @@ import copy
 import logging
 from typing import Dict, List
 
+from selenium.webdriver.common.options import BaseOptions
+
 from pytest_zebrunner.context import zebrunner_context
 from pytest_zebrunner.reporting_service import ReportingService
 
 logger = logging.getLogger(__name__)
+
+# List of allowed WebDriver capabilities
+# https://www.w3.org/TR/webdriver1/#capabilities
+allowed_capabilities: List = [
+    "browserName",
+    "browserVersion",
+    "platformName",
+    "acceptInsecureCerts",
+    "pageLoadStrategy",
+    "proxy",
+    "setWindowRect",
+    "timeouts",
+    "unhandledPromptBehavior",
+]
 
 
 class SeleniumSession:
@@ -23,14 +39,14 @@ class SeleniumSessionManager:
         self._active_sessions: Dict[str, SeleniumSession] = {}
         self._reporting_service = reporting_service
 
-    def start_session(self, session_id: str, capabilities: dict, desired_capabilities: dict) -> None:
+    def start_session(self, session_id: str, options: BaseOptions) -> None:
         session = SeleniumSession(session_id)
         self._active_sessions[session_id] = session
         if zebrunner_context.test_is_active:
             session.tests.append(zebrunner_context.test_id)
 
         zebrunner_session_id = self._reporting_service.start_test_session(
-            session_id, capabilities, desired_capabilities, self._active_sessions[session_id].tests
+            session_id, options, self._active_sessions[session_id].tests
         )
         if zebrunner_session_id:
             session.zebrunner_id = zebrunner_session_id
@@ -60,33 +76,32 @@ def inject_driver(session_manager: SeleniumSessionManager) -> None:
         def init(  # type: ignore
             session: WebDriver,
             command_executor: str = "http://127.0.0.1:4444/wd/hub",
-            desired_capabilities: dict = None,
-            browser_profile=None,
-            proxy=None,
             keep_alive: bool = False,
             file_detector=None,
             options=None,
         ) -> None:  # type: ignore
             # Override capabilities and command_executor with new ones provided by zebrunner.
-            caps = copy.deepcopy(desired_capabilities)
+            opts = copy.deepcopy(options)
             if zebrunner_context.settings.zebrunner:
                 zeb_settings = zebrunner_context.settings.zebrunner
                 if zeb_settings.hub_url:
                     command_executor = zeb_settings.hub_url
-                if zeb_settings.desired_capabilities and caps:
-                    caps.update(zeb_settings.desired_capabilities)
+                zeb_desired_capabilities = zeb_settings.desired_capabilities
+                if zeb_desired_capabilities and opts:
+                    for capability_name, capability_value in zeb_desired_capabilities.items():
+                        if (capability_name in allowed_capabilities) or (":" in capability_name):
+                            opts.set_capability(capability_name, capability_value)
+                        else:
+                            logger.warning(f"Capability '{capability_name}':'{capability_value}' was not set")
 
             base_init(
                 session,
                 command_executor,
-                caps,
-                browser_profile,
-                proxy,
                 keep_alive,
                 file_detector,
-                options,
+                opts,
             )
-            session_manager.start_session(session.session_id, session.capabilities, desired_capabilities or {})
+            session_manager.start_session(session.session_id, options)
             if zebrunner_context.test_is_active:
                 session_manager.add_test(zebrunner_context.test_id)
 
