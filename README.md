@@ -38,8 +38,8 @@ The following configuration parameters are recognized by the agent:
 - `REPORTING_NOTIFICATION_SLACK_CHANNELS` - optional value. The list of comma-separated Slack channels to send notifications to. Notification will be sent only if Slack integration is properly configured in Zebrunner with valid credentials for the project the tests are reported to. Zebrunner can send two type of notifications: on each test failure (if appropriate property is enabled) and on suite finish;
 - `REPORTING_NOTIFICATION_MS_TEAMS_CHANNELS` - optional value. The list of comma-separated Microsoft Teams channels to send notifications to. Notification will be sent only if Teams integration is configured in Zebrunner project with valid webhooks for the channels. Zebrunner can send two type of notifications: on each test failure (if appropriate property is enabled) and on suite finish;
 - `REPORTING_NOTIFICATION_EMAILS` - optional value. The list of comma-separated emails to send notifications to. This type of notification does not require further configuration on Zebrunner side. Unlike other notification mechanisms, Zebrunner can send emails only on suite finish;
- - `REPORTING_RUN_TREAT_SKIPS_AS_FAILURES` - optional value. If value is false all test-runs with skipped & passed tests
- would be marked as passed.
+- `REPORTING_RUN_TREAT_SKIPS_AS_FAILURES` - optional value. If value is false all test-runs with skipped & passed tests
+would be marked as passed.
 
 Agent also recognizes `.env` file in the resources root folder.
 
@@ -531,11 +531,11 @@ Default reference to the VNC streaming is based on `provider` capability. Value 
 The following code snippet shows the creation of `Remote` web driver with enabled VNC streaming, video recording and session log artifacts, but overrides the link to VNC streaming. The `<session-id>` placeholder of `vncLink` capability will be replaced by the actual session id.
 ```python
 def init_driver() -> Remote:
-    options = ChromeOptions();
-    options.set_capability("enableVNC", "true");
-    options.set_capability("vncLink", "wss://example.com/vnc/<session-id>");
-    options.set_capability("enableVideo", "true");
-    options.set_capability("enableLog", "true");
+    options = ChromeOptions()
+    options.set_capability("enableVNC", "true")
+    options.set_capability("vncLink", "wss://example.com/vnc/<session-id>")
+    options.set_capability("enableVideo", "true")
+    options.set_capability("enableLog", "true")
 
     return Remote(..., options=options, ...)
 
@@ -545,15 +545,14 @@ def init_driver() -> Remote:
 ```python
 def test_something():
     hub_url = 'https://username:password@engine.zebrunner.com/wd/hub'
-    capabilities = {
-        'browserName': 'firefox',
-        'enableVideo': True,
-        'enableLog': True,
-        'enableVNC': True,
-        'provider': 'zebrunner',
-        ...
-    }
-    driver = Remote(command_executor=hub_url, desired_capabilities=capabilities)
+    options = ChromeOptions()
+    options.set_capability("enableVNC", "true")
+    options.set_capability("vncLink", "wss://example.com/vnc/<session-id>")
+    options.set_capability("enableVideo", "true")
+    options.set_capability("enableLog", "true")
+    options.set_capability("zebrunner:provider", "ZEBRUNNER")
+
+    driver = Remote(command_executor=hub_url, options=options, ...)
     ...
 ```
 
@@ -561,12 +560,9 @@ def test_something():
 ```python title="BrowserStack"
 def test_something():
     hub_url = 'https://username:password@hub-cloud.browserstack.com/wd/hub'
-    capabilities = {
-        'browser': 'firefox',
-        'provider': 'BROWSERSTACK',
-        ...
-    }
-    driver = Remote(command_executor=hub_url, desired_capabilities=capabilities)
+    options = ChromeOptions()
+    ...
+    driver = Remote(command_executor=hub_url, options=options)
     ...
 ```
 
