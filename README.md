@@ -89,17 +89,78 @@ which need to be specified. Parameter names are case insensitive and can be writ
 
 ## Collecting test logs
 
-For sending logs to zebrunner you need to add ZebrunnerHandler to yours logger.
-Example:
+To send logs to Zebrunner you need to add a ZebrunnerHandler to your logger.
+
+Add logger configuration to your `pytest.ini` file:
+```
+[pytest]
+testpaths = tests
+
+log_cli = true
+log_level = notset
+log_format = [%(asctime)s] [%(levelname)s] - %(name)s - %(message)s
+log_date_format = %Y-%m-%d %H:%M:%S
+```
+
+and add this code to your project:
 
 ```python
 import logging
 
 from pytest_zebrunner.zebrunner_logging import ZebrunnerHandler
 
-logger = logging.getLogger(__name__) # It might any logger that you created earlier
+logger = logging.getLogger(__name__) # It might be any logger that you created earlier
 logger.addHandler(ZebrunnerHandler())
 ```
+---
+Or you can configure logging via Yaml file:
+
+`logger.yaml`
+```yaml
+version: 1
+disable_existing_loggers: False
+
+formatters:
+    simple:
+        format: '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+        datefmt: '%Y-%m-%d %H:%M:%S'
+
+handlers:
+    console:
+        class: logging.StreamHandler
+        level: NOTSET
+        formatter: simple
+        stream: ext://sys.stdout
+
+    zebrunner:
+        class: pytest_zebrunner.zebrunner_logging.ZebrunnerHandler
+        level: NOTSET
+        formatter: simple
+
+loggers:
+    development:
+        level: NOTSET
+        handlers: [console, zebrunner]
+        propagate: no
+
+root:
+    level: NOTSET
+    handlers: [console]
+```
+and add this code to your project:
+
+```python
+# Logger configuring
+  # Load the config file
+with open('logger.yaml', 'rt') as f:
+    config = yaml.safe_load(f.read())
+  # Configure the logging module with the config file
+logging.config.dictConfig(config)
+  # Get a logger object
+logger = logging.getLogger('development')
+```
+> [!NOTE]
+> The logger must be invoked before the tests run.
 
 ## Collecting captured screenshot
 Sometimes it may be useful to have the ability to track captured screenshots in scope of Zebrunner Reporting. The agent comes
