@@ -19,6 +19,7 @@ def pytest_configure(config: Config) -> None:
     config.addinivalue_line("markers", "test_rail_case_id(id): Attach test rail case id")
     config.addinivalue_line("markers", "xray_test_key(id): Attach xray case id")
     config.addinivalue_line("markers", "zephyr_test_case_key(id): Attach zephyr case id")
+    config.addinivalue_line("markers", "zebrunner_test_case_key(key): Attach zebrunner case key")
 
     try:
         settings = load_settings()

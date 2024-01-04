@@ -29,6 +29,7 @@ from pytest_zebrunner.errors import AgentApiError
 from pytest_zebrunner.tcm.test_rail import TestRail
 from pytest_zebrunner.tcm.xray import Xray
 from pytest_zebrunner.tcm.zephyr import Zephyr
+from pytest_zebrunner.tcm.zebrunner import Zebrunner
 from pytest_zebrunner.zebrunner_logging import ZebrunnerHandler
 
 logger = logging.getLogger(__name__)
@@ -200,6 +201,11 @@ class ReportingService:
         if zephyr_case_ids:
             for case_id in zephyr_case_ids:
                 Zephyr.set_test_case_key(case_id)
+
+        zebrunner_case_keys = getattr(report, "zebrunner_case_keys", None)
+        if zebrunner_case_keys:
+            for case_key in zebrunner_case_keys:
+                Zebrunner.set_test_case_key(case_key)
 
         try:
             self.api.finish_test(
