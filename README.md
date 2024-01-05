@@ -357,11 +357,68 @@ attach_test_run_artifact_reference("name", "reference")
 Artifact uploading process is performed in the foreground now, so it will block the execution thread while sending.
 The background uploading will be available in upcoming releases.
 
-## Syncing test executions with external TCM systems
+## Syncing test executions with TCM systems
 
-Zebrunner provides an ability to upload test results to external test case management systems (TCMs) on test run finish. For some TCMs it is possible to upload results in real-time during the test run execution.
+Zebrunner provides an ability to upload test results to test case management systems (TCMs) on test run finish. For some TCMs it is possible to upload results in real-time during the test run execution.
 
-This functionality is currently supported for TestRail, Xray, Zephyr Squad and Zephyr Scale.
+This functionality is currently supported for Zebrunner TCM, TestRail, Xray, Zephyr Squad and Zephyr Scale.
+
+### Zebrunner TCM
+
+For successful upload of test run results in Zebrunner TCM, one step must be performed:
+
+1. Configuration is performed on the tests side
+
+
+#### Configuration
+
+Zebrunner agent has a special `Zebrunner` class with a bunch of methods to control results upload:
+
+`#set_test_case_key(str)` or `@pytest.mark.zebrunner_test_case_key(str)`
+:   Mandatory. Using these mechanisms you can set Zebrunner's TCM case associated with specific automated test. It is highly recommended using the `@pytest.mark.zebrunner_test_case_key` annotation instead of static method invocation. Use the static method only for special cases.
+
+`#disable_sync()`
+:   Optional. Disables result upload. This method must be invoked before all tests.
+
+`#enable_real_time_sync()`
+:   Optional. Enables real-time results upload. In this mode, result of test execution will be uploaded immediately after test finish. This method must be invoked before all tests.
+
+`#set_run_id(str)`
+:   Optional. Adds result into existing Zebrunner test run. This method must be invoked before all tests.
+
+#### Example
+
+```python
+#conftest.py
+from pytest_zebrunner.tcm import Zebrunner
+
+@pytest.hookimpl(trylast=True)
+def pytest_sessionstart(session: Session) -> None:
+    Zebrunner.set_run_id("<run-id>")
+    # or
+    Zebrunner.disable_sync()
+    # or
+    Zebrunner.enable_real_time_sync()
+```
+
+```python
+# test_file.py
+import pytest
+
+from pytest_zebrunner.tcm import Zebrunner
+
+
+@pytest.mark.zebrunner_test_case_key("<test-case-key-1>")
+@pytest.mark.zebrunner_test_case_key("<test-case-key-2>", "<test-case-key-3>")
+def awesome_test1():
+    ...
+
+
+def awesome_test2():
+    ...
+    Zebrunner.set_test_case_key("<test-case-key-4>")
+    ...
+```
 
 ### TestRail
 
