@@ -68,6 +68,9 @@ class PytestHooks:
         report.zephyr_case_ids = list(
             itertools.chain(*[mark.args for mark in item.iter_markers("zephyr_test_case_key")])
         )
+        report.zebrunner_case_keys = list(
+            itertools.chain(*[mark.args for mark in item.iter_markers("zebrunner_test_case_key")])
+        )
 
     @pytest.hookimpl
     def pytest_runtest_logreport(self, report: TestReport) -> None:
