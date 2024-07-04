@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pytest-zebrunner"
-version = "1.6.1"
+version = "1.6.2"
 description = "Pytest connector for Zebrunner reporting"
 authors = ["Anatoliy Platonov <p4m.dev@gmail.com>"]
 license = "Apache"
@@ -37,7 +37,7 @@ pytest = ">=4.5.0"
 httpx = "^0.25.0"
 pydantic = "^1.0"
 python-dotenv = ">=0.10"
-PyYAML = "^5.3.1"
+PyYAML = "^6.0.1"
 
 [tool.poetry.dev-dependencies]
 black = "^23.9.1"
