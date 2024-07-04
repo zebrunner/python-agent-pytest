@@ -95,11 +95,11 @@ def inject_driver(session_manager: SeleniumSessionManager) -> None:
                             logger.warning(f"Capability '{capability_name}':'{capability_value}' was not set")
 
             base_init(
-                session,
-                command_executor,
-                keep_alive,
-                file_detector,
-                opts,
+                self=session,
+                command_executor=command_executor,
+                keep_alive=keep_alive,
+                file_detector=file_detector,
+                options=opts,
             )
             session_manager.start_session(session.session_id, options)
             if zebrunner_context.test_is_active:
