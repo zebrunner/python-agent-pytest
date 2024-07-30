@@ -21,6 +21,7 @@ class Test:
         self.file = file
         self.maintainers = maintainers
         self.labels = labels
+        self.is_reverted = False
 
 
 class ZebrunnerContext:
@@ -33,26 +34,24 @@ class ZebrunnerContext:
             self.settings = None  # type: ignore
 
     @property
+    def is_configured(self) -> bool:
+        return self.settings is not None
+
+    @property
     def test_is_active(self) -> bool:
-        return self.test_run_is_active and self.test is not None and self.test.zebrunner_id is not None
+        return self.is_configured and self.test_run_is_active and self.test_id is not None
 
     @property
     def test_run_is_active(self) -> bool:
-        return self.test_run is not None and self.test_run.zebrunner_id is not None
+        return self.is_configured and self.test_run_id is not None
 
     @property
     def test_id(self) -> int:
-        if self.test is not None and self.test.zebrunner_id is not None:
-            return self.test.zebrunner_id
-        else:
-            raise ValueError("Test id not found.")
+        return getattr(self.test, "zebrunner_id", None)
 
     @property
     def test_run_id(self) -> int:
-        if self.test_run is not None and self.test_run.zebrunner_id is not None:
-            return self.test_run.zebrunner_id
-        else:
-            raise ValueError("Test-run id not found")
+        return getattr(self.test_run, "zebrunner_id", None)
 
 
 zebrunner_context = ZebrunnerContext()

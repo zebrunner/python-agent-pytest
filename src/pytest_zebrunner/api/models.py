@@ -7,10 +7,22 @@ from pydantic import BaseModel, Field
 
 
 def generate_uuid() -> str:
+    """
+    Generate an universal unique identifier.
+
+    Returns:
+         (str): Universal unique identifier (uuid).
+    """
     return str(uuid4())
 
 
 def generate_datetime_str() -> str:
+    """
+    Generate a DateTime string in ISO format.
+
+    Returns:
+        (str): DateTime in ISO format.
+    """
     return (datetime.utcnow()).replace(tzinfo=timezone.utc).isoformat()
 
 
@@ -31,6 +43,19 @@ class NotificationsType(Enum):
 
 
 def to_camel_case(key: str) -> str:
+    """
+    Convert a string from snake case to camel case.
+
+    Args:
+        key (str): String to be converted to camel case.
+
+    Returns:
+        (str): New string in camel case.
+
+    Example:
+        this_is_snake_case.
+        ThisIsCamelCase.
+    """
     parts = key.split("_")
     for i, part in enumerate(parts[1:]):
         parts[i + 1] = part.capitalize()
@@ -47,6 +72,7 @@ class CamelModel(BaseModel):
 class TestRunConfigModel(CamelModel):
     environment: Optional[str] = None
     build: Optional[str] = None
+    treat_skips_as_failures: bool = True
 
 
 class MilestoneModel(CamelModel):
@@ -64,6 +90,11 @@ class NotificationTargetModel(CamelModel):
     value: str
 
 
+class NotificationsModel(CamelModel):
+    notify_on_each_failure: bool = False
+    targets: Optional[List[NotificationTargetModel]] = None
+
+
 class StartTestRunModel(CamelModel):
     name: str
     framework: str
@@ -73,7 +104,7 @@ class StartTestRunModel(CamelModel):
     config: Optional[TestRunConfigModel] = None
     milestone: Optional[MilestoneModel] = None
     ci_context: Optional[CiContextModel] = None
-    notification_targets: Optional[List[NotificationTargetModel]] = None
+    notifications: Optional[NotificationsModel] = None
 
 
 class LabelModel(CamelModel):
@@ -116,12 +147,16 @@ class StartTestSessionModel(CamelModel):
     started_at: str = Field(default_factory=generate_datetime_str)
     desired_capabilities: dict
     capabilities: dict
-    test_ids: List[str] = []
+    test_ids: List[int] = []
 
 
 class FinishTestSessionModel(CamelModel):
     ended_at: str = Field(default_factory=generate_datetime_str)
-    test_ids: List[str] = []
+    test_ids: List[int] = []
+
+
+class AttachTestsToSessionModel(CamelModel):
+    test_ids: List[int] = []
 
 
 class ArtifactReferenceModel(CamelModel):
@@ -130,6 +165,7 @@ class ArtifactReferenceModel(CamelModel):
 
 
 class TestModel(CamelModel):
+    id: int
     name: str
     correlation_data: Optional[CorrelationDataModel]
     status: str
@@ -138,7 +174,13 @@ class TestModel(CamelModel):
 
 
 class RerunDataModel(CamelModel):
-    id: str
-    run_exists: bool
-    rerun_only_failed_tests: bool
-    tests: List[TestModel]
+    test_run_uuid: str
+    run_allowed: bool
+    reason: Optional[str]
+    run_only_specific_tests: bool
+    tests_to_run: List[TestModel]
+
+
+class PlatformModel(CamelModel):
+    name: str
+    version: Optional[str]
