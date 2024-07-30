@@ -87,6 +87,7 @@ class ReportingService:
                 environment=test_run.environment,
                 build=test_run.build,
                 treat_skips_as_failures=settings.run.treat_skips_as_failures,
+                issue_linking_strategy=settings.run.issue_linking_strategy,
             ),
             milestone=milestone,
             ci_context=CiContextLoader.resolve_ci_context(),

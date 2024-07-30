@@ -23,6 +23,7 @@ class TestRunSettings(BaseModel):
     environment: Optional[str] = None
     context: Optional[str] = None
     treat_skips_as_failures: bool = True
+    issue_linking_strategy: Optional[str] = None
 
 
 class ServerSettings(BaseModel):
